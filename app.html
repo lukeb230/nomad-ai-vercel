@@ -1087,7 +1087,7 @@ function cardHTML(s,i,isSavedView=false){
     else siteName='campsite';
     return `https://www.google.com/search?q=${encodeURIComponent(s.name+' '+siteName)}`;
   })();
-  const listingBtn=`<a class="fb solid" href="${listingUrl}" target="_blank" style="flex-direction:column;gap:1px;line-height:1.2;font-size:11px;color:var(--sand);">Search<span>Site</span></a>`;
+  const listingBtn=`<a class="fb solid" href="${listingUrl}" target="_blank" style="flex-direction:column;gap:1px;line-height:1.2;font-size:11px;color:var(--tan);">Search<span>Site</span></a>`;
   const savedClass=isSaved(s.name)?'save-btn saved':'save-btn';
   const visitedClass=isVisited(s.name)?'visited-btn been':'visited-btn';
   const tripClass=inTrip(s.name)?'visited-btn been':'visited-btn';
