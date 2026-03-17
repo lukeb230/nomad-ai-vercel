@@ -2666,10 +2666,20 @@ function handleProfilePhoto(input) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const dataUrl = e.target.result;
-    document.getElementById('profile-avatar-display').innerHTML = `<img src="${dataUrl}" alt="Profile photo"/>`;
-    // Store temp photo for saving
-    document.getElementById('profile-avatar-display').dataset.photo = dataUrl;
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 200;
+      const ratio = Math.min(MAX / img.width, MAX / img.height);
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.7);
+      console.log('Photo compressed to:', compressed.length, 'chars');
+      document.getElementById('profile-avatar-display').innerHTML = `<img src="${compressed}" alt="Profile photo"/>`;
+      document.getElementById('profile-avatar-display').dataset.photo = compressed;
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -2736,17 +2746,20 @@ async function syncToSupabase() {
   // Upsert user settings (single row)
   await supa.from('user_settings').delete().eq('user_id', currentUser.id);
   await supa.from('user_settings').insert([{ user_id: currentUser.id, data: { ...settings, trip } }]);
-  // Upsert profile to dedicated table
+  // Save profile to dedicated table
   const profile = getProfile();
   if (profile.name !== undefined || profile.photo !== undefined) {
-    const { error: profileError } = await supa.from('user_profiles').upsert({
+    console.log('Saving profile to user_profiles table, user_id:', currentUser.id);
+    const delRes = await supa.from('user_profiles').delete().eq('user_id', currentUser.id);
+    if (delRes.error) console.error('Profile delete error:', delRes.error);
+    const insRes = await supa.from('user_profiles').insert({
       user_id: currentUser.id,
       display_name: profile.name || '',
       photo: profile.photo || '',
       updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id' });
-    if (profileError) console.error('Profile upsert error:', profileError);
-    else console.log('Profile saved to Supabase');
+    });
+    if (insRes.error) console.error('Profile insert error:', insRes.error);
+    else console.log('Profile saved successfully:', profile.name);
   }
 
 }
@@ -2790,17 +2803,20 @@ async function syncFromSupabase() {
   }
 
   // Fetch profile from dedicated table
+  console.log('Fetching profile for user_id:', currentUser.id);
   const { data: profileData, error: profileFetchError } = await supa.from('user_profiles')
     .select('display_name, photo')
     .eq('user_id', currentUser.id)
-    .single();
-  if (profileFetchError) console.error('Profile fetch error:', profileFetchError);
+    .maybeSingle();
+  if (profileFetchError) console.error('Profile fetch error:', JSON.stringify(profileFetchError));
   if (profileData) {
     const profile = { name: profileData.display_name || '', photo: profileData.photo || '' };
     localStorage.setItem('cf_profile', JSON.stringify(profile));
     console.log('Profile loaded from Supabase:', profile.name);
     updateUserBadge();
     renderHome();
+  } else {
+    console.log('No profile saved yet for this user');
   }
   renderSaved();
   renderSearchHistory();
