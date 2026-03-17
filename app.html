@@ -305,7 +305,7 @@
     /* User badge in topbar */
     .user-badge { display: flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--slate); border-radius: 50px; padding: 4px 10px 4px 6px; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; }
     .user-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--sand); font-weight: 800; }
-    .ai-response-box { background: var(--card); border: 1.5px solid var(--slate); border-radius: 16px; padding: 14px 16px; margin-bottom: 14px; display: none; }
+    .ai-response-box { background: var(--card); border: 1.5px solid var(--slate); border-radius: 16px; padding: 14px 16px; margin-bottom: 0; display: none; }
     .ai-response-box.show { display: block; }
     .ai-response-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .ai-response-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--tan); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
@@ -547,20 +547,27 @@
     <div class="topbar"><div class="topbar-left"><div class="topbar-title">Search 🔍</div><div class="topbar-sub">Find your campsite</div></div></div>
     <div class="search-wrap" id="search-wrap-outer">
       <div style="display:flex;gap:6px;margin-bottom:8px;background:var(--darker);border-radius:50px;padding:4px;">
-        <div id="mode-location-btn" onclick="setSearchMode('location')" style="flex:1;height:38px;border-radius:50px;background:var(--tan);color:var(--sand);border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;white-space:nowrap;padding:0 16px;">📍 Location</div>
-        <div id="mode-nl-btn" onclick="setSearchMode('nl')" style="flex:1;height:38px;border-radius:50px;background:var(--card);color:var(--muted);border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.2s;white-space:nowrap;padding:0 16px;">✨ Ask AI</div>
+        <div id="mode-nl-btn" onclick="setSearchMode('nl')" style="flex:1;height:38px;border-radius:50px;background:var(--tan);color:var(--sand);border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;white-space:nowrap;padding:0 16px;">✨ Ask AI</div>
+        <div id="mode-location-btn" onclick="setSearchMode('location')" style="flex:1;height:38px;border-radius:50px;background:var(--card);color:var(--tan);border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.2s;white-space:nowrap;padding:0 16px;">📍 Location</div>
       </div>
-      <div class="search-box" id="location-search-box">
+      <div class="search-box" id="location-search-box" style="display:none;">
         <span style="font-size:15px;color:rgba(154,112,64,0.55);">🔍</span>
         <input id="loc" type="text" placeholder="City, zip, or address…" oninput="toggleClearBtn();acSearch(this.value)" onkeydown="handleAcKey(event)" autocomplete="off" />
         <div id="clear-btn" onclick="clearSearch()" style="display:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">✕</div>
       </div>
-      <div class="search-box" id="nl-search-box" style="display:none;">
+      <div class="search-box" id="nl-search-box">
         <span style="font-size:15px;color:rgba(154,112,64,0.55);">✨</span>
-        <div id="nl-input" contenteditable="true" data-placeholder="Free spot near Moab with a fire ring..." style="flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;caret-color:var(--muted);line-height:1.5;min-height:24px;word-break:break-word;overflow-wrap:break-word;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doNLSearch();}" oninput="toggleNLClearBtn()"></div>
+        <div id="nl-input" contenteditable="true" data-placeholder="Free spot near Moab with a fire ring..." style="flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;caret-color:var(--muted);line-height:1.5;min-height:24px;word-break:break-word;overflow-wrap:break-word;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doNLSearch();}" oninput="toggleNLClearBtn();if((this.innerText||'').trim()){const b=document.getElementById('ai-response-box');if(b.classList.contains('show')&&document.getElementById('ai-response-text').innerHTML.includes('Hey there'))b.classList.remove('show');}"></div>
         <div id="nl-clear-btn" onclick="clearNLSearch()" style="display:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">&#x2715;</div>
       </div>
       <div id="autocomplete-list" class="autocomplete-list" style="display:none;"></div>
+      <div class="ai-response-box" id="ai-response-box" style="margin-top:8px;margin-bottom:0;">
+        <div class="ai-response-header">
+          <div class="ai-response-avatar">🏕️</div>
+          <div class="ai-response-name">NomadAI</div>
+        </div>
+        <div class="ai-response-text" id="ai-response-text"></div>
+      </div>
     </div>
     <div id="search-history-wrap"></div>
     <div class="slabel">Sources</div>
@@ -592,13 +599,6 @@
     <div class="status-row"><div class="spin" id="spin"></div><span id="st"></span></div>
     <div id="err"></div>
     <div id="recent-section" style="padding:0 16px;display:flex;flex-direction:column;gap:10px;"></div>
-    <div class="ai-response-box" id="ai-response-box">
-      <div class="ai-response-header">
-        <div class="ai-response-avatar">🏕️</div>
-        <div class="ai-response-name">NomadAI</div>
-      </div>
-      <div class="ai-response-text" id="ai-response-text"></div>
-    </div>
     <div class="results" id="res"></div>
   </div>
 
@@ -1269,7 +1269,7 @@ function switchTab(tab){
   ['home-tab','search-tab','map-tab','saved-tab'].forEach(id=>{document.getElementById(id).style.display='none';});document.getElementById('map-click-hint').style.display='none';document.getElementById('map-search-btn').classList.remove('show');
   ['nav-home','nav-search','nav-map','nav-saved'].forEach(id=>document.getElementById(id).classList.remove('active'));
   if(tab==='home'){document.getElementById('home-tab').style.display='flex';document.getElementById('home-tab').style.flexDirection='column';document.getElementById('nav-home').classList.add('active');showHomeBtn();}
-  else if(tab==='search'){document.getElementById('search-tab').style.display='flex';document.getElementById('search-tab').style.flexDirection='column';document.getElementById('nav-search').classList.add('active');document.getElementById('err').innerHTML='';renderRecentSection();renderSearchHistory();}
+  else if(tab==='search'){document.getElementById('search-tab').style.display='flex';document.getElementById('search-tab').style.flexDirection='column';document.getElementById('nav-search').classList.add('active');document.getElementById('err').innerHTML='';renderRecentSection();renderSearchHistory();if(currentSearchMode==='nl'&&!(document.getElementById('nl-input').innerText||'').trim()){document.getElementById('ai-response-text').innerHTML="Hey there! 👋 I'm NomadAI, your personal camping guide! I can help you find free and dispersed campsites on public lands, search by location or vibe, save favorites, plan trips, and share spots. I can also answer questions about camping areas, best seasons, overlanding tips, and more.<br><br>🗺️ <span style=\"color:var(--tan);font-weight:800;\">Driving somewhere?</span> Ask me for camps along your route — then check the Map tab to see all the spots pinned along the way.<br><br>Try asking: <span style=\"color:var(--tan);font-weight:800;\">\"free BLM spot near Moab with a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"campsites along I-70 from Denver to Grand Junction\"</span>";document.getElementById('ai-response-box').classList.add('show');}}
   else if(tab==='map'){document.getElementById('map-click-hint').style.display='block';document.getElementById('map-tab').style.display='flex';document.getElementById('map-tab').style.flexDirection='column';document.getElementById('nav-map').classList.add('active');initMap();refreshMap();}
   else{document.getElementById('saved-tab').style.display='flex';document.getElementById('saved-tab').style.flexDirection='column';document.getElementById('nav-saved').classList.add('active');renderSaved();if(routeOpen)renderRoutePlanner();if(passportOpen)renderPassport();}
 }
@@ -1417,7 +1417,7 @@ function skeletonCards(count, containerId) {
 }
 
 // ── NATURAL LANGUAGE SEARCH ──
-let currentSearchMode = 'location';
+let currentSearchMode = 'nl';
 
 function setSearchMode(mode) {
   currentSearchMode = mode;
@@ -1439,11 +1439,10 @@ function setSearchMode(mode) {
     nlBtn.style.borderRadius = '50px';
     goBtn.innerHTML = '✨ Ask AI';
     document.getElementById('autocomplete-list').style.display = 'none';
-    document.getElementById('nl-input').focus();
     // Show welcome message if box is empty
     const nlVal = (document.getElementById('nl-input').innerText||'').trim();
     if (!nlVal) {
-      document.getElementById('ai-response-text').innerHTML = "Hey there! 👋 I\'m NomadAI, your personal camping guide! I can help you find free and dispersed campsites on public lands, search by location or vibe, save favorites, plan trips, and share spots. I can also answer questions about camping areas, best seasons, overlanding tips, and more. Try asking: <span style=\"color:var(--tan);font-weight:800;\">\"free BLM spot near Moab with a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"what\'s camping like in Big Bend?\"</span>";
+      document.getElementById('ai-response-text').innerHTML = "Hey there! 👋 I'm NomadAI, your personal camping guide! I can help you find free and dispersed campsites on public lands, search by location or vibe, save favorites, plan trips, and share spots. I can also answer questions about camping areas, best seasons, overlanding tips, and more.<br><br>🗺️ <span style=\"color:var(--tan);font-weight:800;\">Driving somewhere?</span> Ask me for camps along your route — then check the Map tab to see all the spots pinned along the way.<br><br>Try asking: <span style=\"color:var(--tan);font-weight:800;\">\"free BLM spot near Moab with a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"campsites along I-70 from Denver to Grand Junction\"</span>";
       document.getElementById('ai-response-box').classList.add('show');
     }
   } else {
@@ -1465,8 +1464,8 @@ function setSearchMode(mode) {
 }
 
 function toggleNLClearBtn(){
-  const nlClearVal = (document.getElementById('nl-input').innerText || '').trim();
-  document.getElementById('nl-clear-btn').style.display = nlClearVal ? 'block' : 'none';
+  const val = (document.getElementById('nl-input').innerText || '').trim();
+  document.getElementById('nl-clear-btn').style.display = val ? 'block' : 'none';
 }
 function clearNLSearch(){
   const nlEl = document.getElementById('nl-input'); nlEl.innerText = '';
