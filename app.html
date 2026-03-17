@@ -266,6 +266,28 @@
     #app.light .settings-close { background: #f0ebe0; }
     #app.light .settings-btn { background: #f0ebe0; }
 
+    /* STATS */
+    #stats-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 998; background: rgba(0,0,0,0.6); }
+    #stats-overlay.show { display: block; }
+    #stats-panel { display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: var(--dark); border-radius: 24px 24px 0 0; z-index: 999; padding: 0 0 env(safe-area-inset-bottom); max-height: 85vh; overflow-y: auto; }
+    #stats-panel.show { display: block; }
+    .stats-handle { width: 36px; height: 4px; background: var(--slate); border-radius: 2px; margin: 12px auto 0; }
+    .stats-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 8px; }
+    .stats-title { font-size: 18px; font-weight: 800; color: var(--sand); }
+    .stats-close { width: 32px; height: 32px; border-radius: 50%; background: var(--card); border: none; color: var(--muted); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 20px; }
+    .stat-card { background: var(--card); border-radius: 16px; padding: 14px; border: 1px solid var(--slate); }
+    .stat-num { font-size: 28px; font-weight: 800; color: var(--sand); line-height: 1; margin-bottom: 4px; }
+    .stat-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .stat-card.wide { grid-column: 1 / -1; }
+    .stat-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .stat-bar-label { font-size: 12px; color: var(--light); font-weight: 700; width: 100px; flex-shrink: 0; }
+    .stat-bar-track { flex: 1; height: 6px; background: var(--darker); border-radius: 3px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; border-radius: 3px; background: var(--tan); transition: width 0.6s ease; }
+    .stat-fun-fact { background: var(--card); border-radius: 16px; padding: 14px 16px; margin: 0 20px 10px; border: 1px solid var(--slate); font-size: 13px; color: var(--light); line-height: 1.6; }
+    .stat-fun-fact .fact-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+    .stat-section-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--tan); padding: 8px 20px 4px; }
+
     /* AUTH MODAL */
     #auth-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1001; background: rgba(0,0,0,0.8); }
     #auth-overlay.show { display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -610,6 +632,18 @@
     <div class="saved-list" id="saved-list"></div>
   </div>
 
+  <!-- STATS MODAL -->
+  <div id="stats-overlay" onclick="closeStats()"></div>
+  <div id="stats-panel">
+    <div class="stats-handle"></div>
+    <div class="stats-header">
+      <div class="stats-title">Your Stats 📊</div>
+      <button class="stats-close" onclick="closeStats()">✕</button>
+    </div>
+    <div id="stats-content"></div>
+    <div style="height:20px;"></div>
+  </div>
+
   <!-- AUTH MODAL -->
   <div id="auth-overlay">
     <div id="auth-panel">
@@ -713,6 +747,13 @@
 
     <div class="settings-section">
       <div class="settings-section-label">About</div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-label">Your stats</div>
+          <div class="settings-row-sub">Trips, states visited, and more</div>
+        </div>
+        <button class="settings-btn" onclick="closeSettings();openStats()">View</button>
+      </div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-label">NomadAI</div>
@@ -1417,6 +1458,81 @@ async function doSearch(){
 }
 
 
+
+// ── STATS ──
+function openStats() {
+  renderStats();
+  document.getElementById('stats-overlay').classList.add('show');
+  document.getElementById('stats-panel').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeStats() {
+  document.getElementById('stats-overlay').classList.remove('show');
+  document.getElementById('stats-panel').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function renderStats() {
+  const saved = getSaved();
+  const visited = getVisited();
+  const trip = getTrip();
+  const history = JSON.parse(localStorage.getItem('cf_search_history')||'[]');
+
+  // States visited
+  const statesVisited = [...new Set(saved.filter(s=>s.state).map(s=>s.state))];
+  const statesSaved = statesVisited.length;
+
+  // Source breakdown
+  const sources = {};
+  saved.forEach(s => {
+    const src = (s.sourceLabel||s.source||'Other');
+    sources[src] = (sources[src]||0) + 1;
+  });
+  const topSources = Object.entries(sources).sort((a,b)=>b[1]-a[1]).slice(0,4);
+
+  // Free vs paid
+  const freeCount = saved.filter(s=>!s.fee||s.fee==='Free'||s.fee==='free').length;
+  const paidCount = saved.length - freeCount;
+
+  // Fun facts
+  const facts = [];
+  if (visited.length > 0) facts.push({ icon: '🏕️', text: `You've camped at <strong>${visited.length} spot${visited.length!==1?'s':''}</strong> so far. Keep exploring!` });
+  if (statesSaved > 0) facts.push({ icon: '🗺️', text: `You've saved spots in <strong>${statesSaved} state${statesSaved!==1?'s':''}</strong>: ${statesVisited.slice(0,5).join(', ')}${statesVisited.length>5?' and more':''}` });
+  if (freeCount > 0 && saved.length > 0) facts.push({ icon: '💰', text: `<strong>${Math.round(freeCount/saved.length*100)}%</strong> of your saved spots are free — you know how to camp smart!` });
+  if (trip.length > 0) facts.push({ icon: '📍', text: `Your current trip has <strong>${trip.length} stop${trip.length!==1?'s':''}</strong> planned.` });
+  if (history.length > 0) facts.push({ icon: '🔍', text: `You've searched <strong>${history.length}</strong> different location${history.length!==1?'s':''}. Your most recent: <strong>${history[0]}</strong>` });
+  if (saved.length === 0 && visited.length === 0) facts.push({ icon: '🌲', text: `Start saving and visiting campsites to see your stats here!` });
+
+  let html = '';
+
+  // Big numbers grid
+  html += '<div class="stats-grid">';
+  html += `<div class="stat-card"><div class="stat-num">${saved.length}</div><div class="stat-label">Spots Saved</div></div>`;
+  html += `<div class="stat-card"><div class="stat-num">${visited.length}</div><div class="stat-label">Visited</div></div>`;
+  html += `<div class="stat-card"><div class="stat-num">${statesSaved}</div><div class="stat-label">States Explored</div></div>`;
+  html += `<div class="stat-card"><div class="stat-num">${freeCount}</div><div class="stat-label">Free Sites Saved</div></div>`;
+
+  // Source breakdown bar
+  if (topSources.length > 0) {
+    const max = topSources[0][1];
+    html += `<div class="stat-card wide"><div class="stat-label" style="margin-bottom:10px;">Saved by source</div>`;
+    topSources.forEach(([src, count]) => {
+      html += `<div class="stat-bar-row"><div class="stat-bar-label">${src}</div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${Math.round(count/max*100)}%;background:var(--tan);"></div></div><div style="font-size:11px;color:var(--muted);font-weight:700;width:20px;text-align:right;">${count}</div></div>`;
+    });
+    html += `</div>`;
+  }
+  html += '</div>';
+
+  // Fun facts
+  if (facts.length > 0) {
+    html += '<div class="stat-section-label">Fun Facts</div>';
+    facts.forEach(f => {
+      html += `<div class="stat-fun-fact"><span class="fact-icon">${f.icon}</span>${f.text}</div>`;
+    });
+  }
+
+  document.getElementById('stats-content').innerHTML = html;
+}
 
 // ── SETTINGS ──
 function openSettings(){
