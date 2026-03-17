@@ -97,6 +97,10 @@
     .go-wrap { padding: 0 16px 20px; }
     .status-row { display: flex; align-items: center; gap: 8px; padding: 0 16px 10px; font-size: 13px; color: var(--muted); min-height: 20px; }
     .spin { width: 13px; height: 13px; border: 2px solid var(--card); border-top-color: var(--tan); border-radius: 50%; animation: sp .7s linear infinite; display: none; flex-shrink: 0; }
+    #ai-loader { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 24px 0 8px; }
+    #ai-loader.show { display: flex; }
+    .ai-loader-ring { width: 40px; height: 40px; border: 3px solid var(--card); border-top-color: var(--tan); border-radius: 50%; animation: sp .8s linear infinite; }
+    .ai-loader-text { font-size: 12px; font-weight: 800; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
     .spin.on { display: block; }
     @keyframes sp { to { transform: rotate(360deg); } }
     .results { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
@@ -556,7 +560,7 @@
         <div id="clear-btn" onclick="clearSearch()" style="display:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">✕</div>
       </div>
       <div class="search-box" id="nl-search-box">
-        <span style="font-size:15px;color:rgba(154,112,64,0.55);">✨</span>
+        <span style="font-size:15px;color:rgba(154,112,64,0.55);">🔍</span>
         <div id="nl-input" contenteditable="true" data-placeholder="Free spot near Moab with a fire ring..." style="flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;caret-color:var(--muted);line-height:1.5;min-height:24px;word-break:break-word;overflow-wrap:break-word;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doNLSearch();}" oninput="toggleNLClearBtn();if((this.innerText||'').trim()){const b=document.getElementById('ai-response-box');if(b.classList.contains('show')&&document.getElementById('ai-response-text').innerHTML.includes('Hey there'))b.classList.remove('show');}"></div>
         <div id="nl-clear-btn" onclick="clearNLSearch()" style="display:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">&#x2715;</div>
       </div>
@@ -594,9 +598,10 @@
       <div class="rad-btn" onclick="setR(this,200)">200 mi</div>
     </div>
     <div class="go-wrap">
-      <div id="go-btn" onclick="handleSearch()" style="width:100%;height:52px;background:#c4a06a;color:#e8d5b7;border-radius:50px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;">🔍 Find Campsites Tonight</div>
+      <div id="go-btn" onclick="handleSearch()" style="width:100%;height:52px;background:#c4a06a;color:#e8d5b7;border-radius:50px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;">✨ Ask AI</div>
     </div>
     <div class="status-row"><div class="spin" id="spin"></div><span id="st"></span></div>
+    <div id="ai-loader"><div class="ai-loader-ring"></div><span class="ai-loader-text">Asking AI…</span></div>
     <div id="err"></div>
     <div id="recent-section" style="padding:0 16px;display:flex;flex-direction:column;gap:10px;"></div>
     <div class="results" id="res"></div>
@@ -1455,7 +1460,7 @@ function setSearchMode(mode) {
     nlBtn.style.background = 'var(--card)';
     nlBtn.style.color = 'var(--tan)';
     nlBtn.style.boxShadow = 'none';
-    goBtn.innerHTML = '🔍 Find Campsites Tonight';
+    goBtn.innerHTML = '✨ Ask AI';
     // Hide welcome message when switching to location mode
     const aiBox = document.getElementById('ai-response-box');
     const aiText = document.getElementById('ai-response-text').innerHTML;
@@ -1487,6 +1492,7 @@ async function doNLSearch() {
   const goBtn = document.getElementById('go-btn');
   goBtn.innerHTML = '⏳ Asking AI...';
   goBtn.style.pointerEvents = 'none';
+  document.getElementById('ai-loader').classList.add('show');
 
   document.getElementById('res').innerHTML = '';
   skeletonCards(6, 'res');
@@ -1519,6 +1525,7 @@ async function doNLSearch() {
       document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">⚠️ '+(d.error.message||'Something went wrong')+'</div>';
       goBtn.innerHTML = '✨ Ask AI';
       goBtn.style.pointerEvents = '';
+      document.getElementById('ai-loader').classList.remove('show');
       return;
     }
 
@@ -1531,6 +1538,7 @@ async function doNLSearch() {
       document.getElementById('res').innerHTML = '';
       goBtn.innerHTML = '✨ Ask AI';
       goBtn.style.pointerEvents = '';
+      document.getElementById('ai-loader').classList.remove('show');
       return;
     }
 
@@ -1580,6 +1588,7 @@ async function doNLSearch() {
 
   goBtn.innerHTML = '✨ Ask AI';
   goBtn.style.pointerEvents = '';
+  document.getElementById('ai-loader').classList.remove('show');
 }
 
 async function doSearch(){
