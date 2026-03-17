@@ -240,6 +240,7 @@
     #app.light .chip.on.rec   { background: #8aac7a; color: #f0ebe0; }
     #app.light .chip.on.camp  { background: #7a6a50; color: #f0ebe0; }
     #app.light .chip { background: #e4ddd0; }
+    #app.light #mode-location-btn, #app.light #mode-nl-btn { color: #c4a06a; }
     #app.light .chip.rec { border-color: #8aac7a; color: #8aac7a; }
     #app.light .filter-chip.walk { border-color: #8aac7a; color: #8aac7a; }
     #app.light .filter-chip.on.disp { background: var(--slate); color: #f0ebe0; }
@@ -310,6 +311,14 @@
     .ai-response-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--tan); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
     .ai-response-name { font-size: 12px; font-weight: 800; color: var(--tan); }
     .ai-response-text { font-size: 13px; color: var(--light); line-height: 1.65; }
+    .search-mode-row { display: flex; flex-direction: row; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .search-mode-pills { flex-shrink: 0; }
+    .search-box-desktop { flex: 1; }
+    @media (max-width: 767px) {
+      .search-mode-row { flex-direction: column; align-items: stretch; }
+      .search-mode-pills { width: 100%; }
+      .search-box-desktop { width: 100%; }
+    }
     .saved-empty { text-align: center; padding: 48px 16px; color: var(--muted); font-size: 14px; line-height: 1.8; }
     .saved-filter-bar { display: flex; gap: 8px; padding: 0 16px 12px; align-items: center; flex-wrap: wrap; }
     .saved-filter-bar select { background: var(--card); border: 1.5px solid var(--slate); color: var(--sand); border-radius: 10px; padding: 7px 12px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; outline: none; flex: 1; }
@@ -1419,11 +1428,11 @@ function setSearchMode(mode) {
   if (mode === 'nl') {
     locBox.style.display = 'none';
     nlBox.style.display = 'flex';
-    locBtn.style.background = 'transparent';
-    locBtn.style.color = 'var(--muted)';
+    locBtn.style.background = 'var(--card)';
+    locBtn.style.color = 'var(--tan)';
     locBtn.style.boxShadow = 'none';
     nlBtn.style.background = 'var(--tan)';
-    nlBtn.style.color = 'var(--sand)';
+    nlBtn.style.color = '#e8d5b7';
     nlBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
     nlBtn.style.borderRadius = '50px';
     goBtn.innerHTML = '✨ Ask AI';
@@ -1433,11 +1442,11 @@ function setSearchMode(mode) {
     locBox.style.display = 'flex';
     nlBox.style.display = 'none';
     locBtn.style.background = 'var(--tan)';
-    locBtn.style.color = 'var(--sand)';
+    locBtn.style.color = '#e8d5b7';
     locBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
     locBtn.style.borderRadius = '50px';
-    nlBtn.style.background = 'transparent';
-    nlBtn.style.color = 'var(--muted)';
+    nlBtn.style.background = 'var(--card)';
+    nlBtn.style.color = 'var(--tan)';
     nlBtn.style.boxShadow = 'none';
     goBtn.innerHTML = '🔍 Find Campsites Tonight';
   }
@@ -1463,10 +1472,18 @@ async function doNLSearch() {
   const fields = '{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"2 sentences","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"..."}';
 
   // Check if query is camping/travel related before sending
-  const prompt = 'Find real campsites matching this request: "' + query + '". ' + locationContext + ' Return ONLY a valid JSON array of up to 12 campsites. Each object: ' + fields + ' No fake results. JSON array only.';
+  // Detect if this is a question about the app vs a campsite search
+  const isAppQuestion = /what can you do|how do (i|you|this)|what (is|are) (your|this|nomad)|help|features|how (does|to)|what.*(search|find|use|work)|explain|tell me about/i.test(query);
+
+  let prompt;
+  if (isAppQuestion) {
+    prompt = 'You are NomadAI, an AI-powered campsite finder app. The user is asking: "' + query + '". Answer their question helpfully and conversationally in 2-4 sentences. Describe what NomadAI can do: find BLM/dispersed/free campsites, search by location or natural language description, save spots, plan trips, track visited camps, share spots with friends, view weather and sunrise/sunset per campsite, and show satellite maps with campsite pins. Do NOT return JSON. Just answer naturally.';
+  } else {
+    prompt = 'Find real campsites matching this request: "' + query + '". ' + locationContext + ' Return ONLY a valid JSON array of up to 12 campsites. Each object: ' + fields + ' No fake results. JSON array only.';
+  }
 
   // Build a prompt that returns both a message and JSON results
-  const fullPrompt = prompt + ' Also prepend your JSON array with a single friendly sentence (max 20 words) starting with "MSG:" that summarizes what you found. Format: MSG:Your message here\n[...json array...]';
+  const fullPrompt = isAppQuestion ? prompt : prompt + ' Start your response with MSG: followed by one friendly sentence (max 15 words) summarizing results. Then on a new line return the raw JSON array. No code fences. Example: MSG:Found 8 free BLM spots near Moab with great views.\n[{...}]';
 
   try {
     const r = await fetch('/api/claude', {
@@ -1486,9 +1503,9 @@ async function doNLSearch() {
     const txt = d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
 
     // Extract MSG prefix if present
-    const firstLine = txt.indexOf('MSG:') === 0 ? txt.substring(0, txt.indexOf('[')) : ''; const msgMatch = firstLine.length > 4 ? [null, firstLine.substring(4).trim()] : null;
+    const msgLine = txt.indexOf('MSG:') === 0 ? txt.substring(4, txt.indexOf('\n') > 0 ? txt.indexOf('\n') : 80) : ''; const cleanMsg = msgLine.replace(/```json|```/g,'').replace(/\[.*$/,'').trim(); const msgMatch = cleanMsg.length > 2 ? [null, cleanMsg] : null;
     if (msgMatch) {
-      document.getElementById('ai-response-text').textContent = msgMatch[1].trim();
+      document.getElementById('ai-response-text').textContent = msgMatch[1];
       document.getElementById('ai-response-box').classList.add('show');
     }
 
