@@ -1564,10 +1564,8 @@ function renderJournal() {
   const el = document.getElementById('home-journal');
   if (!el) return;
 
-  // Show visited spots first, fall back to saved if none visited
-  const spots = visited.length
-    ? saved.filter(s => visited.includes(s.name))
-    : saved.slice(0, 5);
+  // Only show visited spots
+  const spots = saved.filter(s => visited.includes(s.name));
 
   if (!spots.length) {
     el.innerHTML = `<div class="journal-empty">✓ Mark campsites as visited to start your journal.<br><span style="color:var(--tan);font-weight:700;">Tap the ✓ button on any card.</span></div>`;
