@@ -1465,8 +1465,8 @@ function setSearchMode(mode) {
 }
 
 function toggleNLClearBtn(){
-  const val = (document.getElementById('nl-input').innerText || '').trim();
-  document.getElementById('nl-clear-btn').style.display = val ? 'block' : 'none';
+  const nlClearVal = (document.getElementById('nl-input').innerText || '').trim();
+  document.getElementById('nl-clear-btn').style.display = nlClearVal ? 'block' : 'none';
 }
 function clearNLSearch(){
   const nlEl = document.getElementById('nl-input'); nlEl.innerText = '';
