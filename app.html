@@ -1488,7 +1488,8 @@ function getCompletedTrips(){try{return JSON.parse(localStorage.getItem('cf_comp
 function renderHomeStats() {
   const saved = getSaved();
   const visited = getVisited();
-  const states = [...new Set(saved.filter(s=>s.state).map(s=>s.state))];
+  const visitedSites = saved.filter(s => visited.includes(s.name) && s.state);
+  const states = [...new Set(visitedSites.map(s=>s.state))];
   const trips = getCompletedTrips().filter(t => t.count >= 3);
   const el1 = document.getElementById('home-stat-visited');
   const el2 = document.getElementById('home-stat-trips');
@@ -2303,10 +2304,11 @@ function completeTrip() {
 }
 
 function clearStatsConfirm() {
-  if (confirm('Clear all ratings, journal notes, and completed trips? This cannot be undone.')) {
+  if (confirm('Clear all stats? This will reset visited spots, ratings, journal notes, completed trips, and states. This cannot be undone.')) {
     localStorage.removeItem('cf_ratings');
     localStorage.removeItem('cf_completed_trips');
     localStorage.removeItem('cf_notes');
+    localStorage.removeItem('cf_visited');
     renderHome();
     syncToSupabase();
     alert('Stats and journal cleared!');
