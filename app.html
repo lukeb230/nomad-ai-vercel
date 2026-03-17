@@ -1077,7 +1077,19 @@ function cardHTML(s,i,isSavedView=false){
   const tags=(s.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('');
   const mapsUrl=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name+' campsite')}`;
   const src=(s.source||'other').toLowerCase().replace('recreation.gov','rec').replace('ioverlander','iover').replace('campendium','camp');
-  const listingBtn=s.url?`<a class="fb solid" href="${s.url}" target="_blank">📄 View</a>`:`<span class="fb dim">No link</span>`;
+  const listingUrl=(function(){
+    const name=encodeURIComponent(s.name);
+    const src=(s.source||'').toLowerCase();
+    const lat=s.coordinates&&s.coordinates.lat;
+    const lng=s.coordinates&&s.coordinates.lng;
+    if(src.includes('dyrt')) return `https://thedyrt.com/search?query=${name}`;
+    if(src.includes('recreation')) return `https://www.recreation.gov/search?q=${name}`;
+    if(src.includes('iover')) return `https://www.ioverlander.com/search#?search=${name}`;
+    if(src.includes('camp')) return `https://www.campendium.com/search?q=${name}`;
+    if(lat&&lng) return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    return `https://www.google.com/maps/search/?api=1&query=${name}+campsite`;
+  })();
+  const listingBtn=`<a class="fb solid" href="${listingUrl}" target="_blank">📄 View</a>`;
   const savedClass=isSaved(s.name)?'save-btn saved':'save-btn';
   const visitedClass=isVisited(s.name)?'visited-btn been':'visited-btn';
   const tripClass=inTrip(s.name)?'visited-btn been':'visited-btn';
