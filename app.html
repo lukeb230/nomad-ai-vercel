@@ -157,7 +157,7 @@
     .tag-loc { font-size: 11px; padding: 3px 9px; background: rgba(168,196,204,0.15); border-radius: 6px; color: var(--sky); font-weight: 700; border: 1px solid rgba(168,196,204,0.3); }
     .sc-foot { display: grid; grid-template-columns: 1fr 1fr 44px 44px; gap: 6px; }
     .fb { height: 42px; border-radius: 12px; font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; }
-    .fb.solid   { background: var(--tan);  color: var(--sand); }
+    .fb.solid   { background: var(--tan);  color: #fff; }
     .fb.outline { background: var(--dark); color: var(--sky);  border: 1.5px solid var(--slate); }
     .fb.dim     { background: var(--dark); color: var(--muted); cursor: default; }
     .fb.save-btn { background: var(--dark); border: 1.5px solid var(--slate); color: var(--muted); }
@@ -1091,7 +1091,7 @@ function cardHTML(s,i,isSavedView=false){
     else siteName='campsite';
     return `https://www.google.com/search?q=${encodeURIComponent(s.name+' '+siteName)}`;
   })();
-  const listingBtn=`<a class="fb solid" href="${listingUrl}" target="_blank" style="flex-direction:column;gap:1px;line-height:1.2;font-size:11px;color:#f0e8d8;">Search<span>Site</span></a>`;
+  const listingBtn=`<a class="fb solid" href="${listingUrl}" target="_blank" style="flex-direction:column;gap:1px;line-height:1.2;font-size:11px;color:#fff!important;">Search<span>Site</span></a>`;
   const savedClass=isSaved(s.name)?'save-btn saved':'save-btn';
   const visitedClass=isVisited(s.name)?'visited-btn been':'visited-btn';
   const tripClass=inTrip(s.name)?'visited-btn been':'visited-btn';
