@@ -1372,11 +1372,13 @@ function clearDataConfirm(key, msg){
 }
 
 // Load saved preferences on init
-(function initPrefs(){
+function initPrefs(){
   if(localStorage.getItem('cf_light_mode')==='1') document.getElementById('app').classList.add('light');
+  else document.getElementById('app').classList.remove('light');
   const savedRadius=localStorage.getItem('cf_default_radius');
   if(savedRadius) { radius=parseInt(savedRadius); }
-})();
+}
+initPrefs(); // Apply from localStorage immediately
 
 // ── PASSPORT ──
 let passportOpen = false;
@@ -1806,6 +1808,7 @@ async function syncFromSupabase() {
   }
   renderSaved();
   renderSearchHistory();
+  initPrefs();
 }
 
 showMain();
