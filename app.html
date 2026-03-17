@@ -1103,6 +1103,7 @@ function setMapMode(mode){
   document.getElementById('map-btn-saved').classList.toggle('on',mode==='saved');
   document.getElementById('map-btn-route').classList.toggle('on',mode==='route');
   clearMapMarkers();
+  if(routePolyline&&mode!=='route'){routePolyline.remove();routePolyline=null;}
   if(mode==='results'){if(lastSearchResults.length)plotSites(lastSearchResults,'#e85555');}
   else if(mode==='saved'){const saved=getSaved();if(saved.length)plotSites(saved,'#8aac7a');}
   else if(mode==='route'){plotRoute();}
