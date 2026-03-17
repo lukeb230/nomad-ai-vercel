@@ -368,7 +368,7 @@
     .route-handle { font-size: 16px; color: var(--muted); cursor: grab; }
     .route-empty { padding: 20px 16px; text-align: center; font-size: 13px; color: var(--muted); line-height: 1.7; }
     .route-actions { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.06); box-sizing: border-box; width: 100%; }
-    .route-go-btn { flex: 1; height: 40px; background: var(--sage); color: var(--sand); border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; min-width: 0; overflow: hidden; }
+    .route-go-btn { flex: 1; height: 40px; background: #c4a06a; color: var(--sand); border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; min-width: 0; overflow: hidden; }
     .route-clear-btn { height: 40px; padding: 0 14px; background: var(--dark); border: 1.5px solid #7a3030; color: #f0a0a0; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; }
     .route-optimize-btn { height: 40px; padding: 0 14px; background: var(--dark); border: 1.5px solid var(--tan); color: var(--tan); border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; white-space: nowrap; }
     .route-add-all-btn { height: 40px; padding: 0 14px; background: var(--dark); border: 1.5px solid var(--sage); color: var(--sage); border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; white-space: nowrap; }
@@ -531,6 +531,7 @@
     .trip-dash-btn.primary { background: var(--tan); color: var(--sand); }
     .trip-dash-btn.outline { background: var(--dark); border: 1.5px solid var(--slate); color: var(--muted); }
     .trip-dash-btn.next { background: var(--dark); border: 1.5px solid var(--sage); color: var(--sage); }
+    .trip-dash-btn.tan { background: #c4a06a !important; color: #e8d5b7 !important; border: none; }
 
     /* STATS STRIP */
     .stats-strip { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 6px; }
@@ -695,7 +696,7 @@
       <div class="route-header"><span>Use ↑ ↓ to reorder your stops</span><div class="route-loc-toggle" id="route-loc-toggle" onclick="toggleRouteFromLocation()"><div class="route-loc-dot"></div>📍 Start from me</div></div>
       <div class="route-list" id="route-list"></div>
       <div class="route-actions">
-        <a class="route-go-btn" id="route-go-btn" href="#" target="_blank">🧭 Maps</a>
+        <div class="route-go-btn" id="route-go-btn" onclick="switchTab('map');setTimeout(()=>setMapMode('route'),150);">🗺️</div>
         <button class="route-add-all-btn" onclick="addAllSavedToRoute()">+ All</button>
         <button class="route-optimize-btn" onclick="optimizeRoute()">✦ Optimize</button>
         <button class="route-optimize-btn" style="border-color:var(--sage);color:var(--sage);" onclick="completeTrip()">✓ Completed</button>
@@ -1459,7 +1460,7 @@ function renderTripDash() {
       ${next.distance ? `<div class="trip-dash-pill">📍 ${next.distance}</div>` : ''}
     </div>
     <div class="trip-dash-actions">
-      <a class="trip-dash-btn primary" href="${mapsUrl}" target="_blank">🧭 Maps</a>
+      <a class="trip-dash-btn tan" href="${mapsUrl}" target="_blank">🗺️</a>
       <div class="trip-dash-btn next" onclick="nextTripStop()">Next stop →</div>
       <div class="trip-dash-btn outline" onclick="switchTab('saved');setTimeout(()=>{if(!routeOpen)toggleRoutePlanner();},100);">Route</div>
     </div>
@@ -2223,7 +2224,7 @@ function renderRoutePlanner() {
 function updateRouteLink(sites) {
   const tripSites = getTrip();
   const withCoords = tripSites.filter(s => s.coordinates?.lat && s.coordinates?.lng);
-  if (!withCoords.length) { document.getElementById('route-go-btn').href = '#'; return; }
+  if (!withCoords.length) return;
   let origin, dest, middle;
   if (routeFromLocation && userLat && userLng) {
     origin = `${userLat},${userLng}`;
@@ -2236,7 +2237,7 @@ function updateRouteLink(sites) {
   }
   let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`;
   if (middle) url += `&waypoints=${middle}`;
-  document.getElementById('route-go-btn').href = url;
+  // route-go-btn now navigates to map tab, not external URL
 }
 
 function moveStop(idx, dir) {
