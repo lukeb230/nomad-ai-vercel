@@ -445,8 +445,10 @@
         grid-row: 1;
         height: 100vh;
         overflow-y: auto;
+        overflow-x: hidden;
         padding-bottom: 24px;
         max-width: 100%;
+        box-sizing: border-box;
       }
 
       #map-tab {
@@ -476,8 +478,8 @@
       .slabel { padding: 0 24px 9px; }
       .chips { padding: 0 24px 10px; }
       .filters { padding: 0 24px 14px; }
-      .chip, .filter-chip { height: 38px !important; min-height: 38px !important; overflow: visible !important; display: inline-flex !important; align-items: center !important; flex-shrink: 0 !important; }
-      .chips, .filters, .search-history { display: flex !important; overflow-x: auto; flex-wrap: nowrap !important; align-items: center; height: auto !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .chip, .filter-chip { height: 38px !important; min-height: 38px !important; overflow: visible !important; display: inline-flex !important; align-items: center !important; flex-shrink: 0 !important; white-space: nowrap !important; }
+      .chips, .filters, .search-history { display: flex !important; overflow-x: auto !important; overflow-y: visible !important; flex-wrap: nowrap !important; align-items: center !important; height: auto !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; box-sizing: border-box; }
       .chips::-webkit-scrollbar, .filters::-webkit-scrollbar { display: none; }
       .rad-row { display: flex !important; flex-wrap: nowrap !important; }
       .history-pill { height: 34px; display: inline-flex !important; align-items: center !important; flex-shrink: 0 !important; }
@@ -641,14 +643,14 @@
     </div>
     <div id="search-history-wrap"></div>
     <div class="slabel">Sources</div>
-    <div class="chips">
+    <div class="chips" style="max-width:100%;box-sizing:border-box;">
       <div class="chip on rec"   onclick="tog(this,'rec')">🛶 Recreation.gov</div>
       <div class="chip on iover" onclick="tog(this,'iover')">⛺️ iOverlander</div>
       <div class="chip on dyrt"  onclick="tog(this,'dyrt')">🗺️ The Dyrt</div>
       <div class="chip on camp" onclick="tog(this,'camp')">🏕️ Campendium</div>
     </div>
     <div class="slabel">Filters</div>
-    <div class="filters">
+    <div class="filters" style="max-width:100%;box-sizing:border-box;">
       <div class="filter-chip on disp" onclick="togf(this,'disp')">🌲 Dispersed/BLM</div>
       <div class="filter-chip on paid" onclick="togf(this,'paid')">🏗️ Paid w/ Facilities</div>
       <div class="filter-chip over"    onclick="togf(this,'over')">⛰️ Overlanding</div>
