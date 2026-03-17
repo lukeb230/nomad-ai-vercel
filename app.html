@@ -1609,7 +1609,13 @@ function showMain(){
   const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone;
   if(isIOS)document.getElementById('ios-hint').classList.add('show');
   switchTab('search');
-  
+  // Silently request location on startup so distances are ready
+  if(navigator.geolocation && !userLat) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+    }, ()=>{}, {timeout:8000, maximumAge:60000});
+  }
 }
 
 function switchTab(tab){
@@ -1907,6 +1913,8 @@ async function doNLSearch() {
       recalcDistances(sites);
       const resEl = document.getElementById('res');
       resEl.innerHTML = sites.map((s,i) => cardHTML(s,i,false)).join('');
+      // Re-render distances after short delay in case location just came in
+      setTimeout(() => { recalcDistances(sites); resEl.querySelectorAll('[data-cardid]').forEach((card,i) => { const s=sites[i]; if(s) { const locEl=card.querySelector('.sc-loc'); if(locEl&&s.distance) locEl.textContent='📍 '+s.distance; } }); }, 2000);
       sites.forEach((s,i) => {
         const card = resEl.children[i];
         if (!card) return;
