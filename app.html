@@ -1240,8 +1240,8 @@ function showMain(){
   document.getElementById('bottom-nav').classList.add('show');
   const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone;
   if(isIOS)document.getElementById('ios-hint').classList.add('show');
-  switchTab('home');
-  setTimeout(loadHome, 1000);
+  switchTab('search');
+  
 }
 
 function switchTab(tab){
