@@ -164,7 +164,9 @@
     .fb.save-btn { background: var(--dark); border: 1.5px solid var(--slate); color: var(--muted); }
     .fb.save-btn.saved { color: var(--tan); border-color: var(--tan); }
     .fb.visited-btn { background: var(--dark); border: 1.5px solid var(--slate); color: var(--muted); }
-    .fb.visited-btn.been { color: var(--sage); border-color: var(--sage); }
+    .fb.visited-btn.been { background: var(--sage); border-color: var(--sage); color: #fff; }
+    .fb.trip-btn { background: var(--dark); border: 1.5px solid var(--slate); color: var(--muted); }
+    .fb.trip-btn.added { background: var(--tan); border-color: var(--tan); color: #fff; }
     .fb.delete-btn { background: var(--dark); border: 1.5px solid #7a3030; color: #f0a0a0; }
     .fb.share-btn { background: var(--dark); border: 1.5px solid var(--sky); color: var(--sky); }
     .weather-strip { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--dark); border-radius: 10px; margin-bottom: 12px; font-size: 12px; color: var(--light); font-weight: 600; }
@@ -259,6 +261,7 @@
     #app.light .fb.outline { background: #e4ddd0; }
     #app.light .fb.save-btn { background: #e4ddd0; }
     #app.light .fb.visited-btn { background: #e4ddd0; }
+    #app.light .fb.trip-btn { background: #e4ddd0; }
     #app.light .fb.delete-btn { background: #e4ddd0; }
     #app.light .tag { background: #e4ddd0; }
     #app.light .route-toggle-btn { background: #e4ddd0; }
@@ -1236,7 +1239,7 @@ function cardHTML(s,i,isSavedView=false){
   const listingBtn=`<a class="fb search-site-btn" href="${listingUrl}" target="_blank">Search<span>Site</span></a>`;
   const savedClass=isSaved(s.name)?'save-btn saved':'save-btn';
   const visitedClass=isVisited(s.name)?'visited-btn been':'visited-btn';
-  const tripClass=inTrip(s.name)?'visited-btn been':'visited-btn';
+  const tripClass=inTrip(s.name)?'trip-btn added':'trip-btn';
   const tripBtn=isSavedView?`<div class="fb ${tripClass}" onclick="addToTrip(${JSON.stringify(s).replace(/"/g,'&quot;')},this)" title="Add to trip">+</div>`:'';
   const actionBtn=isSavedView?`<div class="fb delete-btn" onclick="removeSaved('${s.name.replace(/'/g,"\\'")}')">🗑️</div>`:`<div class="fb ${savedClass}" onclick="toggleSave(${JSON.stringify(s).replace(/"/g,'&quot;')},this)">🔖</div>`;
   const visitBtn=`<div class="fb ${visitedClass}" onclick="toggleVisited('${s.name.replace(/'/g,"\\'")}',this)">✓</div>`;
@@ -1270,11 +1273,16 @@ function toggleSave(site,btn){let saved=getSaved();if(isSaved(site.name)){saved=
 function getTrip(){try{return JSON.parse(localStorage.getItem('cf_trip')||'[]');}catch(e){return[];}}
 function inTrip(name){return getTrip().some(s=>s.name===name);}
 function addToTrip(site,btn){
+  if(inTrip(site.name)){
+    localStorage.setItem('cf_trip',JSON.stringify(getTrip().filter(s=>s.name!==site.name)));
+    btn.classList.remove('added');
+    if(routeOpen)renderRoutePlanner();
+    return;
+  }
   let trip=getTrip();
-  if(inTrip(site.name))return;
   trip.push(site);
   localStorage.setItem('cf_trip',JSON.stringify(trip));
-  btn.textContent='✓';btn.style.color='var(--sage)';btn.style.borderColor='var(--sage)';
+  btn.classList.add('added');
   if(routeOpen)renderRoutePlanner();
 }
 function removeFromTrip(name){
