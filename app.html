@@ -825,6 +825,13 @@
         </div>
         <button class="settings-btn danger" onclick="clearDataConfirm('cf_visited','Passport cleared!')">Clear</button>
       </div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-label">Stats &amp; journal</div>
+          <div class="settings-row-sub">Clear ratings, journal notes, and completed trips</div>
+        </div>
+        <button class="settings-btn danger" onclick="clearStatsConfirm()">Clear</button>
+      </div>
     </div>
 
     <div class="settings-section" id="settings-account-section">
@@ -2293,6 +2300,17 @@ function completeTrip() {
   // Flash confirmation
   const btn = document.querySelector('[onclick="completeTrip()"]');
   if (btn) { btn.textContent = '🎉 Logged!'; setTimeout(() => btn.textContent = '✓ Done', 2000); }
+}
+
+function clearStatsConfirm() {
+  if (confirm('Clear all ratings, journal notes, and completed trips? This cannot be undone.')) {
+    localStorage.removeItem('cf_ratings');
+    localStorage.removeItem('cf_completed_trips');
+    localStorage.removeItem('cf_notes');
+    renderHome();
+    syncToSupabase();
+    alert('Stats and journal cleared!');
+  }
 }
 
 function clearRoute() {
