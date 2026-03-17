@@ -3031,6 +3031,13 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
 
 
   <!-- PROFILE MODAL -->
+  <div id="profile-overlay" onclick="if(event.target===this)closeProfile();" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1001;background:rgba(0,0,0,0.7);">
+    <div id="profile-panel" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 40px);max-width:380px;">
+      <button class="profile-close" onclick="closeProfile()">✕</button>
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar" id="profile-avatar-display" onclick="document.getElementById('profile-photo-input').click()">
+          <span id="profile-avatar-initial">👤</span>
+        </div>
         <div class="profile-avatar-hint">Tap to change photo</div>
         <input type="file" id="profile-photo-input" accept="image/*" style="display:none;" onchange="handleProfilePhoto(this)"/>
       </div>
@@ -3043,8 +3050,10 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
     </div>
   </div>
 
-
   <!-- PASSPORT MODAL -->
+  <div id="passport-overlay" onclick="if(event.target===this)closePassportModal();" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1002;background:rgba(0,0,0,0.75);">
+    <div id="passport-modal" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;border-radius:24px 24px 0 0;max-height:85vh;display:flex;flex-direction:column;">
+      <div style="width:36px;height:4px;background:var(--slate);border-radius:2px;margin:12px auto 0;flex-shrink:0;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;flex-shrink:0;">
         <div>
           <div style="font-size:18px;font-weight:800;color:var(--sand);">🪪 Camp Passport</div>
