@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#1c2820"/>
+<title>NomadAI — Campsite</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--sand:#e8d5b7;--sky:#a8c4cc;--slate:#6a8c8a;--sage:#8aac7a;--tan:#c4a06a;--tan-dark:#9a7040;--dark:#2a3830;--darker:#1c2820;--card:#324438;--muted:#7a9a88;--light:#d4e8d8;--red:#e8a0a0}
+body{background:var(--darker);color:var(--sand);font-family:'Nunito',sans-serif;min-height:100vh;padding:0;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--dark);border-bottom:1px solid var(--slate);}
+.logo{font-size:18px;font-weight:800;color:var(--sand);text-decoration:none;}
+.open-btn{background:var(--tan);color:var(--darker);padding:8px 18px;border-radius:50px;font-weight:800;font-size:13px;text-decoration:none;font-family:'Nunito',sans-serif;}
+.container{max-width:480px;margin:0 auto;padding:16px;}
+.error{text-align:center;padding:60px 20px;color:var(--muted);font-size:15px;line-height:1.8;}
+/* Card styles */
+.sc{background:var(--card);border-radius:20px;overflow:hidden;border:1px solid var(--slate);}
+.carousel{position:relative;height:200px;background:var(--dark);overflow:hidden;}
+.carousel-track{display:flex;height:100%;transition:transform 0.35s ease;}
+.carousel-slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.carousel-slide img{width:100%;height:100%;object-fit:cover;display:block;}
+.ph-loader{font-size:2rem;opacity:.3;}
+.carousel-btn{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;background:rgba(28,40,32,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;font-size:14px;color:var(--sand);user-select:none;}
+.carousel-btn.prev{left:8px;}.carousel-btn.next{right:8px;}
+.sc-badge{position:absolute;top:10px;left:10px;font-size:10px;font-weight:800;padding:4px 11px;border-radius:20px;color:var(--sand);z-index:2;}
+.sc-badge.dyrt{background:var(--tan)}.sc-badge.rec{background:var(--sage)}.sc-badge.iover{background:#5a8898}.sc-badge.blm{background:var(--slate)}.sc-badge.camp{background:#7a6a50}.sc-badge.other{background:#4a5a50}
+.sc-fee{position:absolute;top:10px;right:10px;background:rgba(28,40,32,0.85);color:var(--tan);font-size:11px;font-weight:800;padding:4px 11px;border-radius:20px;z-index:2;}
+.sc-body{padding:14px 16px;}
+.sc-name{font-size:18px;font-weight:800;color:var(--sand);margin-bottom:4px;line-height:1.25;}
+.sc-loc{font-size:12px;color:var(--sky);font-weight:700;margin-bottom:10px;}
+.sc-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;}
+.pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--dark);color:var(--light);}
+.sc-desc{font-size:13px;color:var(--light);line-height:1.65;margin-bottom:12px;}
+.sc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.tag{font-size:11px;padding:3px 9px;background:var(--dark);border-radius:6px;color:var(--muted);font-weight:600;}
+.weather-strip{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--dark);border-radius:10px;margin-bottom:12px;font-size:12px;color:var(--light);font-weight:600;}
+.weather-strip .w-icon{font-size:18px;}.weather-strip .w-temp{font-size:15px;font-weight:800;color:var(--sand);}.weather-strip .w-desc{color:var(--muted);}.weather-strip .w-wind{margin-left:auto;color:var(--muted);font-size:11px;}
+.sun-strip{display:flex;align-items:center;gap:12px;padding:6px 12px 8px;font-size:11px;color:var(--muted);font-weight:600;border-top:1px solid rgba(255,255,255,0.05);}
+.sc-foot{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;}
+.fb{height:42px;border-radius:12px;font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;}
+.fb.solid{background:var(--tan);color:var(--sand);}
+.fb.outline{background:var(--dark);color:var(--sky);border:1.5px solid var(--slate);}
+.cta{text-align:center;padding:24px 20px;}
+.cta p{font-size:13px;color:var(--muted);margin-bottom:12px;}
+.cta a{display:inline-flex;align-items:center;gap:8px;background:var(--tan);color:var(--darker);padding:14px 32px;border-radius:50px;font-weight:800;font-size:15px;text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="logo">🏕️ NomadAI</a>
+  <a href="/" class="open-btn">Open app →</a>
+</div>
+<div class="container">
+  <div id="content"><div class="error">Loading campsite…</div></div>
+</div>
+<script>
+const WMO={0:'Clear',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',51:'Light drizzle',53:'Drizzle',61:'Light rain',63:'Rain',71:'Light snow',73:'Snow',80:'Showers',95:'Thunderstorm'};
+const WMO_ICON={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',53:'🌦️',61:'🌧️',63:'🌧️',71:'🌨️',73:'❄️',80:'🌦️',95:'⛈️'};
+
+async function loadWeather(cardId, lat, lng) {
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&wind_speed_unit=mph&timezone=auto`);
+    const d = await r.json();
+    const w = d.current_weather;
+    const desc = WMO[w.weathercode]||'';
+    const icon = WMO_ICON[w.weathercode]||'🌡️';
+    const temp = Math.round(w.temperature*9/5+32);
+    document.getElementById(cardId+'-weather').innerHTML = `<span class="w-icon">${icon}</span><span class="w-temp">${temp}°F</span><span class="w-desc">${desc}</span><span class="w-wind">💨 ${Math.round(w.windspeed)} mph</span>`;
+    // Sunrise/sunset
+    const r2 = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=sunrise,sunset&timezone=auto&forecast_days=1`);
+    const d2 = await r2.json();
+    if(d2.daily) {
+      const fmt=t=>{const dt=new Date(t);let h=dt.getHours(),m=dt.getMinutes();const ap=h>=12?'pm':'am';h=h%12||12;return h+':'+(m<10?'0'+m:m)+' '+ap;};
+      document.getElementById(cardId+'-sun').innerHTML = `<span>🌅 ${fmt(d2.daily.sunrise[0])}</span><span>🌇 ${fmt(d2.daily.sunset[0])}</span>`;
+    }
+  } catch(e){}
+}
+
+async function loadPhotos(cardId, name, loc) {
+  try {
+    const r = await fetch(`/api/places?type=search&input=${encodeURIComponent(name+' campground '+loc)}`);
+    const d = await r.json();
+    if(d.candidates&&d.candidates[0]&&d.candidates[0].photos&&d.candidates[0].photos.length>0) {
+      const photos = d.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
+      const track = document.getElementById(cardId+'-track');
+      if(track) track.innerHTML = photos.map((url,i)=>`<div class="carousel-slide"><span class="ph-loader">🏕️</span><img src="${url}" loading="lazy" style="cursor:zoom-in;" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none'"/></div>`).join('');
+    }
+  } catch(e){}
+}
+
+function renderCard(site) {
+  const src = (site.source||'other').toLowerCase().replace('recreation.gov','rec').replace('ioverlander','iover').replace('campendium','camp');
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(site.name+' campsite')}`;
+  const cardId = 'shared-card';
+  const hasCoords = site.coordinates&&site.coordinates.lat&&site.coordinates.lng;
+
+  document.getElementById('content').innerHTML = `
+    <div class="sc" style="margin-bottom:16px;">
+      <div class="carousel">
+        <div class="carousel-track" id="${cardId}-track">
+          <div class="carousel-slide"><span class="ph-loader">🏕️</span></div>
+        </div>
+        <div class="sc-badge ${src}">${site.sourceLabel||src}</div>
+        <div class="sc-fee">${site.fee||'Free'}</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-name">${site.name}</div>
+        <div class="sc-loc">📍 ${site.distance||'Nearby'}</div>
+        <div class="sc-pills">
+          ${site.reservable?'<div class="pill">🗓 Reservable</div>':'<div class="pill">🟢 Walk-up</div>'}
+          ${site.directions?`<div class="pill">🧭 ${site.directions}</div>`:''}
+        </div>
+        ${hasCoords?`<div class="weather-strip" id="${cardId}-weather"><span class="w-desc" style="color:var(--muted);font-size:11px;">Loading weather…</span></div><div class="sun-strip" id="${cardId}-sun"><span style="color:var(--muted);font-size:10px;">Loading sunrise/sunset…</span></div>`:''}
+        <div class="sc-desc">${site.description||''}</div>
+        <div class="sc-tags">${(site.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="sc-foot">
+          ${site.url?`<a class="fb solid" href="${site.url}" target="_blank">📄 View listing</a>`:'<div class="fb solid" style="opacity:.4;cursor:default;">No link</div>'}
+          <a class="fb outline" href="${mapsUrl}" target="_blank">🗺 Directions</a>
+        </div>
+      </div>
+    </div>
+    <div class="cta">
+      <p>Find more campsites like this with NomadAI</p>
+      <a href="/">🏕️ Open NomadAI</a>
+    </div>`;
+
+  if(hasCoords) loadWeather(cardId, site.coordinates.lat, site.coordinates.lng);
+  loadPhotos(cardId, site.name, site.city||'');
+}
+
+// Parse URL
+try {
+  const params = new URLSearchParams(window.location.search);
+  const data = params.get('d');
+  if(!data) throw new Error('No data');
+  const site = JSON.parse(decodeURIComponent(escape(atob(data))));
+  document.title = `${site.name} — NomadAI`;
+  renderCard(site);
+} catch(e) {
+  document.getElementById('content').innerHTML = '<div class="error">🏕️<br><br>Campsite not found.<br><a href="/" style="color:var(--tan);font-weight:700;">Search for campsites →</a></div>';
+}
+</script>
+</body>
+</html>
