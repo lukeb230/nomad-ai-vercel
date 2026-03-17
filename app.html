@@ -2260,6 +2260,8 @@ function openPassportModal() {
   const modal = document.getElementById('passport-modal');
   modal.style.background = isLight ? '#f8f4ec' : '#2a3830';
   modal.style.color = isLight ? '#2a3830' : '#e8d5b7';
+  // Store for use in stamp rendering
+  window._passportIsLight = isLight;
   const visited = getVisited();
   const saved = getSaved();
   document.getElementById('passport-modal-count').textContent = visited.length + ' camp' + (visited.length !== 1 ? 's' : '') + ' visited';
@@ -2286,6 +2288,17 @@ function openPassportModal() {
     }).join('');
   }
   document.getElementById('passport-overlay').style.display = 'flex';
+  // Style stamp cards for light/dark
+  setTimeout(() => {
+    const isLt = window._passportIsLight;
+    document.querySelectorAll('#passport-modal-grid .stamp').forEach(el => {
+      el.style.background = isLt ? '#e8e0d0' : '';
+      el.style.borderColor = isLt ? '#c8c0b0' : '';
+      el.style.color = isLt ? '#2a3830' : '';
+    });
+    const countEl = document.getElementById('passport-modal-count');
+    if (countEl) countEl.style.color = isLt ? '#5a7060' : '';
+  }, 50);
   document.getElementById('passport-overlay').style.alignItems = 'flex-end';
   document.getElementById('passport-overlay').style.justifyContent = 'center';
   document.body.style.overflow = 'hidden';
@@ -2769,6 +2782,22 @@ function openProfile() {
   panel.style.background = isLight ? '#f8f4ec' : '#2a3830';
   panel.style.borderColor = isLight ? '#c8c0b0' : '#6a8c8a';
   panel.style.color = isLight ? '#2a3830' : '#e8d5b7';
+  // Style child elements
+  panel.querySelectorAll('.profile-input').forEach(el => {
+    el.style.background = isLight ? '#f0ebe0' : '';
+    el.style.borderColor = isLight ? '#c8c0b0' : '';
+    el.style.color = isLight ? '#2a3830' : '';
+  });
+  panel.querySelectorAll('.profile-label, .profile-email, .profile-avatar-hint').forEach(el => {
+    el.style.color = isLight ? '#5a7060' : '';
+  });
+  panel.querySelectorAll('.profile-save-btn').forEach(el => {
+    if (!el.style.backgroundColor || el.style.backgroundColor === 'var(--card)') {
+      el.style.background = isLight ? '#e4ddd0' : '';
+      el.style.borderColor = isLight ? '#c8c0b0' : '';
+      el.style.color = isLight ? '#5a7060' : '';
+    }
+  });
   const p = getProfile();
   document.getElementById('profile-email-display').textContent = currentUser.email;
   document.getElementById('profile-name-input').value = p.name || '';
