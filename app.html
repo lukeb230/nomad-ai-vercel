@@ -1035,12 +1035,7 @@ function plotRoute(){
     latlngs.push([lat,lng]);
     bounds.push([lat,lng]);
     // Numbered marker
-    const icon=L.divIcon({
-      className:'',
-      html:`<div style="width:28px;height:28px;border-radius:50%;background:var(--tan);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#1c2820;font-family:Nunito,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,0.4);">${i+1}</div>`,
-      iconSize:[28,28],iconAnchor:[14,14]
-    });
-    const marker=L.marker([lat,lng],{icon}).addTo(map);
+    const marker=L.marker([lat,lng],{icon:makeIcon('#e85555')}).addTo(map);
     marker.bindPopup(`<div class="popup-name">${i+1}. ${s.name}</div><div class="popup-meta">${s.distance||''}</div>`);
     mapMarkers.push(marker);
   });
@@ -1055,14 +1050,14 @@ function plotRoute(){
       .then(d=>{
         if(d.routes&&d.routes[0]){
           const geojson=d.routes[0].geometry;
-          routePolyline=L.geoJSON(geojson,{style:{color:'#c4a06a',weight:3,opacity:0.75}}).addTo(map);
+          routePolyline=L.geoJSON(geojson,{style:{color:'#4a90d9',weight:3,opacity:0.8}}).addTo(map);
         } else {
           // Fallback to straight line if OSRM fails
-          routePolyline=L.polyline(latlngs,{color:'#c4a06a',weight:3,opacity:0.7,dashArray:'6,8'}).addTo(map);
+          routePolyline=L.polyline(latlngs,{color:'#4a90d9',weight:3,opacity:0.8,dashArray:'6,8'}).addTo(map);
         }
       })
       .catch(()=>{
-        routePolyline=L.polyline(latlngs,{color:'#c4a06a',weight:3,opacity:0.7,dashArray:'6,8'}).addTo(map);
+        routePolyline=L.polyline(latlngs,{color:'#4a90d9',weight:3,opacity:0.8,dashArray:'6,8'}).addTo(map);
       });
   }
 }
@@ -1163,7 +1158,7 @@ function cardHTML(s,i,isSavedView=false){
       <div class="sc-pills"><span class="pill">${s.reservable?'🗓 Reservable':'🟢 Walk-up'}</span>${s.directions?`<span class="pill">🧭 ${s.directions.substring(0,28)}</span>`:''}</div>
       ${coordsHtml}
       <div class="sc-desc">${s.description}</div>
-      <div class="sc-tags">${isSavedView&&(s.city||s.state)?'<span class="tag-loc">📍 '+(s.city?s.city+', ':'')+''+( s.state||'')+'</span>':''  }${tags}</div>
+      <div class="sc-tags">${(s.city||s.state)?'<span class="tag-loc">📍 '+(s.city?s.city+', ':'')+''+( s.state||'')+'</span>':''  }${tags}</div>
       ${notesSection}
       ${(s.coordinates&&s.coordinates.lat)?'<div onclick="copyCoords('+s.coordinates.lat+','+s.coordinates.lng+',this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:var(--dark);border:1.5px solid var(--slate);border-radius:8px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;margin-top:14px;margin-bottom:10px;user-select:none;">📍 '+s.coordinates.lat.toFixed(4)+', '+s.coordinates.lng.toFixed(4)+'</div>':''}
       <div class="sc-foot" style="margin-top:${notesSection?'10px':'0'};grid-template-columns:${isSavedView?'1fr 1fr 44px 44px 44px':'1fr 1fr 44px 44px'}">${listingBtn}<a class="fb outline" href="${mapsUrl}" target="_blank">🗺 Directions</a>${visitBtn}${isSavedView?tripBtn:''}${actionBtn}</div>
