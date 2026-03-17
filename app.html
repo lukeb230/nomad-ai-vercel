@@ -2598,17 +2598,6 @@ async function initAuth() {
   });
 }
 
-function updateUserBadge() {
-  updateUserBadge();
-  document.querySelectorAll('.user-badge').forEach(el => {
-    if (currentUser) {
-      el.title = 'Signed in as ' + currentUser.email;
-    } else {
-      el.innerHTML = '👤 Sign in';
-    }
-  });
-}
-
 function openAuth() {
   document.getElementById('auth-overlay').classList.add('show');
   document.getElementById('auth-email').value = '';
@@ -2730,8 +2719,7 @@ async function syncToSupabase() {
     search_history: localStorage.getItem('cf_search_history')||'[]',
     completed_trips: localStorage.getItem('cf_completed_trips')||'[]',
     ratings: localStorage.getItem('cf_ratings')||'{}',
-    visited_states: localStorage.getItem('cf_visited_states')||'[]',
-    profile: localStorage.getItem('cf_profile')||'{}'
+    visited_states: localStorage.getItem('cf_visited_states')||'[]'
   };
   // Upsert saved spots
   await supa.from('saved_spots').delete().eq('user_id', currentUser.id);
@@ -2746,6 +2734,11 @@ async function syncToSupabase() {
   // Upsert user settings (single row)
   await supa.from('user_settings').delete().eq('user_id', currentUser.id);
   await supa.from('user_settings').insert([{ user_id: currentUser.id, data: { ...settings, trip } }]);
+  // Upsert profile separately (may be large due to photo)
+  const profile = getProfile();
+  if (profile.name !== undefined || profile.photo !== undefined) {
+    await supa.from('user_settings').upsert([{ user_id: currentUser.id + '_profile', data: profile }], { onConflict: 'user_id' });
+  }
 }
 
 async function syncFromSupabase() {
@@ -2770,7 +2763,6 @@ async function syncFromSupabase() {
     if (s.completed_trips) localStorage.setItem('cf_completed_trips', s.completed_trips);
     if (s.ratings) localStorage.setItem('cf_ratings', s.ratings);
     if (s.visited_states) localStorage.setItem('cf_visited_states', s.visited_states);
-    if (s.profile) { localStorage.setItem('cf_profile', s.profile); updateUserBadge(); }
     // Apply light mode — use timeout to ensure it runs after any other DOM updates
     setTimeout(() => {
       const mode = (s.light_mode === '0') ? '0' : '1';
@@ -2785,6 +2777,13 @@ async function syncFromSupabase() {
         if(toggle) toggle.classList.remove('on');
       }
     }, 50);
+  }
+  // Fetch profile separately
+  const profileRes = await supa.from('user_settings').select('data').eq('user_id', currentUser.id + '_profile').single().catch(()=>({data:null}));
+  if (profileRes.data) {
+    localStorage.setItem('cf_profile', JSON.stringify(profileRes.data));
+    updateUserBadge();
+    renderHome();
   }
   renderSaved();
   renderSearchHistory();
