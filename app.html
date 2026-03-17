@@ -1350,9 +1350,11 @@ function toggleLightMode(){
   app.classList.toggle('light');
   btn.classList.toggle('on');
   localStorage.setItem('cf_light_mode', app.classList.contains('light')?'1':'0');
+  syncToSupabase();
 }
 function saveDefaultRadius(val){
   localStorage.setItem('cf_default_radius',val);
+  syncToSupabase();
   setR(document.querySelector('.rad-btn.on'), parseInt(val));
 }
 function clearData(key, msg){
@@ -1543,11 +1545,13 @@ function addSearchHistory(loc){
   if(h.length>8)h=h.slice(0,8);
   localStorage.setItem('cf_search_history',JSON.stringify(h));
   renderSearchHistory();
+  syncToSupabase();
 }
 function removeSearchHistory(loc){
   let h=getSearchHistory().filter(l=>l!==loc);
   localStorage.setItem('cf_search_history',JSON.stringify(h));
   renderSearchHistory();
+  syncToSupabase();
 }
 function renderSearchHistory(){
   const wrap=document.getElementById('search-history-wrap');
