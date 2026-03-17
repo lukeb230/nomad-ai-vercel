@@ -1469,6 +1469,21 @@ function nextTripStop() {
     visited.push(current.name);
     localStorage.setItem('cf_visited', JSON.stringify(visited));
   }
+  // Also save the spot if not already saved (so it appears in the journal)
+  let saved = getSaved();
+  if (!saved.find(s => s.name === current.name)) {
+    saved.push(current);
+    localStorage.setItem('cf_saved', JSON.stringify(saved));
+  }
+  // Store visited state for stats
+  const resolvedState = current.state || '';
+  if (resolvedState) {
+    let vs = getVisitedStates();
+    if (!vs.find(s => s.name === current.name)) {
+      vs.push({ name: current.name, state: resolvedState });
+      localStorage.setItem('cf_visited_states', JSON.stringify(vs));
+    }
+  }
   // Advance index if not at last stop
   if (idx < trip.length - 1) setTripIndex(idx + 1);
   syncToSupabase();
