@@ -2832,6 +2832,7 @@ async function syncToSupabase() {
       user_id: uid,
       current_trip: trip,
       completed_trips: completedTrips,
+      trip_index: parseInt(localStorage.getItem('cf_trip_index')||'0'),
       updated_at: new Date().toISOString()
     }, { onConflict: 'user_id' }).then(({error: e}) => {
       if (e) return Promise.reject('trips upsert: '+e.message);
@@ -2869,7 +2870,7 @@ async function syncFromSupabase() {
     supa.from('visited_spots').select('spot_name').eq('user_id', uid),
     supa.from('trip_notes').select('spot_name,note').eq('user_id', uid),
     supa.from('user_settings').select('data').eq('user_id', uid).maybeSingle(),
-    supa.from('user_trips').select('current_trip,completed_trips').eq('user_id', uid).maybeSingle(),
+    supa.from('user_trips').select('current_trip,completed_trips,trip_index').eq('user_id', uid).maybeSingle(),
     supa.from('user_profiles').select('display_name,photo').eq('user_id', uid).maybeSingle()
   ]);
 
@@ -2914,7 +2915,8 @@ async function syncFromSupabase() {
   if (!tripsRes.error && tripsRes.data) {
     if (tripsRes.data.current_trip) localStorage.setItem('cf_trip', JSON.stringify(tripsRes.data.current_trip));
     if (tripsRes.data.completed_trips) localStorage.setItem('cf_completed_trips', JSON.stringify(tripsRes.data.completed_trips));
-    console.log('Loaded trips, current:', (tripsRes.data.current_trip||[]).length, 'completed:', (tripsRes.data.completed_trips||[]).length);
+    if (tripsRes.data.trip_index !== null && tripsRes.data.trip_index !== undefined) localStorage.setItem('cf_trip_index', tripsRes.data.trip_index);
+    console.log('Loaded trips, current:', (tripsRes.data.current_trip||[]).length, 'completed:', (tripsRes.data.completed_trips||[]).length, 'index:', tripsRes.data.trip_index);
   } else if (tripsRes.error) console.error('Trips fetch error:', tripsRes.error.message);
 
   // Profile
