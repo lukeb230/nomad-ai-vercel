@@ -719,7 +719,7 @@
       </div>
     </div>
     <div id="route-planner">
-      <div class="route-header"><span>Use ↑ ↓ to reorder your stops</span><div style="display:flex;gap:10px;flex-shrink:0;"><div class="route-loc-toggle" id="route-round-toggle" onclick="toggleRoundTrip()"><div class="route-loc-dot"></div>🔄 Round trip</div><div class="route-loc-toggle" id="route-loc-toggle" onclick="toggleRouteFromLocation()"><div class="route-loc-dot"></div>📍 Start from me</div></div></div>
+      <div class="route-header"><span>Use ↑ ↓ to reorder your stops</span><div style="display:flex;gap:10px;flex-shrink:0;"><div class="route-loc-toggle" id="route-round-toggle" onclick="toggleRoundTrip()"><div class="route-loc-dot"></div>🔄 Round trip</div><div class="route-loc-toggle on" id="route-loc-toggle" onclick="toggleRouteFromLocation()"><div class="route-loc-dot"></div>📍 Start from me</div></div></div>
       <div class="route-list" id="route-list"></div>
       <div class="route-actions">
         <div class="route-go-btn" id="route-go-btn" onclick="switchTab('map');setTimeout(()=>setMapMode('route'),150);">🗺️</div>
@@ -944,7 +944,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let radius=50, map=null, mapMode='results', mapMarkers=[], routePolyline=null, routeFromLocation=false, routeRoundTrip=false;
+let radius=50, map=null, mapMode='results', mapMarkers=[], routePolyline=null, routeFromLocation=true, routeRoundTrip=false;
 const active=new Set(['dyrt','iover','rec','disp','camp','paid']);
 const carouselState={};
 let lastSearchResults=[];
@@ -2388,19 +2388,42 @@ function optimizeRoute() {
   const withCoords = trip.filter(s => s.coordinates?.lat && s.coordinates?.lng);
   if (withCoords.length < 3) { alert('At least 3 stops need coordinates to optimize.'); return; }
 
-  // Nearest neighbor algorithm starting from first stop
   function dist(a, b) {
     const dLat = a.coordinates.lat - b.coordinates.lat;
     const dLng = a.coordinates.lng - b.coordinates.lng;
     return Math.sqrt(dLat*dLat + dLng*dLng);
   }
 
+  function distCoord(lat1, lng1, lat2, lng2) {
+    return Math.sqrt((lat1-lat2)**2 + (lng1-lng2)**2);
+  }
+
+  // Determine start point
+  let startLat = null, startLng = null;
+  if (routeFromLocation && userLat && userLng) {
+    startLat = userLat; startLng = userLng;
+  }
+
+  // Nearest neighbor — if start from me, begin from user location
   const unvisited = [...withCoords];
-  const optimized = [unvisited.splice(0, 1)[0]];
+  let optimized = [];
+
+  if (startLat !== null) {
+    // Find stop closest to user location first
+    let nearest = 0, nearestDist = Infinity;
+    unvisited.forEach((s, i) => {
+      const d = distCoord(startLat, startLng, s.coordinates.lat, s.coordinates.lng);
+      if (d < nearestDist) { nearestDist = d; nearest = i; }
+    });
+    optimized.push(unvisited.splice(nearest, 1)[0]);
+  } else {
+    optimized.push(unvisited.splice(0, 1)[0]);
+  }
+
+  // Build rest of route greedily
   while (unvisited.length) {
     const last = optimized[optimized.length - 1];
-    let nearest = 0;
-    let nearestDist = Infinity;
+    let nearest = 0, nearestDist = Infinity;
     unvisited.forEach((s, i) => {
       const d = dist(last, s);
       if (d < nearestDist) { nearestDist = d; nearest = i; }
@@ -2408,17 +2431,38 @@ function optimizeRoute() {
     optimized.push(unvisited.splice(nearest, 1)[0]);
   }
 
-  // Add back any stops without coords at the end
+  // Round trip: reorder so the last stop is the one closest back to start
+  if (routeRoundTrip) {
+    const returnLat = startLat !== null ? startLat : optimized[0].coordinates.lat;
+    const returnLng = startLng !== null ? startLng : optimized[0].coordinates.lng;
+    // Find which stop in optimized is closest to start to use as the last stop
+    let bestEnd = optimized.length - 1, bestDist = Infinity;
+    optimized.forEach((s, i) => {
+      const d = distCoord(returnLat, returnLng, s.coordinates.lat, s.coordinates.lng);
+      if (d < bestDist) { bestDist = d; bestEnd = i; }
+    });
+    // Rotate array so bestEnd is last
+    if (bestEnd !== optimized.length - 1) {
+      const rotated = [...optimized.slice(0, bestEnd+1)];
+      // Put closest-to-return last by reversing the tail if needed
+      const rest = optimized.slice(bestEnd+1);
+      optimized = [...rotated.slice(0, -1), ...rest, rotated[rotated.length-1]];
+    }
+  }
+
+  // Add back stops without coords
   const noCoords = trip.filter(s => !s.coordinates?.lat || !s.coordinates?.lng);
   const result = [...optimized, ...noCoords];
 
   localStorage.setItem('cf_trip', JSON.stringify(result));
+  localStorage.removeItem('cf_trip_index');
   renderRoutePlanner();
   renderSaved();
+  syncToSupabase();
 
-  // Brief flash confirmation
   const btn = document.querySelector('.route-optimize-btn');
-  if (btn) { btn.textContent = '✓ Optimized!'; setTimeout(() => btn.textContent = '✦ Optimize', 1800); }
+  const label = routeRoundTrip ? '✓ Loop optimized!' : '✓ Optimized!';
+  if (btn) { btn.textContent = label; setTimeout(() => btn.textContent = '✦ Optimize', 1800); }
 }
 
 
