@@ -146,7 +146,7 @@ body.light .source-pill { filter: brightness(0.9); }
 <body>
 <script>
 (function(){
-  if(localStorage.getItem('cf_light_mode')==='1') document.body.classList.add('light');
+  if(localStorage.getItem('cf_light_mode')!=='0') document.body.classList.add('light');
 })();
 </script>
 
