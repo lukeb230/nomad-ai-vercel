@@ -9,13 +9,12 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--sand:#e8d5b7;--sky:#a8c4cc;--slate:#6a8c8a;--sage:#8aac7a;--tan:#c4a06a;--tan-dark:#9a7040;--dark:#2a3830;--darker:#1c2820;--card:#324438;--muted:#7a9a88;--light:#d4e8d8;--red:#e8a0a0}
-body{background:var(--darker);color:var(--sand);font-family:'Nunito',sans-serif;min-height:100vh;padding:0;}
+body{background:var(--darker);color:var(--sand);font-family:'Nunito',sans-serif;min-height:100vh;}
 .header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--dark);border-bottom:1px solid var(--slate);}
 .logo{font-size:18px;font-weight:800;color:var(--sand);text-decoration:none;}
 .open-btn{background:var(--tan);color:var(--darker);padding:8px 18px;border-radius:50px;font-weight:800;font-size:13px;text-decoration:none;font-family:'Nunito',sans-serif;}
 .container{max-width:480px;margin:0 auto;padding:16px;}
 .error{text-align:center;padding:60px 20px;color:var(--muted);font-size:15px;line-height:1.8;}
-/* Card styles */
 .sc{background:var(--card);border-radius:20px;overflow:hidden;border:1px solid var(--slate);}
 .carousel{position:relative;height:200px;background:var(--dark);overflow:hidden;}
 .carousel-track{display:flex;height:100%;transition:transform 0.35s ease;}
@@ -50,12 +49,17 @@ body{background:var(--darker);color:var(--sand);font-family:'Nunito',sans-serif;
 <body>
 <div class="header">
   <a href="/" class="logo">🏕️ NomadAI</a>
-  <a href="/" class="open-btn">Open app →</a>
+  <a href="/app" class="open-btn">Open app →</a>
 </div>
 <div class="container">
   <div id="content"><div class="error">Loading campsite…</div></div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPA_URL = 'https://gxoffnudqftrrxpfyrjv.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4b2ZmbnVkcWZ0cnJ4cGZ5cmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MTU4MTEsImV4cCI6MjA4OTI5MTgxMX0.ys1JsJ5YOsjVy3L-GjspBCJEXKzC8mLtHRSzY2CgLXc';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
 const WMO={0:'Clear',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',51:'Light drizzle',53:'Drizzle',61:'Light rain',63:'Rain',71:'Light snow',73:'Snow',80:'Showers',95:'Thunderstorm'};
 const WMO_ICON={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',53:'🌦️',61:'🌧️',63:'🌧️',71:'🌨️',73:'❄️',80:'🌦️',95:'⛈️'};
 
@@ -68,7 +72,6 @@ async function loadWeather(cardId, lat, lng) {
     const icon = WMO_ICON[w.weathercode]||'🌡️';
     const temp = Math.round(w.temperature*9/5+32);
     document.getElementById(cardId+'-weather').innerHTML = `<span class="w-icon">${icon}</span><span class="w-temp">${temp}°F</span><span class="w-desc">${desc}</span><span class="w-wind">💨 ${Math.round(w.windspeed)} mph</span>`;
-    // Sunrise/sunset
     const r2 = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=sunrise,sunset&timezone=auto&forecast_days=1`);
     const d2 = await r2.json();
     if(d2.daily) {
@@ -85,7 +88,7 @@ async function loadPhotos(cardId, name, loc) {
     if(d.candidates&&d.candidates[0]&&d.candidates[0].photos&&d.candidates[0].photos.length>0) {
       const photos = d.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
       const track = document.getElementById(cardId+'-track');
-      if(track) track.innerHTML = photos.map((url,i)=>`<div class="carousel-slide"><span class="ph-loader">🏕️</span><img src="${url}" loading="lazy" style="cursor:zoom-in;" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none'"/></div>`).join('');
+      if(track) track.innerHTML = photos.map((url,i)=>`<div class="carousel-slide"><span class="ph-loader">🏕️</span><img src="${url}" loading="lazy" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none'"/></div>`).join('');
     }
   } catch(e){}
 }
@@ -95,6 +98,7 @@ function renderCard(site) {
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(site.name+' campsite')}`;
   const cardId = 'shared-card';
   const hasCoords = site.coordinates&&site.coordinates.lat&&site.coordinates.lng;
+  const loc = [site.city, site.state].filter(Boolean).join(', ');
 
   document.getElementById('content').innerHTML = `
     <div class="sc" style="margin-bottom:16px;">
@@ -102,12 +106,12 @@ function renderCard(site) {
         <div class="carousel-track" id="${cardId}-track">
           <div class="carousel-slide"><span class="ph-loader">🏕️</span></div>
         </div>
-        <div class="sc-badge ${src}">${site.sourceLabel||src}</div>
+        <div class="sc-badge ${src}">${site.source_label||site.sourceLabel||src}</div>
         <div class="sc-fee">${site.fee||'Free'}</div>
       </div>
       <div class="sc-body">
         <div class="sc-name">${site.name}</div>
-        <div class="sc-loc">📍 ${site.distance||'Nearby'}</div>
+        ${loc?`<div class="sc-loc">📍 ${loc}</div>`:''}
         <div class="sc-pills">
           ${site.reservable?'<div class="pill">🗓 Reservable</div>':'<div class="pill">🟢 Walk-up</div>'}
           ${site.directions?`<div class="pill">🧭 ${site.directions}</div>`:''}
@@ -123,24 +127,50 @@ function renderCard(site) {
     </div>
     <div class="cta">
       <p>Find more campsites like this with NomadAI</p>
-      <a href="/">🏕️ Open NomadAI</a>
+      <a href="/app">🏕️ Open NomadAI</a>
     </div>`;
 
   if(hasCoords) loadWeather(cardId, site.coordinates.lat, site.coordinates.lng);
   loadPhotos(cardId, site.name, site.city||'');
 }
 
-// Parse URL
-try {
+async function loadSpot() {
+  const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
-  const data = params.get('d');
-  if(!data) throw new Error('No data');
-  const site = JSON.parse(decodeURIComponent(escape(atob(data))));
-  document.title = `${site.name} — NomadAI`;
-  renderCard(site);
-} catch(e) {
-  document.getElementById('content').innerHTML = '<div class="error">🏕️<br><br>Campsite not found.<br><a href="/" style="color:var(--tan);font-weight:700;">Search for campsites →</a></div>';
+
+  try {
+    // Option 1: Short ID from Supabase e.g. /spot/uuid
+    const pathId = path.split('/spot/')[1];
+    if (pathId) {
+      const { data, error } = await supa.from('shared_spots').select('*').eq('id', pathId).single();
+      if (error || !data) throw new Error('Not found');
+      document.title = `${data.name} — NomadAI`;
+      renderCard(data);
+      return;
+    }
+
+    // Option 2: Legacy base64 encoded data e.g. /spot?d=...
+    const encoded = params.get('d');
+    if (encoded) {
+      const raw = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      const site = raw.n ? {
+        name: raw.n, source: raw.s, sourceLabel: raw.sl, url: raw.u,
+        fee: raw.f, reservable: raw.r, description: raw.d, tags: raw.t,
+        directions: raw.dir, coordinates: raw.c, city: raw.ci, state: raw.st
+      } : raw;
+      document.title = `${site.name} — NomadAI`;
+      renderCard(site);
+      return;
+    }
+
+    throw new Error('No data');
+  } catch(e) {
+    console.error(e);
+    document.getElementById('content').innerHTML = '<div class="error">🏕️<br><br>Campsite not found.<br><a href="/app" style="color:var(--tan);font-weight:700;">Search for campsites →</a></div>';
+  }
 }
+
+loadSpot();
 </script>
 </body>
 </html>
