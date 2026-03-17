@@ -858,7 +858,7 @@ function initMap(){
     mapClickLatLng = e.latlng;
     if (mapClickMarker) mapClickMarker.remove();
     mapClickMarker = L.circleMarker([e.latlng.lat, e.latlng.lng], {
-      radius: 10, color: '#c4a06a', fillColor: '#c4a06a', fillOpacity: 0.4, weight: 2
+      radius: 10, color: '#e85555', fillColor: '#e85555', fillOpacity: 0.4, weight: 2
     }).addTo(map);
     const btn = document.getElementById('map-search-btn');
     if (btn) btn.classList.add('show');
@@ -873,17 +873,64 @@ async function searchMapArea() {
   btn.textContent = '⏳ Searching…';
   btn.disabled = true;
 
-  // Switch to search tab, pre-fill location, run search
+  // Search without switching tabs
   document.getElementById('loc').value = lat + ', ' + lng;
-  switchTab('search');
-  await doSearch();
+  const srcs=[];
+  if(active.has('dyrt')) srcs.push('The Dyrt (thedyrt.com)');
+  if(active.has('iover'))srcs.push('iOverlander (ioverlander.com)');
+  if(active.has('rec'))  srcs.push('Recreation.gov');
+  if(active.has('disp')) srcs.push('BLM dispersed camping');
+  if(active.has('camp')) srcs.push('Campendium (campendium.com)');
 
-  // Reset button
+  const fields='{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"1 sentence max","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"..."}';
+
+  const fetchClaude=async(prompt)=>{
+    try{
+      const r=await fetch('/api/claude',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+      const raw=await r.text();
+      if(!r.ok) return [];
+      const d=JSON.parse(raw);
+      const txt=d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+      const idx=txt.indexOf('[');const idx2=txt.lastIndexOf(']');
+      if(idx===-1||idx2===-1) return [];
+      return JSON.parse(txt.substring(idx,idx2+1));
+    }catch(e){return [];}
+  };
+
+  try {
+    const p1='Find FREE, DISPERSED, and PRIMITIVE campsites near "'+lat+', '+lng+'" within '+radius+' miles. Sources: '+srcs.join(', ')+'. Focus on BLM, National Forest, no-fee sites. Return ONLY valid JSON array, each object: '+fields+' Return UP TO 8 results. No fake results. JSON array only.';
+    const sites1 = await fetchClaude(p1);
+    await new Promise(r=>setTimeout(r,500));
+    const p2='Find PAID, ESTABLISHED campgrounds near "'+lat+', '+lng+'" within '+radius+' miles. Sources: '+srcs.join(', ')+'. Focus on campgrounds with amenities. Return ONLY valid JSON array, each object: '+fields+' Return UP TO 8 results. No fake results. JSON array only.';
+    const sites2 = await fetchClaude(p2);
+
+    const seen=new Set();
+    const all=[...sites1,...sites2].filter(s=>{if(seen.has(s.name))return false;seen.add(s.name);return true;});
+    lastSearchResults = all;
+
+    // Update map with new results
+    setMapMode('results');
+  } catch(e) {
+    console.error(e);
+  }
+
   btn.textContent = '🔍 Search this area';
   btn.disabled = false;
   btn.classList.remove('show');
 }
-function makeIcon(color){return L.divIcon({html:`<div style="width:14px;height:14px;background:${color};border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.5);"></div>`,className:'',iconSize:[14,14],iconAnchor:[7,7],popupAnchor:[0,-10]});}
+function makeIcon(color){
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.4"/>
+    </filter>
+    <g filter="url(#shadow)">
+      <polygon points="12,3 22,19 2,19" fill="${color}" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+      <polygon points="12,11 16,19 8,19" fill="white" opacity="0.25"/>
+      <rect x="10" y="14" width="4" height="5" rx="1" fill="white" opacity="0.6"/>
+    </g>
+  </svg>`;
+  return L.divIcon({html:svg,className:'',iconSize:[24,24],iconAnchor:[12,22],popupAnchor:[0,-22]});
+}
 function clearMapMarkers(){mapMarkers.forEach(m=>m.remove());mapMarkers=[];}
 function plotSites(sites,color){
   if(!map||!sites.length)return;
