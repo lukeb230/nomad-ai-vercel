@@ -26,9 +26,6 @@
     #app { font-family: 'Nunito', sans-serif; background: transparent; color: var(--sand); max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 
     /* SPLASH */
-    #splash { position: relative; min-height: 100vh; min-height: 100dvh; background: linear-gradient(175deg, rgba(42,56,48,0.3) 0%, rgba(28,40,32,0.93) 70%), url('https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&q=80') center/cover no-repeat; display: flex; flex-direction: column; justify-content: flex-end; padding: 32px 24px; }
-    #splash h1 { font-size: 30px; font-weight: 800; color: var(--sand); line-height: 1.15; margin-bottom: 10px; }
-    #splash p { font-size: 13px; color: var(--light); line-height: 1.75; margin-bottom: 28px; opacity: .9; }
 
     /* TABS */
     #home-tab   { display: none; flex-direction: column; flex: 1; padding-bottom: 80px; overflow-y: visible; }
@@ -486,21 +483,6 @@
       #map-tab { height: 100vh; }
       #leaflet-map { height: calc(100vh - 130px) !important; }
 
-      /* Splash full screen on desktop */
-      #splash {
-        grid-column: 1 / -1;
-        max-width: 100%;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 60px 80px;
-        background: linear-gradient(175deg, rgba(42,56,48,0.3) 0%, rgba(28,40,32,0.93) 70%), url('https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=1600&q=80') center/cover no-repeat;
-      }
-      #splash h1 { font-size: 52px; max-width: 700px; }
-      #splash p { font-size: 16px; max-width: 540px; }
     }
 
       .saved-empty, .home-empty { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; }
@@ -520,13 +502,6 @@
 </head>
 <body>
 <div id="app" style="position:relative;z-index:1;">
-  <div id="splash" style="display:none!important;">
-    <div style="margin-bottom:20px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 680" width="72" height="72" style="border-radius:16px;"><rect x="90" y="90" width="500" height="500" rx="110" fill="#8aac7a"/><polygon points="340,180 530,480 150,480" fill="#d4706a"/><polygon points="340,310 400,480 280,480" fill="#5a7a4a"/><rect x="140" y="475" width="400" height="18" rx="9" fill="#5a7a4a" opacity="0.6"/></svg></div>
-    <h1>Find Your Camp Tonight</h1>
-    <p>Search BLM land, National Forests, The Dyrt, iOverlander and Recreation.gov — all in one place.</p>
-    <div onclick="showMain()" style="display:inline-flex;align-items:center;gap:8px;background:#c4a06a;color:#e8d5b7;border-radius:50px;padding:15px 32px;font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;user-select:none;width:fit-content;">Get started →</div>
-  </div>
-
   <!-- HOME TAB -->
   <div id="home-tab">
     <div class="topbar">
@@ -1262,7 +1237,6 @@ function setHomeSt(m,ld=false){document.getElementById('home-st').textContent=m;
 
 // ── APP INIT ──
 function showMain(){
-  document.getElementById('splash').style.display='none';
   document.getElementById('bottom-nav').classList.add('show');
   const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone;
   if(isIOS)document.getElementById('ios-hint').classList.add('show');
@@ -1772,8 +1746,8 @@ function clearDataConfirm(key, msg){
 function initPrefs(){
   const app = document.getElementById('app');
   const savedMode = localStorage.getItem('cf_light_mode');
-  if(savedMode === '0') app.classList.remove('light');
-  else app.classList.add('light');
+  if(savedMode === '0') { app.classList.remove('light'); localStorage.setItem('cf_light_mode','0'); }
+  else { app.classList.add('light'); localStorage.setItem('cf_light_mode','1'); }
   const savedRadius=localStorage.getItem('cf_default_radius');
   if(savedRadius) { radius=parseInt(savedRadius); }
 }
@@ -2241,5 +2215,7 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
   deferredPrompt=null;
 });
 </script>
+
+
 </body>
 </html>
