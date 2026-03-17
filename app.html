@@ -2295,7 +2295,16 @@ function openPassportModal() {
       el.style.background = isLt ? '#e8e0d0' : '';
       el.style.borderColor = isLt ? '#c8c0b0' : '';
       el.style.color = isLt ? '#2a3830' : '';
+      el.querySelectorAll('.stamp-name, .stamp-loc, .stamp-check').forEach(t => {
+        t.style.color = isLt ? '#9a7040' : '';
+      });
     });
+    // Fix passport close button
+    const passportClose = document.querySelector('#passport-modal button');
+    if (passportClose) {
+      passportClose.style.background = isLt ? '#e4ddd0' : '';
+      passportClose.style.color = isLt ? '#2a3830' : '';
+    }
     const countEl = document.getElementById('passport-modal-count');
     if (countEl) countEl.style.color = isLt ? '#5a7060' : '';
   }, 50);
@@ -2791,6 +2800,11 @@ function openProfile() {
   panel.querySelectorAll('.profile-label, .profile-email, .profile-avatar-hint').forEach(el => {
     el.style.color = isLight ? '#5a7060' : '';
   });
+  const closeBtn = panel.querySelector('.profile-close');
+  if (closeBtn) {
+    closeBtn.style.background = isLight ? '#e4ddd0' : '';
+    closeBtn.style.color = isLight ? '#2a3830' : '';
+  }
   panel.querySelectorAll('.profile-save-btn').forEach(el => {
     if (!el.style.backgroundColor || el.style.backgroundColor === 'var(--card)') {
       el.style.background = isLight ? '#e4ddd0' : '';
