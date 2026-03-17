@@ -2738,7 +2738,7 @@ function updateUserBadge() {
 
 async function syncToSupabase() {
   if (!currentUser) return;
-  console.log("Syncing to Supabase...");
+  const uid = currentUser.id;
   const saved = getSaved();
   const visited = getVisited();
   const notes = JSON.parse(localStorage.getItem('cf_notes')||'{}');
@@ -2751,123 +2751,135 @@ async function syncToSupabase() {
     ratings: localStorage.getItem('cf_ratings')||'{}',
     visited_states: localStorage.getItem('cf_visited_states')||'[]'
   };
-  // Saved spots
-  try {
-    await supa.from('saved_spots').delete().eq('user_id', currentUser.id);
-    if (saved.length) await supa.from('saved_spots').insert(saved.map(s => ({ user_id: currentUser.id, data: s })));
-    console.log('Saved spots synced:', saved.length);
-  } catch(e) { console.error('Saved spots sync error:', e); }
-  // Visited
-  try {
-    await supa.from('visited_spots').delete().eq('user_id', currentUser.id);
-    if (visited.length) await supa.from('visited_spots').insert(visited.map(name => ({ user_id: currentUser.id, spot_name: name })));
-    console.log('Visited synced:', visited.length);
-  } catch(e) { console.error('Visited sync error:', e); }
-  // Notes
-  try {
-    await supa.from('trip_notes').delete().eq('user_id', currentUser.id);
-    const noteEntries = Object.entries(notes);
-    if (noteEntries.length) await supa.from('trip_notes').insert(noteEntries.map(([spot_name, note]) => ({ user_id: currentUser.id, spot_name, note })));
-    console.log('Notes synced:', Object.keys(notes).length);
-  } catch(e) { console.error('Notes sync error:', e); }
-  // Settings
-  try {
-    await supa.from('user_settings').delete().eq('user_id', currentUser.id);
-    await supa.from('user_settings').insert([{ user_id: currentUser.id, data: settings }]);
-    console.log('Settings synced');
-  } catch(e) { console.error('Settings sync error:', e); }
-  // Trips
-  try {
-    await supa.from('user_trips').delete().eq('user_id', currentUser.id);
-    const { error: tripInsErr } = await supa.from('user_trips').insert({
-      user_id: currentUser.id,
+
+  // Use upsert for single-row tables, delete+insert only for multi-row tables
+  const ops = [
+    // Saved spots (multi-row)
+    supa.from('saved_spots').delete().eq('user_id', uid).then(({error: e}) => {
+      if (e) return Promise.reject('saved delete: '+e.message);
+      if (!saved.length) return;
+      return supa.from('saved_spots').insert(saved.map(s => ({ user_id: uid, data: s }))).then(({error: e2}) => {
+        if (e2) return Promise.reject('saved insert: '+e2.message);
+      });
+    }),
+    // Visited spots (multi-row)
+    supa.from('visited_spots').delete().eq('user_id', uid).then(({error: e}) => {
+      if (e) return Promise.reject('visited delete: '+e.message);
+      if (!visited.length) return;
+      return supa.from('visited_spots').insert(visited.map(n => ({ user_id: uid, spot_name: n }))).then(({error: e2}) => {
+        if (e2) return Promise.reject('visited insert: '+e2.message);
+      });
+    }),
+    // Notes (multi-row)
+    supa.from('trip_notes').delete().eq('user_id', uid).then(({error: e}) => {
+      if (e) return Promise.reject('notes delete: '+e.message);
+      const entries = Object.entries(notes);
+      if (!entries.length) return;
+      return supa.from('trip_notes').insert(entries.map(([spot_name, note]) => ({ user_id: uid, spot_name, note }))).then(({error: e2}) => {
+        if (e2) return Promise.reject('notes insert: '+e2.message);
+      });
+    }),
+    // Settings (single row - upsert)
+    supa.from('user_settings').upsert({ user_id: uid, data: settings }, { onConflict: 'user_id' }).then(({error: e}) => {
+      if (e) return Promise.reject('settings upsert: '+e.message);
+    }),
+    // Trips (single row - upsert)
+    supa.from('user_trips').upsert({
+      user_id: uid,
       current_trip: trip,
       completed_trips: completedTrips,
       updated_at: new Date().toISOString()
-    });
-    if (tripInsErr) console.error('Trip insert error:', JSON.stringify(tripInsErr));
-    else console.log('Trips synced, current stops:', trip.length, 'completed:', completedTrips.length);
-  } catch(e) { console.error('Trips sync error:', e); }
-  // Save profile to dedicated table
-  try {
-    const profile = getProfile();
-    if (profile.name !== undefined || profile.photo !== undefined) {
-      const { error: profileErr } = await supa.from('user_profiles').upsert({
-        user_id: currentUser.id,
-        display_name: profile.name || '',
-        photo: profile.photo || '',
+    }, { onConflict: 'user_id' }).then(({error: e}) => {
+      if (e) return Promise.reject('trips upsert: '+e.message);
+    }),
+    // Profile (single row - upsert)
+    (function() {
+      const p = getProfile();
+      if (p.name === undefined && p.photo === undefined) return Promise.resolve();
+      return supa.from('user_profiles').upsert({
+        user_id: uid,
+        display_name: p.name || '',
+        photo: p.photo || '',
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id', ignoreDuplicates: false });
-      if (profileErr) console.error('Profile upsert error:', JSON.stringify(profileErr));
-      else console.log('Profile synced:', profile.name);
-    }
-  } catch(e) { console.error('Profile sync error:', e); }
+      }, { onConflict: 'user_id' }).then(({error: e}) => {
+        if (e) return Promise.reject('profile upsert: '+e.message);
+      });
+    })()
+  ];
 
+  const results = await Promise.allSettled(ops);
+  const labels = ['saved', 'visited', 'notes', 'settings', 'trips', 'profile'];
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') console.error('Sync error ['+labels[i]+']:', r.reason);
+    else console.log('Synced:', labels[i]);
+  });
 }
 
 async function syncFromSupabase() {
   if (!currentUser) return;
   console.log("Syncing from Supabase...");
-  const [savedRes, visitedRes, notesRes, settingsRes] = await Promise.all([
-    supa.from('saved_spots').select('data').eq('user_id', currentUser.id),
-    supa.from('visited_spots').select('spot_name').eq('user_id', currentUser.id),
-    supa.from('trip_notes').select('spot_name,note').eq('user_id', currentUser.id),
-    supa.from('user_settings').select('data').eq('user_id', currentUser.id).single()
+  const uid = currentUser.id;
+
+  const [savedRes, visitedRes, notesRes, settingsRes, tripsRes, profileRes] = await Promise.all([
+    supa.from('saved_spots').select('data').eq('user_id', uid),
+    supa.from('visited_spots').select('spot_name').eq('user_id', uid),
+    supa.from('trip_notes').select('spot_name,note').eq('user_id', uid),
+    supa.from('user_settings').select('data').eq('user_id', uid).maybeSingle(),
+    supa.from('user_trips').select('current_trip,completed_trips').eq('user_id', uid).maybeSingle(),
+    supa.from('user_profiles').select('display_name,photo').eq('user_id', uid).maybeSingle()
   ]);
-  if (savedRes.data) localStorage.setItem('cf_saved', JSON.stringify(savedRes.data.map(r => r.data)));
-  if (visitedRes.data) localStorage.setItem('cf_visited', JSON.stringify(visitedRes.data.map(r => r.spot_name)));
-  if (notesRes.data) { const notes = {}; notesRes.data.forEach(r => { notes[r.spot_name] = r.note; }); localStorage.setItem('cf_notes', JSON.stringify(notes)); }
-  if (settingsRes.data) {
+
+  // Saved spots — only overwrite if we got real data (no error)
+  if (!savedRes.error && savedRes.data) {
+    localStorage.setItem('cf_saved', JSON.stringify(savedRes.data.map(r => r.data)));
+    console.log('Loaded saved spots:', savedRes.data.length);
+  } else if (savedRes.error) console.error('Saved fetch error:', savedRes.error.message);
+
+  // Visited
+  if (!visitedRes.error && visitedRes.data) {
+    localStorage.setItem('cf_visited', JSON.stringify(visitedRes.data.map(r => r.spot_name)));
+    console.log('Loaded visited:', visitedRes.data.length);
+  } else if (visitedRes.error) console.error('Visited fetch error:', visitedRes.error.message);
+
+  // Notes
+  if (!notesRes.error && notesRes.data) {
+    const notes = {};
+    notesRes.data.forEach(r => { notes[r.spot_name] = r.note; });
+    localStorage.setItem('cf_notes', JSON.stringify(notes));
+  } else if (notesRes.error) console.error('Notes fetch error:', notesRes.error.message);
+
+  // Settings
+  if (!settingsRes.error && settingsRes.data) {
     const s = settingsRes.data;
-    // Save to localStorage first
     localStorage.setItem('cf_light_mode', (s.light_mode === '0') ? '0' : '1');
     if (s.default_radius) localStorage.setItem('cf_default_radius', s.default_radius);
     if (s.search_history) localStorage.setItem('cf_search_history', s.search_history);
     if (s.ratings) localStorage.setItem('cf_ratings', s.ratings);
     if (s.visited_states) localStorage.setItem('cf_visited_states', s.visited_states);
-    // Apply light mode — use timeout to ensure it runs after any other DOM updates
     setTimeout(() => {
       const mode = (s.light_mode === '0') ? '0' : '1';
       localStorage.setItem('cf_light_mode', mode);
       const app = document.getElementById('app');
       const toggle = document.getElementById('light-mode-toggle');
-      if (mode === '1') {
-        app.classList.add('light');
-        if(toggle) toggle.classList.add('on');
-      } else {
-        app.classList.remove('light');
-        if(toggle) toggle.classList.remove('on');
-      }
+      if (mode === '1') { app.classList.add('light'); if(toggle) toggle.classList.add('on'); }
+      else { app.classList.remove('light'); if(toggle) toggle.classList.remove('on'); }
     }, 50);
-  }
+  } else if (settingsRes.error) console.error('Settings fetch error:', settingsRes.error.message);
 
-  // Fetch profile from dedicated table
-  // Fetch trips from dedicated table
-  const { data: tripData, error: tripFetchErr } = await supa.from('user_trips')
-    .select('current_trip, completed_trips')
-    .eq('user_id', currentUser.id)
-    .maybeSingle();
-  if (tripFetchErr) console.error('Trip fetch error:', tripFetchErr);
-  if (tripData) {
-    if (tripData.current_trip) localStorage.setItem('cf_trip', JSON.stringify(tripData.current_trip));
-    if (tripData.completed_trips) localStorage.setItem('cf_completed_trips', JSON.stringify(tripData.completed_trips));
-    console.log('Trips loaded from Supabase, current stops:', (tripData.current_trip||[]).length, 'completed:', (tripData.completed_trips||[]).length);
-  }
-  console.log('Fetching profile for user_id:', currentUser.id);
-  const { data: profileData, error: profileFetchError } = await supa.from('user_profiles')
-    .select('display_name, photo')
-    .eq('user_id', currentUser.id)
-    .maybeSingle();
-  if (profileFetchError) console.error('Profile fetch error:', JSON.stringify(profileFetchError));
-  if (profileData) {
-    const profile = { name: profileData.display_name || '', photo: profileData.photo || '' };
+  // Trips
+  if (!tripsRes.error && tripsRes.data) {
+    if (tripsRes.data.current_trip) localStorage.setItem('cf_trip', JSON.stringify(tripsRes.data.current_trip));
+    if (tripsRes.data.completed_trips) localStorage.setItem('cf_completed_trips', JSON.stringify(tripsRes.data.completed_trips));
+    console.log('Loaded trips, current:', (tripsRes.data.current_trip||[]).length, 'completed:', (tripsRes.data.completed_trips||[]).length);
+  } else if (tripsRes.error) console.error('Trips fetch error:', tripsRes.error.message);
+
+  // Profile
+  if (!profileRes.error && profileRes.data) {
+    const profile = { name: profileRes.data.display_name || '', photo: profileRes.data.photo || '' };
     localStorage.setItem('cf_profile', JSON.stringify(profile));
-    console.log('Profile loaded from Supabase:', profile.name);
+    console.log('Loaded profile:', profile.name);
     updateUserBadge();
-    renderHome();
-  } else {
-    console.log('No profile saved yet for this user');
-  }
+  } else if (profileRes.error) console.error('Profile fetch error:', profileRes.error.message);
   renderSaved();
   renderSearchHistory();
   initPrefs();
