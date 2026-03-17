@@ -714,7 +714,6 @@
     </div>
     <div class="route-bar" style="justify-content:flex-end;">
       <div style="display:flex;gap:8px;">
-        <div class="route-toggle-btn" id="passport-toggle-btn" onclick="togglePassport()">🪪 Passport</div>
         <div class="route-toggle-btn" id="route-toggle-btn" onclick="toggleRoutePlanner()">Plan a trip</div>
       </div>
     </div>
@@ -3003,6 +3002,7 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
       <label class="profile-label">Display name</label>
       <input class="profile-input" id="profile-name-input" type="text" placeholder="Your name" maxlength="40"/>
       <button class="profile-save-btn" onclick="saveProfile()">Save profile</button>
+      <button class="profile-save-btn" onclick="closeProfile();switchTab('saved');setTimeout(()=>{if(!passportOpen)togglePassport();},100);" style="background:var(--card);border:1.5px solid var(--slate);color:var(--muted);margin-top:8px;">🪪 View passport</button>
       <div class="profile-sign-out" onclick="signOut();closeProfile();">Sign out</div>
     </div>
   </div>
