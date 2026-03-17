@@ -2721,6 +2721,7 @@ function updateUserBadge() {
   });
 }
 
+
 async function syncToSupabase() {
   if (!currentUser) return;
   console.log("Syncing to Supabase...");
@@ -2728,6 +2729,7 @@ async function syncToSupabase() {
   const visited = getVisited();
   const notes = JSON.parse(localStorage.getItem('cf_notes')||'{}');
   const trip = getTrip();
+  const completedTrips = JSON.parse(localStorage.getItem('cf_completed_trips')||'[]');
   const settings = {
     light_mode: localStorage.getItem('cf_light_mode')||'1',
     default_radius: localStorage.getItem('cf_default_radius')||'50',
@@ -2735,31 +2737,43 @@ async function syncToSupabase() {
     ratings: localStorage.getItem('cf_ratings')||'{}',
     visited_states: localStorage.getItem('cf_visited_states')||'[]'
   };
-  // Upsert saved spots
-  await supa.from('saved_spots').delete().eq('user_id', currentUser.id);
-  if (saved.length) await supa.from('saved_spots').insert(saved.map(s => ({ user_id: currentUser.id, data: s })));
-  // Upsert visited
-  await supa.from('visited_spots').delete().eq('user_id', currentUser.id);
-  if (visited.length) await supa.from('visited_spots').insert(visited.map(name => ({ user_id: currentUser.id, spot_name: name })));
-  // Upsert notes
-  await supa.from('trip_notes').delete().eq('user_id', currentUser.id);
-  const noteEntries = Object.entries(notes);
-  if (noteEntries.length) await supa.from('trip_notes').insert(noteEntries.map(([spot_name, note]) => ({ user_id: currentUser.id, spot_name, note })));
-  // Upsert user settings (single row - no trip data)
-  await supa.from('user_settings').delete().eq('user_id', currentUser.id);
-  await supa.from('user_settings').insert([{ user_id: currentUser.id, data: settings }]);
-  // Save trips to dedicated table
-  const completedTrips = JSON.parse(localStorage.getItem('cf_completed_trips')||'[]');
-  const { error: tripDelErr } = await supa.from('user_trips').delete().eq('user_id', currentUser.id);
-  if (tripDelErr) console.error('Trip delete error:', tripDelErr);
-  const { error: tripInsErr } = await supa.from('user_trips').insert({
-    user_id: currentUser.id,
-    current_trip: trip,
-    completed_trips: completedTrips,
-    updated_at: new Date().toISOString()
-  });
-  if (tripInsErr) console.error('Trip insert error:', tripInsErr);
-  else console.log('Trips saved to Supabase, current stops:', trip.length, 'completed:', completedTrips.length);
+  // Saved spots
+  try {
+    await supa.from('saved_spots').delete().eq('user_id', currentUser.id);
+    if (saved.length) await supa.from('saved_spots').insert(saved.map(s => ({ user_id: currentUser.id, data: s })));
+    console.log('Saved spots synced:', saved.length);
+  } catch(e) { console.error('Saved spots sync error:', e); }
+  // Visited
+  try {
+    await supa.from('visited_spots').delete().eq('user_id', currentUser.id);
+    if (visited.length) await supa.from('visited_spots').insert(visited.map(name => ({ user_id: currentUser.id, spot_name: name })));
+    console.log('Visited synced:', visited.length);
+  } catch(e) { console.error('Visited sync error:', e); }
+  // Notes
+  try {
+    await supa.from('trip_notes').delete().eq('user_id', currentUser.id);
+    const noteEntries = Object.entries(notes);
+    if (noteEntries.length) await supa.from('trip_notes').insert(noteEntries.map(([spot_name, note]) => ({ user_id: currentUser.id, spot_name, note })));
+    console.log('Notes synced:', Object.keys(notes).length);
+  } catch(e) { console.error('Notes sync error:', e); }
+  // Settings
+  try {
+    await supa.from('user_settings').delete().eq('user_id', currentUser.id);
+    await supa.from('user_settings').insert([{ user_id: currentUser.id, data: settings }]);
+    console.log('Settings synced');
+  } catch(e) { console.error('Settings sync error:', e); }
+  // Trips
+  try {
+    await supa.from('user_trips').delete().eq('user_id', currentUser.id);
+    const { error: tripInsErr } = await supa.from('user_trips').insert({
+      user_id: currentUser.id,
+      current_trip: trip,
+      completed_trips: completedTrips,
+      updated_at: new Date().toISOString()
+    });
+    if (tripInsErr) console.error('Trip insert error:', JSON.stringify(tripInsErr));
+    else console.log('Trips synced, current stops:', trip.length, 'completed:', completedTrips.length);
+  } catch(e) { console.error('Trips sync error:', e); }
   // Save profile to dedicated table
   const profile = getProfile();
   if (profile.name !== undefined || profile.photo !== undefined) {
