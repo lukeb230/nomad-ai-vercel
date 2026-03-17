@@ -530,6 +530,7 @@
     .trip-dash-btn { flex: 1; height: 38px; border-radius: 10px; font-size: 12px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; }
     .trip-dash-btn.primary { background: var(--tan); color: var(--sand); }
     .trip-dash-btn.outline { background: var(--dark); border: 1.5px solid var(--slate); color: var(--muted); }
+    .trip-dash-btn.next { background: var(--dark); border: 1.5px solid var(--sage); color: var(--sage); }
 
     /* STATS STRIP */
     .stats-strip { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 6px; }
@@ -551,6 +552,17 @@
     .journal-note::placeholder { color: var(--muted); }
     .journal-save { margin-top: 7px; height: 30px; padding: 0 14px; background: var(--dark); border: 1.5px solid var(--slate); color: var(--muted); border-radius: 8px; font-size: 11px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; }
     .journal-empty { text-align: center; padding: 20px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  
+    /* TRIPS HISTORY */
+    .trip-hist-card { background: var(--card); border: 1px solid rgba(138,172,122,0.15); border-radius: 16px; padding: 14px 16px; }
+    .trip-hist-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .trip-hist-date { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--tan); }
+    .trip-hist-count { font-size: 11px; font-weight: 700; color: var(--muted); }
+    .trip-hist-stops { display: flex; flex-direction: column; gap: 6px; }
+    .trip-hist-stop { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--light); font-weight: 600; }
+    .trip-hist-stop-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(196,160,106,0.15); border: 1px solid rgba(196,160,106,0.3); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: var(--tan); flex-shrink: 0; }
+    .trip-hist-empty { text-align: center; padding: 32px 20px; font-size: 13px; color: var(--muted); line-height: 1.7; }
 
   </style>
 </head>
@@ -580,10 +592,10 @@
     <!-- STATS STRIP -->
     <div class="home-section" style="padding-top:14px;">
       <div class="home-section-label">Your stats</div>
-      <div class="stats-strip" onclick="openStats()">
-        <div class="stat-strip-card"><div class="stat-strip-num" id="home-stat-saved">0</div><div class="stat-strip-label">Saved</div></div>
-        <div class="stat-strip-card"><div class="stat-strip-num" id="home-stat-trips">0</div><div class="stat-strip-label">Trips</div></div>
-        <div class="stat-strip-card"><div class="stat-strip-num" id="home-stat-states">0</div><div class="stat-strip-label">States</div></div>
+      <div class="stats-strip">
+        <div class="stat-strip-card" onclick="openStats()"><div class="stat-strip-num" id="home-stat-visited">0</div><div class="stat-strip-label">Visited</div></div>
+        <div class="stat-strip-card" onclick="openTripsHistory()"><div class="stat-strip-num" id="home-stat-trips">0</div><div class="stat-strip-label">Trips</div></div>
+        <div class="stat-strip-card" onclick="openStats()"><div class="stat-strip-num" id="home-stat-states">0</div><div class="stat-strip-label">States</div></div>
       </div>
     </div>
 
@@ -683,10 +695,10 @@
       <div class="route-header"><span>Use ↑ ↓ to reorder your stops</span><div class="route-loc-toggle" id="route-loc-toggle" onclick="toggleRouteFromLocation()"><div class="route-loc-dot"></div>📍 Start from me</div></div>
       <div class="route-list" id="route-list"></div>
       <div class="route-actions">
-        <a class="route-go-btn" id="route-go-btn" href="#" target="_blank">🧭 Open in Maps</a>
+        <a class="route-go-btn" id="route-go-btn" href="#" target="_blank">🧭 Maps</a>
         <button class="route-add-all-btn" onclick="addAllSavedToRoute()">+ All</button>
         <button class="route-optimize-btn" onclick="optimizeRoute()">✦ Optimize</button>
-        <button class="route-optimize-btn" style="border-color:var(--sage);color:var(--sage);" onclick="completeTrip()">✓ Done</button>
+        <button class="route-optimize-btn" style="border-color:var(--sage);color:var(--sage);" onclick="completeTrip()">✓ Completed</button>
         <button class="route-clear-btn" onclick="clearRoute()">Clear</button>
       </div>
     </div>
@@ -1385,6 +1397,36 @@ function renderHome() {
   renderJournal();
 }
 
+function nextTripStop() {
+  let trip = getTrip();
+  if (!trip.length) return;
+  const current = trip[0];
+  // Mark as visited
+  let visited = getVisited();
+  if (!visited.includes(current.name)) {
+    visited.push(current.name);
+    localStorage.setItem('cf_visited', JSON.stringify(visited));
+  }
+  // Remove from trip
+  trip.shift();
+  localStorage.setItem('cf_trip', JSON.stringify(trip));
+  syncToSupabase();
+  renderTripDash();
+  renderHomeStats();
+  renderJournal();
+  if (routeOpen) renderRoutePlanner();
+  // Show confirmation
+  const dash = document.getElementById('home-trip-dash');
+  if (dash && trip.length) {
+    const flash = document.createElement('div');
+    flash.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(138,172,122,0.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--sage);pointer-events:none;';
+    flash.textContent = '✓ Marked as visited!';
+    dash.style.position = 'relative';
+    dash.appendChild(flash);
+    setTimeout(() => flash.remove(), 1200);
+  }
+}
+
 function renderTripDash() {
   const trip = getTrip();
   const el = document.getElementById('home-trip-dash');
@@ -1417,8 +1459,9 @@ function renderTripDash() {
       ${next.distance ? `<div class="trip-dash-pill">📍 ${next.distance}</div>` : ''}
     </div>
     <div class="trip-dash-actions">
-      <a class="trip-dash-btn primary" href="${mapsUrl}" target="_blank">🧭 Open in Maps</a>
-      <div class="trip-dash-btn outline" onclick="switchTab('saved');setTimeout(()=>{if(!routeOpen)toggleRoutePlanner();},100);">View full trip</div>
+      <a class="trip-dash-btn primary" href="${mapsUrl}" target="_blank">🧭 Maps</a>
+      <div class="trip-dash-btn next" onclick="nextTripStop()">Next stop →</div>
+      <div class="trip-dash-btn outline" onclick="switchTab('saved');setTimeout(()=>{if(!routeOpen)toggleRoutePlanner();},100);">Route</div>
     </div>
   </div>`;
 }
@@ -1427,12 +1470,13 @@ function getCompletedTrips(){try{return JSON.parse(localStorage.getItem('cf_comp
 
 function renderHomeStats() {
   const saved = getSaved();
+  const visited = getVisited();
   const states = [...new Set(saved.filter(s=>s.state).map(s=>s.state))];
-  const trips = getCompletedTrips();
-  const el1 = document.getElementById('home-stat-saved');
+  const trips = getCompletedTrips().filter(t => t.count >= 3);
+  const el1 = document.getElementById('home-stat-visited');
   const el2 = document.getElementById('home-stat-trips');
   const el3 = document.getElementById('home-stat-states');
-  if (el1) el1.textContent = saved.length;
+  if (el1) el1.textContent = visited.length;
   if (el2) el2.textContent = trips.length;
   if (el3) el3.textContent = states.length;
 }
@@ -1442,6 +1486,17 @@ function saveRating(name, stars) {
   const r = getRatings(); r[name] = stars;
   localStorage.setItem('cf_ratings', JSON.stringify(r));
   renderJournal();
+  syncToSupabase();
+}
+
+function deleteJournalEntry(name) {
+  let visited = getVisited().filter(n => n !== name);
+  localStorage.setItem('cf_visited', JSON.stringify(visited));
+  const ratings = getRatings(); delete ratings[name];
+  localStorage.setItem('cf_ratings', JSON.stringify(ratings));
+  const notes = JSON.parse(localStorage.getItem('cf_notes')||'{}'); delete notes[name];
+  localStorage.setItem('cf_notes', JSON.stringify(notes));
+  renderJournal(); renderHomeStats();
 }
 
 function renderJournal() {
@@ -1476,12 +1531,44 @@ function renderJournal() {
           <div class="journal-card-name">${s.name}</div>
           ${loc ? `<div class="journal-card-loc">📍 ${loc}</div>` : ''}
         </div>
-        <div class="journal-stars">${stars}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="journal-stars">${stars}</div>
+          <div onclick="deleteJournalEntry(this.dataset.name)" data-name="${s.name}" style="width:24px;height:24px;border-radius:50%;background:var(--dark);border:1.5px solid #7a3030;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#f0a0a0;flex-shrink:0;line-height:1;">−</div>
+        </div>
       </div>
       <textarea class="journal-note" id="${cardId}-note" placeholder="Add your notes about this spot...">${note}</textarea>
       <button class="journal-save" onclick="saveNote('${s.name.replace(/'/g,"\'")}',document.getElementById('${cardId}-note').value);this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save note',1500)">Save note</button>
     </div>`;
   }).join('');
+}
+
+// ── TRIPS HISTORY ──
+function openTripsHistory() {
+  const trips = getCompletedTrips().filter(t => t.count >= 3);
+  const list = document.getElementById('trips-history-list');
+  if (!trips.length) {
+    list.innerHTML = '<div class="trip-hist-empty">🗺️ No completed trips yet.<br><span style="color:var(--tan);font-weight:700;">Complete a route with 3+ stops to see it here.</span></div>';
+  } else {
+    list.innerHTML = trips.map((t,i) => `
+      <div class="trip-hist-card">
+        <div class="trip-hist-header">
+          <div class="trip-hist-date">${t.date}</div>
+          <div class="trip-hist-count">${t.count} stop${t.count!==1?'s':''}</div>
+        </div>
+        <div class="trip-hist-stops">
+          ${t.stops.map((name,j) => `<div class="trip-hist-stop"><div class="trip-hist-stop-num">${j+1}</div>${name}</div>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('trips-overlay').style.display = 'block';
+  document.getElementById('trips-panel').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTripsHistory() {
+  document.getElementById('trips-overlay').style.display = 'none';
+  document.getElementById('trips-panel').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 // ── APP INIT ──
@@ -2192,6 +2279,7 @@ function completeTrip() {
   renderRoutePlanner();
   renderSaved();
   renderHome();
+  syncToSupabase();
   // Flash confirmation
   const btn = document.querySelector('[onclick="completeTrip()"]');
   if (btn) { btn.textContent = '🎉 Logged!'; setTimeout(() => btn.textContent = '✓ Done', 2000); }
@@ -2495,7 +2583,9 @@ async function syncToSupabase() {
   const settings = {
     light_mode: localStorage.getItem('cf_light_mode')||'1',
     default_radius: localStorage.getItem('cf_default_radius')||'50',
-    search_history: localStorage.getItem('cf_search_history')||'[]'
+    search_history: localStorage.getItem('cf_search_history')||'[]',
+    completed_trips: localStorage.getItem('cf_completed_trips')||'[]',
+    ratings: localStorage.getItem('cf_ratings')||'{}'
   };
   // Upsert saved spots
   await supa.from('saved_spots').delete().eq('user_id', currentUser.id);
@@ -2531,6 +2621,8 @@ async function syncFromSupabase() {
     if (s.default_radius) localStorage.setItem('cf_default_radius', s.default_radius);
     if (s.search_history) localStorage.setItem('cf_search_history', s.search_history);
     if (s.trip) localStorage.setItem('cf_trip', JSON.stringify(s.trip));
+    if (s.completed_trips) localStorage.setItem('cf_completed_trips', s.completed_trips);
+    if (s.ratings) localStorage.setItem('cf_ratings', s.ratings);
     // Apply light mode — use timeout to ensure it runs after any other DOM updates
     setTimeout(() => {
       const mode = (s.light_mode === '0') ? '0' : '1';
@@ -2579,6 +2671,18 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
 });
 </script>
 
+
+
+  <!-- TRIPS HISTORY MODAL -->
+  <div id="trips-overlay" onclick="closeTripsHistory()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:998;background:rgba(0,0,0,0.6);"></div>
+  <div id="trips-panel" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--dark);border-radius:24px 24px 0 0;z-index:999;padding:0 0 env(safe-area-inset-bottom);max-height:80vh;overflow-y:auto;">
+    <div style="width:36px;height:4px;background:var(--slate);border-radius:2px;margin:12px auto 0;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;">
+      <div style="font-size:18px;font-weight:800;color:var(--sand);">Completed Trips</div>
+      <button onclick="closeTripsHistory()" style="width:32px;height:32px;border-radius:50%;background:var(--card);border:none;color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;">✕</button>
+    </div>
+    <div id="trips-history-list" style="padding:8px 20px 24px;display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
 
 </body>
 </html>
