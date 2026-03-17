@@ -1269,20 +1269,52 @@ document.addEventListener('click', e => {
   }
 });
 
-function shareSpot(site) {
+async function shareSpot(site) {
+  // Show loading feedback
+  const shareEl = event.target.closest('[title="Share"]') || event.target;
+  const orig = shareEl.textContent;
+  shareEl.textContent = '⏳';
+
   try {
-    const data = btoa(unescape(encodeURIComponent(JSON.stringify(site))));
-    const url = 'https://nomadai.us/spot?d=' + data;
+    // Save to Supabase shared_spots table
+    const { data, error } = await supa.from('shared_spots').insert([{
+      name: site.name,
+      source: site.source||'',
+      source_label: site.sourceLabel||'',
+      url: site.url||'',
+      fee: site.fee||'Free',
+      reservable: site.reservable||false,
+      description: site.description||'',
+      tags: site.tags||[],
+      directions: site.directions||'',
+      coordinates: site.coordinates||null,
+      city: site.city||'',
+      state: site.state||''
+    }]).select('id').single();
+
+    if (error) throw error;
+
+    const shareUrl = 'https://nomadai.us/spot/' + data.id;
+    shareEl.textContent = orig;
+
     if (navigator.share) {
-      navigator.share({ title: site.name, text: 'Check out ' + site.name + ' on NomadAI! ' + url, url });
+      navigator.share({ title: site.name, text: 'Check out ' + site.name + ' on NomadAI!', url: shareUrl });
     } else {
-      navigator.clipboard.writeText(url).then(() => {
-        // Show brief feedback
-        const btn = event.target.closest('.share-btn');
-        if (btn) { const orig = btn.textContent; btn.textContent = '✓'; btn.style.color = 'var(--sage)'; setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500); }
-      });
+      await navigator.clipboard.writeText(shareUrl);
+      shareEl.textContent = '✓';
+      shareEl.style.color = 'var(--sage)';
+      setTimeout(() => { shareEl.textContent = orig; shareEl.style.color = ''; }, 1500);
     }
-  } catch(e) { console.error(e); }
+  } catch(e) {
+    console.error(e);
+    shareEl.textContent = orig;
+    // Fallback to old method
+    const slim = { n: site.name, s: site.source, sl: site.sourceLabel, u: site.url||'', f: site.fee||'Free', r: site.reservable||false, d: site.description||'', t: (site.tags||[]).slice(0,3), dir: site.directions||'', c: site.coordinates||null, ci: site.city||'', st: site.state||'' };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(slim))));
+    const fallbackUrl = 'https://nomadai.us/spot?d=' + encoded;
+    if (navigator.share) navigator.share({ title: site.name, text: 'Check out ' + site.name + ' on NomadAI!', url: fallbackUrl });
+    else navigator.clipboard.writeText(fallbackUrl);
+  }
 }
 
 function toggleClearBtn(){
