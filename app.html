@@ -57,11 +57,11 @@
     .search-box input { flex: 1; background: none; border: none; outline: none; font-size: 16px; color: var(--muted); font-family: 'Nunito', sans-serif; font-weight: 700; caret-color: var(--muted); }
     .search-box input::placeholder { color: rgba(154,112,64,0.55); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; }
     .slabel { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 0 16px 9px; }
-    .search-history { display: flex; gap: 7px; padding: 0 16px 14px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+    .search-history { display: flex; gap: 5px; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
     .search-history::-webkit-scrollbar { display: none; }
-    .history-pill { padding: 7px 13px; border-radius: 50px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; user-select: none; background: var(--card); border: 1.5px solid var(--slate); color: var(--muted); font-family: 'Nunito', sans-serif; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+    .history-pill { padding: 4px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer; user-select: none; background: var(--card); border: 1px solid var(--slate); color: var(--muted); font-family: 'Nunito', sans-serif; flex-shrink: 0; display: flex; align-items: center; gap: 5px; }
     .history-pill:active { background: var(--slate); color: var(--sand); }
-    .history-pill .h-x { color: var(--muted); font-size: 13px; opacity: 0.6; }
+    .history-pill .h-x { color: var(--muted); font-size: 11px; opacity: 0.6; }
     .chips { display: flex; gap: 7px; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
     .chips::-webkit-scrollbar { display: none; }
     .chip { padding: 9px 15px; border-radius: 50px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; user-select: none; background: var(--card); font-family: 'Nunito', sans-serif; flex-shrink: 0; }
@@ -2090,7 +2090,7 @@ function addSearchHistory(loc){
   let h=getSearchHistory();
   h=h.filter(l=>l.toLowerCase()!==loc.toLowerCase());
   h.unshift(loc);
-  if(h.length>8)h=h.slice(0,8);
+  if(h.length>3)h=h.slice(0,3);
   localStorage.setItem('cf_search_history',JSON.stringify(h));
   renderSearchHistory();
   syncToSupabase();
