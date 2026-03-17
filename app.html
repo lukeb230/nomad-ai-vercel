@@ -1450,15 +1450,7 @@ async function doNLSearch() {
   const fields = '{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"2 sentences","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"..."}';
 
   // Check if query is camping/travel related before sending
-  const prompt = `You are NomadAI, a campsite and outdoor travel assistant. You ONLY help with camping, overlanding, dispersed camping, RV travel, hiking, and outdoor adventure. You do NOT answer general questions unrelated to camping or outdoor travel.
-
-The user is asking: "\${query}".\${locationContext}
-
-Find real campsites that match this request. Be specific and literal — if they want a fire ring, only include spots likely to have fire rings. If they want cell signal, only include spots near towns.
-
-Return ONLY a valid JSON array of up to 12 campsites matching the request. Each object: \${fields}
-
-Prioritize exact matches. No fake results. JSON array only.`;
+  const prompt = 'Find real campsites matching this request: "' + query + '". ' + locationContext + ' Return ONLY a valid JSON array of up to 12 campsites. Each object: ' + fields + ' No fake results. JSON array only.';
 
   try {
     const r = await fetch('/api/claude', {
