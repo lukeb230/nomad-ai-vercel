@@ -365,6 +365,7 @@
     .route-go-btn { flex: 1; height: 40px; background: var(--sage); color: var(--sand); border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; min-width: 0; overflow: hidden; }
     .route-clear-btn { height: 40px; padding: 0 14px; background: var(--dark); border: 1.5px solid #7a3030; color: #f0a0a0; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; }
     .route-optimize-btn { height: 40px; padding: 0 14px; background: var(--dark); border: 1.5px solid var(--tan); color: var(--tan); border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; white-space: nowrap; }
+    .route-add-all-btn { height: 40px; padding: 0 14px; background: var(--dark); border: 1.5px solid var(--sage); color: var(--sage); border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; white-space: nowrap; }
 
     #ios-hint { display: none; background: var(--card); border: 1px solid var(--slate); border-radius: 12px; padding: 12px 16px; font-size: 13px; color: var(--light); margin: 0 16px 16px; line-height: 1.6; }
     #ios-hint.show { display: block; }
@@ -613,6 +614,7 @@
       <div class="route-list" id="route-list"></div>
       <div class="route-actions">
         <a class="route-go-btn" id="route-go-btn" href="#" target="_blank">🧭 Open in Maps</a>
+        <button class="route-add-all-btn" onclick="addAllSavedToRoute()">+ All</button>
         <button class="route-optimize-btn" onclick="optimizeRoute()">✦ Optimize</button>
         <button class="route-clear-btn" onclick="clearRoute()">Clear</button>
       </div>
@@ -1536,6 +1538,7 @@ async function doNLSearch() {
   // Check if query is camping/travel related before sending
   // Detect if this is a question about the app vs a campsite search
   const isAppQuestion = /what can|how do|how does|how to|what is|what are|what do|who are|tell me|explain|help me|features|capabilities|can you|do you|are you|how work|nomadai|about you|about this|where is|what's in|what.*like|good time|best time|weather in|things to do|near.*what|recommend|suggest|tips for|far from|drive.*from|distance/i.test(query);
+  const isRouteQuery = /along|on the way|on my way|en route|between .* and|from .* to|drive.*through|road trip|highway|interstate|\bI-\d|\bUS-\d|\bhwy\b|\broute\b.*\d/i.test(query);
 
   let prompt;
   if (isAppQuestion) {
@@ -1612,6 +1615,22 @@ async function doNLSearch() {
         setTimeout(() => loadPhotosForCard(cid,s,loc), i*200);
         if (lat && lng) setTimeout(() => loadWeatherForCard(cid,lat,lng), i*300+100);
       });
+    }
+
+    // Auto-populate route planner for route queries
+    if (isRouteQuery && sites.length) {
+      const withCoords = sites.filter(s => s.coordinates?.lat && s.coordinates?.lng);
+      if (withCoords.length) {
+        localStorage.setItem('cf_trip', JSON.stringify(withCoords));
+        if (typeof renderRoutePlanner === 'function') renderRoutePlanner();
+        if (typeof renderSaved === 'function') renderSaved();
+        // Show a hint in the AI response box
+        const routeHint = document.getElementById('ai-response-text');
+        const aiBox = document.getElementById('ai-response-box');
+        const current = routeHint.innerHTML;
+        routeHint.innerHTML = current + '<br><br>🧭 <span style="color:var(--sage);font-weight:800;">Route added!</span> Head to Saved → Plan a trip to see your stops, or check the Map → My route tab.';
+        aiBox.classList.add('show');
+      }
     }
 
     // Add to search history
@@ -1931,6 +1950,21 @@ function moveStop(idx, dir) {
   trip.splice(newIdx, 0, moved);
   localStorage.setItem('cf_trip', JSON.stringify(trip));
   renderRoutePlanner();
+}
+
+function addAllSavedToRoute() {
+  const saved = getSaved();
+  if (!saved.length) { alert('No saved spots to add. Save some campsites first!'); return; }
+  let trip = getTrip();
+  const existingNames = new Set(trip.map(s => s.name));
+  const toAdd = saved.filter(s => !existingNames.has(s.name));
+  if (!toAdd.length) { alert('All saved spots are already in your route.'); return; }
+  trip = [...trip, ...toAdd];
+  localStorage.setItem('cf_trip', JSON.stringify(trip));
+  renderRoutePlanner();
+  renderSaved();
+  const btn = document.querySelector('.route-add-all-btn');
+  if (btn) { btn.textContent = '✓ Added!'; setTimeout(() => btn.textContent = '+ All', 1800); }
 }
 
 function clearRoute() {
