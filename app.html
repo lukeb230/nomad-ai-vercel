@@ -1067,14 +1067,14 @@ function plotRoute(){
       .then(d=>{
         if(d.routes&&d.routes[0]){
           const geojson=d.routes[0].geometry;
-          routePolyline=L.geoJSON(geojson,{style:{color:'#4a90d9',weight:3,opacity:0.8}}).addTo(map);
+          routePolyline=L.geoJSON(geojson,{style:{color:'#5aabff',weight:3.5,opacity:0.95}}).addTo(map);
         } else {
           // Fallback to straight line if OSRM fails
-          routePolyline=L.polyline(latlngs,{color:'#4a90d9',weight:3,opacity:0.8,dashArray:'6,8'}).addTo(map);
+          routePolyline=L.polyline(latlngs,{color:'#5aabff',weight:3.5,opacity:0.95,dashArray:'6,8'}).addTo(map);
         }
       })
       .catch(()=>{
-        routePolyline=L.polyline(latlngs,{color:'#4a90d9',weight:3,opacity:0.8,dashArray:'6,8'}).addTo(map);
+        routePolyline=L.polyline(latlngs,{color:'#5aabff',weight:3.5,opacity:0.95,dashArray:'6,8'}).addTo(map);
       });
   }
 }
