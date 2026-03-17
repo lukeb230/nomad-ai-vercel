@@ -1429,7 +1429,7 @@ function nextTripStop() {
   const dash = document.getElementById('home-trip-dash');
   if (dash && trip.length) {
     const flash = document.createElement('div');
-    flash.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(28,40,32,0.88);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#8aac7a;pointer-events:none;backdrop-filter:blur(2px);';
+    flash.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(28,40,32,0.92);border-radius:50px;padding:8px 18px;white-space:nowrap;font-size:13px;font-weight:800;color:#8aac7a;pointer-events:none;box-shadow:0 2px 12px rgba(0,0,0,0.4);';
     flash.textContent = '✓ Marked as visited!';
     dash.style.position = 'relative';
     dash.appendChild(flash);
