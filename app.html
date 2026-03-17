@@ -1524,7 +1524,7 @@ async function doNLSearch() {
     if (d.error) {
       document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">⚠️ '+(d.error.message||'Something went wrong')+'</div>';
       goBtn.innerHTML = '✨ Ask AI';
-      goBtn.style.display = '';
+      goBtn.style.display = 'flex';
       goBtn.style.pointerEvents = '';
       document.getElementById('ai-loader').classList.remove('show');
       return;
@@ -1538,7 +1538,7 @@ async function doNLSearch() {
       document.getElementById('ai-response-box').classList.add('show');
       document.getElementById('res').innerHTML = '';
       goBtn.innerHTML = '✨ Ask AI';
-      goBtn.style.display = '';
+      goBtn.style.display = 'flex';
       goBtn.style.pointerEvents = '';
       document.getElementById('ai-loader').classList.remove('show');
       return;
@@ -1589,7 +1589,7 @@ async function doNLSearch() {
   }
 
   goBtn.innerHTML = '✨ Ask AI';
-  goBtn.style.display = '';
+  goBtn.style.display = 'flex';
   goBtn.style.pointerEvents = '';
   document.getElementById('ai-loader').classList.remove('show');
 }
