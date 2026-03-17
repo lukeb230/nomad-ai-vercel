@@ -998,7 +998,7 @@ function cardHTML(s,i,isSavedView=false){
 // ── SAVE ──
 function getSaved(){try{return JSON.parse(localStorage.getItem('cf_saved')||'[]');}catch(e){return[];}}
 function isSaved(name){return getSaved().some(s=>s.name===name);}
-function toggleSave(site,btn){let saved=getSaved();if(isSaved(site.name)){saved=saved.filter(s=>s.name!==site.name);btn.classList.remove('saved');}else{saved.push(site);btn.classList.add('saved');}localStorage.setItem('cf_saved',JSON.stringify(saved));}
+function toggleSave(site,btn){let saved=getSaved();if(isSaved(site.name)){saved=saved.filter(s=>s.name!==site.name);btn.classList.remove('saved');}else{saved.push(site);btn.classList.add('saved');}localStorage.setItem('cf_saved',JSON.stringify(saved));syncToSupabase();}
 // ── TRIP LIST ──
 function getTrip(){try{return JSON.parse(localStorage.getItem('cf_trip')||'[]');}catch(e){return[];}}
 function inTrip(name){return getTrip().some(s=>s.name===name);}
@@ -1743,6 +1743,7 @@ async function signOut() {
 // ── SUPABASE SYNC ──
 async function syncToSupabase() {
   if (!currentUser) return;
+  console.log("Syncing to Supabase...");
   const saved = getSaved();
   const visited = getVisited();
   const notes = JSON.parse(localStorage.getItem('cf_notes')||'{}');
@@ -1760,6 +1761,7 @@ async function syncToSupabase() {
 
 async function syncFromSupabase() {
   if (!currentUser) return;
+  console.log("Syncing from Supabase...");
   const [savedRes, visitedRes, notesRes] = await Promise.all([
     supa.from('saved_spots').select('data').eq('user_id', currentUser.id),
     supa.from('visited_spots').select('spot_name').eq('user_id', currentUser.id),
