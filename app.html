@@ -269,7 +269,7 @@
     #app.light .refresh-btn { background: #e4ddd0; border-color: #c8c0b0; }
     #app.light #settings-panel { background: #e4ddd0; }
     /* PROFILE LIGHT MODE */
-    #app.light #profile-panel { background: #f8f4ec; border-color: #c8c0b0; }
+    #app.light #profile-panel { background: #f8f4ec !important; border-color: #c8c0b0 !important; color: #2a3830; }
     #app.light #profile-overlay { background: rgba(0,0,0,0.5); }
     #app.light .profile-input { background: #f0ebe0; border-color: #c8c0b0; color: #2a3830; }
     #app.light .profile-input::placeholder { color: #8aac8a; }
@@ -279,7 +279,7 @@
     #app.light .profile-avatar-hint { color: #5a7060; }
     #app.light .profile-sign-out { color: #5a7060; }
     #app.light .profile-save-btn:not([style*="background"]) { background: #9a7040; }
-    #app.light #passport-modal { background: #f8f4ec; }
+    #app.light #passport-modal { background: #f8f4ec !important; }
     #app.light #passport-modal button { background: #e4ddd0; }
     #app.light #passport-overlay { background: rgba(0,0,0,0.5); }
     #app.light .settings-close { background: #f0ebe0; }
@@ -3036,7 +3036,7 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
 
   <!-- PROFILE MODAL -->
   <div id="profile-overlay" onclick="if(event.target===this)closeProfile();" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1001;background:rgba(0,0,0,0.7);">
-    <div id="profile-panel" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 40px);max-width:380px;">
+    <div id="profile-panel" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 40px);max-width:380px;background:var(--dark);border-radius:24px;padding:28px 24px;border:1px solid var(--slate);">
       <button class="profile-close" onclick="closeProfile()">✕</button>
       <div class="profile-avatar-wrap">
         <div class="profile-avatar" id="profile-avatar-display" onclick="document.getElementById('profile-photo-input').click()">
@@ -3056,7 +3056,7 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
 
   <!-- PASSPORT MODAL -->
   <div id="passport-overlay" onclick="if(event.target===this)closePassportModal();" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1002;background:rgba(0,0,0,0.75);">
-    <div id="passport-modal" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;border-radius:24px 24px 0 0;max-height:85vh;display:flex;flex-direction:column;">
+    <div id="passport-modal" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--dark);border-radius:24px 24px 0 0;max-height:85vh;display:flex;flex-direction:column;">
       <div style="width:36px;height:4px;background:var(--slate);border-radius:2px;margin:12px auto 0;flex-shrink:0;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;flex-shrink:0;">
         <div>
