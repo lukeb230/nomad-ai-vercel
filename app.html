@@ -1786,13 +1786,23 @@ async function syncFromSupabase() {
   if (notesRes.data) { const notes = {}; notesRes.data.forEach(r => { notes[r.spot_name] = r.note; }); localStorage.setItem('cf_notes', JSON.stringify(notes)); }
   if (settingsRes.data) {
     const s = settingsRes.data;
-    if (s.light_mode) localStorage.setItem('cf_light_mode', s.light_mode);
+    // Save to localStorage first
+    localStorage.setItem('cf_light_mode', s.light_mode||'0');
     if (s.default_radius) localStorage.setItem('cf_default_radius', s.default_radius);
     if (s.search_history) localStorage.setItem('cf_search_history', s.search_history);
     if (s.trip) localStorage.setItem('cf_trip', JSON.stringify(s.trip));
-    // Apply light mode
-    if (s.light_mode === '1') document.getElementById('app').classList.add('light');
-    else document.getElementById('app').classList.remove('light');
+    // Apply light mode — use timeout to ensure it runs after any other DOM updates
+    setTimeout(() => {
+      const app = document.getElementById('app');
+      const toggle = document.getElementById('light-mode-toggle');
+      if (s.light_mode === '1') {
+        app.classList.add('light');
+        if(toggle) toggle.classList.add('on');
+      } else {
+        app.classList.remove('light');
+        if(toggle) toggle.classList.remove('on');
+      }
+    }, 100);
   }
   renderSaved();
   renderSearchHistory();
