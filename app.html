@@ -1917,7 +1917,23 @@ function toggleRoutePlanner() {
 }
 
 function toggleRouteFromLocation() {
-  if (!userLat || !userLng) { alert("Your location isn't available yet. Try tapping the GPS button on the Search tab first."); return; }
+  if (!userLat || !userLng) {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          userLat = pos.coords.latitude;
+          userLng = pos.coords.longitude;
+          routeFromLocation = true;
+          document.getElementById('route-loc-toggle').classList.add('on');
+          renderRoutePlanner();
+        },
+        () => { alert("Couldn't get your location. Please allow location access and try again."); }
+      );
+    } else {
+      alert("Location is not supported on this device.");
+    }
+    return;
+  }
   routeFromLocation = !routeFromLocation;
   document.getElementById('route-loc-toggle').classList.toggle('on', routeFromLocation);
   renderRoutePlanner();
