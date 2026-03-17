@@ -364,6 +364,7 @@
     .route-actions { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.06); box-sizing: border-box; width: 100%; }
     .route-go-btn { flex: 1; height: 40px; background: var(--sage); color: var(--sand); border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; min-width: 0; overflow: hidden; }
     .route-clear-btn { height: 40px; padding: 0 14px; background: var(--dark); border: 1.5px solid #7a3030; color: #f0a0a0; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; }
+    .route-optimize-btn { height: 40px; padding: 0 14px; background: var(--dark); border: 1.5px solid var(--tan); color: var(--tan); border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; white-space: nowrap; }
 
     #ios-hint { display: none; background: var(--card); border: 1px solid var(--slate); border-radius: 12px; padding: 12px 16px; font-size: 13px; color: var(--light); margin: 0 16px 16px; line-height: 1.6; }
     #ios-hint.show { display: block; }
@@ -589,6 +590,7 @@
     <div class="map-toggle">
       <div class="map-toggle-btn on" id="map-btn-results" onclick="setMapMode('results')">🔍 Search results</div>
       <div class="map-toggle-btn" id="map-btn-saved" onclick="setMapMode('saved')">🔖 Saved spots</div>
+      <div class="map-toggle-btn" id="map-btn-route" onclick="setMapMode('route')">🧭 My route</div>
     </div>
     <div id="map-container">
       <div id="leaflet-map"></div>
@@ -611,6 +613,7 @@
       <div class="route-list" id="route-list"></div>
       <div class="route-actions">
         <a class="route-go-btn" id="route-go-btn" href="#" target="_blank">🧭 Open in Maps</a>
+        <button class="route-optimize-btn" onclick="optimizeRoute()">✦ Optimize</button>
         <button class="route-clear-btn" onclick="clearRoute()">Clear</button>
       </div>
     </div>
@@ -822,7 +825,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let radius=50, map=null, mapMode='results', mapMarkers=[];
+let radius=50, map=null, mapMode='results', mapMarkers=[], routePolyline=null;
 const active=new Set(['dyrt','iover','rec','disp','camp','paid']);
 const carouselState={};
 let lastSearchResults=[];
@@ -996,7 +999,7 @@ function makeIcon(color){
   </svg>`;
   return L.divIcon({html:svg,className:'',iconSize:[24,24],iconAnchor:[12,22],popupAnchor:[0,-22]});
 }
-function clearMapMarkers(){mapMarkers.forEach(m=>m.remove());mapMarkers=[];}
+function clearMapMarkers(){mapMarkers.forEach(m=>m.remove());mapMarkers=[];if(routePolyline){routePolyline.remove();routePolyline=null;}}
 function plotSites(sites,color){
   if(!map||!sites.length)return;
   const bounds=[];
@@ -1012,9 +1015,40 @@ function setMapMode(mode){
   mapMode=mode;
   document.getElementById('map-btn-results').classList.toggle('on',mode==='results');
   document.getElementById('map-btn-saved').classList.toggle('on',mode==='saved');
+  document.getElementById('map-btn-route').classList.toggle('on',mode==='route');
   clearMapMarkers();
   if(mode==='results'){if(lastSearchResults.length)plotSites(lastSearchResults,'#e85555');}
-  else{const saved=getSaved();if(saved.length)plotSites(saved,'#8aac7a');}
+  else if(mode==='saved'){const saved=getSaved();if(saved.length)plotSites(saved,'#8aac7a');}
+  else if(mode==='route'){plotRoute();}
+}
+
+function plotRoute(){
+  const trip=getTrip();
+  if(!map||!trip.length)return;
+  const withCoords=trip.filter(s=>s.coordinates?.lat&&s.coordinates?.lng);
+  if(!withCoords.length)return;
+  const bounds=[];
+  const latlngs=[];
+
+  withCoords.forEach((s,i)=>{
+    const lat=s.coordinates.lat, lng=s.coordinates.lng;
+    latlngs.push([lat,lng]);
+    bounds.push([lat,lng]);
+    // Numbered marker
+    const icon=L.divIcon({
+      className:'',
+      html:`<div style="width:28px;height:28px;border-radius:50%;background:var(--tan);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#1c2820;font-family:Nunito,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,0.4);">${i+1}</div>`,
+      iconSize:[28,28],iconAnchor:[14,14]
+    });
+    const marker=L.marker([lat,lng],{icon}).addTo(map);
+    marker.bindPopup(`<div class="popup-name">${i+1}. ${s.name}</div><div class="popup-meta">${s.distance||''}</div>`);
+    mapMarkers.push(marker);
+  });
+
+  // Draw route line
+  routePolyline=L.polyline(latlngs,{color:'#c4a06a',weight:3,opacity:0.7,dashArray:'6,8'}).addTo(map);
+
+  if(bounds.length>0)map.fitBounds(bounds,{padding:[40,40]});
 }
 function refreshMap(){setTimeout(()=>{if(map)map.invalidateSize();setMapMode(mapMode);},100);}
 
@@ -1894,6 +1928,45 @@ function clearRoute() {
     renderRoutePlanner();
     renderSaved();
   }
+}
+
+function optimizeRoute() {
+  let trip = getTrip();
+  if (trip.length < 3) { alert('Add at least 3 stops to optimize your route.'); return; }
+  const withCoords = trip.filter(s => s.coordinates?.lat && s.coordinates?.lng);
+  if (withCoords.length < 3) { alert('At least 3 stops need coordinates to optimize.'); return; }
+
+  // Nearest neighbor algorithm starting from first stop
+  function dist(a, b) {
+    const dLat = a.coordinates.lat - b.coordinates.lat;
+    const dLng = a.coordinates.lng - b.coordinates.lng;
+    return Math.sqrt(dLat*dLat + dLng*dLng);
+  }
+
+  const unvisited = [...withCoords];
+  const optimized = [unvisited.splice(0, 1)[0]];
+  while (unvisited.length) {
+    const last = optimized[optimized.length - 1];
+    let nearest = 0;
+    let nearestDist = Infinity;
+    unvisited.forEach((s, i) => {
+      const d = dist(last, s);
+      if (d < nearestDist) { nearestDist = d; nearest = i; }
+    });
+    optimized.push(unvisited.splice(nearest, 1)[0]);
+  }
+
+  // Add back any stops without coords at the end
+  const noCoords = trip.filter(s => !s.coordinates?.lat || !s.coordinates?.lng);
+  const result = [...optimized, ...noCoords];
+
+  localStorage.setItem('cf_trip', JSON.stringify(result));
+  renderRoutePlanner();
+  renderSaved();
+
+  // Brief flash confirmation
+  const btn = document.querySelector('.route-optimize-btn');
+  if (btn) { btn.textContent = '✓ Optimized!'; setTimeout(() => btn.textContent = '✦ Optimize', 1800); }
 }
 
 
