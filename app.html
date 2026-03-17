@@ -718,7 +718,7 @@
       </div>
     </div>
     <div id="route-planner">
-      <div class="route-header"><span>Use ↑ ↓ to reorder your stops</span><div class="route-loc-toggle" id="route-loc-toggle" onclick="toggleRouteFromLocation()"><div class="route-loc-dot"></div>📍 Start from me</div></div>
+      <div class="route-header"><span>Use ↑ ↓ to reorder your stops</span><div style="display:flex;gap:10px;flex-shrink:0;"><div class="route-loc-toggle" id="route-round-toggle" onclick="toggleRoundTrip()"><div class="route-loc-dot"></div>🔄 Round trip</div><div class="route-loc-toggle" id="route-loc-toggle" onclick="toggleRouteFromLocation()"><div class="route-loc-dot"></div>📍 Start from me</div></div></div>
       <div class="route-list" id="route-list"></div>
       <div class="route-actions">
         <div class="route-go-btn" id="route-go-btn" onclick="switchTab('map');setTimeout(()=>setMapMode('route'),150);">🗺️</div>
@@ -943,7 +943,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let radius=50, map=null, mapMode='results', mapMarkers=[], routePolyline=null, routeFromLocation=false;
+let radius=50, map=null, mapMode='results', mapMarkers=[], routePolyline=null, routeFromLocation=false, routeRoundTrip=false;
 const active=new Set(['dyrt','iover','rec','disp','camp','paid']);
 const carouselState={};
 let lastSearchResults=[];
@@ -1453,19 +1453,23 @@ function renderHome() {
   renderJournal();
 }
 
+function getTripIndex() { return parseInt(localStorage.getItem('cf_trip_index')||'0'); }
+function setTripIndex(i) { localStorage.setItem('cf_trip_index', i); }
+
 function nextTripStop() {
-  let trip = getTrip();
+  const trip = getTrip();
   if (!trip.length) return;
-  const current = trip[0];
-  // Mark as visited
+  const idx = getTripIndex();
+  const current = trip[idx];
+  if (!current) return;
+  // Mark current as visited
   let visited = getVisited();
   if (!visited.includes(current.name)) {
     visited.push(current.name);
     localStorage.setItem('cf_visited', JSON.stringify(visited));
   }
-  // Remove from trip
-  trip.shift();
-  localStorage.setItem('cf_trip', JSON.stringify(trip));
+  // Advance index if not at last stop
+  if (idx < trip.length - 1) setTripIndex(idx + 1);
   syncToSupabase();
   renderTripDash();
   renderHomeStats();
@@ -1473,13 +1477,13 @@ function nextTripStop() {
   if (routeOpen) renderRoutePlanner();
   // Show confirmation
   const dash = document.getElementById('home-trip-dash');
-  if (dash && trip.length) {
+  if (dash) {
     const flash = document.createElement('div');
     flash.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(28,40,32,0.92);border-radius:50px;padding:8px 18px;white-space:nowrap;font-size:13px;font-weight:800;color:#8aac7a;pointer-events:none;box-shadow:0 2px 12px rgba(0,0,0,0.4);';
-    flash.textContent = '✓ Marked as visited!';
+    flash.textContent = idx < trip.length - 1 ? '✓ Moving to next stop!' : '✓ Last stop reached!';
     dash.style.position = 'relative';
     dash.appendChild(flash);
-    setTimeout(() => flash.remove(), 1200);
+    setTimeout(() => flash.remove(), 1400);
   }
 }
 
@@ -1496,27 +1500,29 @@ function renderTripDash() {
     </div>`;
     return;
   }
-  const next = trip[0];
+  const idx = Math.min(getTripIndex(), trip.length - 1);
+  const next = trip[idx];
+  const isLast = idx === trip.length - 1;
   const mapsUrl = next.coordinates?.lat
     ? `https://www.google.com/maps/dir/?api=1&destination=${next.coordinates.lat},${next.coordinates.lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(next.name)}`;
   el.innerHTML = `<div class="trip-dash">
     <div class="trip-dash-next">
-      <div class="trip-dash-num">1</div>
+      <div class="trip-dash-num">${idx+1}</div>
       <div class="trip-dash-info">
-        <div class="trip-dash-label">Next stop</div>
+        <div class="trip-dash-label">${isLast ? 'Final stop' : 'Current stop'}</div>
         <div class="trip-dash-name">${next.name}</div>
         ${next.city||next.state ? `<div class="trip-dash-loc">📍 ${[next.city,next.state].filter(Boolean).join(', ')}</div>` : ''}
       </div>
     </div>
     <div class="trip-dash-meta">
-      <div class="trip-dash-pill">🏕️ ${trip.length} stop${trip.length!==1?'s':''}</div>
+      <div class="trip-dash-pill">🏕️ ${idx+1} of ${trip.length}</div>
       ${next.fee ? `<div class="trip-dash-pill">${next.fee}</div>` : ''}
       ${next.distance ? `<div class="trip-dash-pill">📍 ${next.distance}</div>` : ''}
     </div>
     <div class="trip-dash-actions">
       <a class="trip-dash-btn tan" href="${mapsUrl}" target="_blank">🗺️</a>
-      <div class="trip-dash-btn next" onclick="nextTripStop()">Next stop →</div>
+      ${!isLast ? `<div class="trip-dash-btn next" onclick="nextTripStop()">Next stop →</div>` : `<div class="trip-dash-btn next" style="opacity:0.5;cursor:default;">Last stop</div>`}
       <div class="trip-dash-btn outline" onclick="switchTab('saved');setTimeout(()=>{if(!routeOpen)toggleRoutePlanner();},100);">Route</div>
     </div>
   </div>`;
@@ -2235,6 +2241,12 @@ function toggleRoutePlanner() {
   if (routeOpen) renderRoutePlanner();
 }
 
+function toggleRoundTrip() {
+  routeRoundTrip = !routeRoundTrip;
+  document.getElementById('route-round-toggle').classList.toggle('on', routeRoundTrip);
+  renderRoutePlanner();
+}
+
 function toggleRouteFromLocation() {
   if (!userLat || !userLng) {
     if (navigator.geolocation) {
@@ -2336,6 +2348,7 @@ function completeTrip() {
   });
   localStorage.setItem('cf_completed_trips', JSON.stringify(completed));
   localStorage.removeItem('cf_trip');
+  localStorage.removeItem('cf_trip_index');
   renderRoutePlanner();
   renderSaved();
   renderHome();
@@ -2361,8 +2374,10 @@ function clearStatsConfirm() {
 function clearRoute() {
   if (confirm('Clear all stops from your trip?')) {
     localStorage.removeItem('cf_trip');
+    localStorage.removeItem('cf_trip_index');
     renderRoutePlanner();
     renderSaved();
+    renderHome();
   }
 }
 
