@@ -734,8 +734,8 @@
   <button id="back-to-top" onclick="scrollToTop()">↑</button>
 
   <!-- MAP SEARCH BUTTON (always in DOM) -->
-  <div id="map-click-hint" style="display:none;">Tap map to search that area</div>
-  <button id="map-search-btn" onclick="searchMapArea()" style="display:none;">🔍 Search this area</button>
+  <div id="map-click-hint">Tap map to search that area</div>
+  <button id="map-search-btn" onclick="searchMapArea()">🔍 Search this area</button>
 
   <!-- PHOTO LIGHTBOX -->
   <div id="photo-lightbox" onclick="closeLightbox(event)">
@@ -1135,11 +1135,11 @@ function showMain(){
 }
 
 function switchTab(tab){
-  ['home-tab','search-tab','map-tab','saved-tab'].forEach(id=>{document.getElementById(id).style.display='none';});
+  ['home-tab','search-tab','map-tab','saved-tab'].forEach(id=>{document.getElementById(id).style.display='none';});document.getElementById('map-click-hint').style.display='none';document.getElementById('map-search-btn').classList.remove('show');
   ['nav-home','nav-search','nav-map','nav-saved'].forEach(id=>document.getElementById(id).classList.remove('active'));
   if(tab==='home'){document.getElementById('home-tab').style.display='flex';document.getElementById('home-tab').style.flexDirection='column';document.getElementById('nav-home').classList.add('active');showHomeBtn();}
   else if(tab==='search'){document.getElementById('search-tab').style.display='flex';document.getElementById('search-tab').style.flexDirection='column';document.getElementById('nav-search').classList.add('active');document.getElementById('err').innerHTML='';renderRecentSection();renderSearchHistory();}
-  else if(tab==='map'){document.getElementById('map-tab').style.display='flex';document.getElementById('map-tab').style.flexDirection='column';document.getElementById('nav-map').classList.add('active');initMap();refreshMap();}
+  else if(tab==='map'){document.getElementById('map-click-hint').style.display='block';document.getElementById('map-tab').style.display='flex';document.getElementById('map-tab').style.flexDirection='column';document.getElementById('nav-map').classList.add('active');initMap();refreshMap();}
   else{document.getElementById('saved-tab').style.display='flex';document.getElementById('saved-tab').style.flexDirection='column';document.getElementById('nav-saved').classList.add('active');renderSaved();if(routeOpen)renderRoutePlanner();if(passportOpen)renderPassport();}
 }
 
