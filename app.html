@@ -1490,7 +1490,7 @@ async function doNLSearch() {
   if (userLat && userLng) locationContext = ` The user is currently at coordinates ${userLat.toFixed(4)}, ${userLng.toFixed(4)}.`;
 
   const goBtn = document.getElementById('go-btn');
-  goBtn.innerHTML = '⏳ Asking AI...';
+  goBtn.style.display = 'none';
   goBtn.style.pointerEvents = 'none';
   document.getElementById('ai-loader').classList.add('show');
 
@@ -1524,6 +1524,7 @@ async function doNLSearch() {
     if (d.error) {
       document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">⚠️ '+(d.error.message||'Something went wrong')+'</div>';
       goBtn.innerHTML = '✨ Ask AI';
+      goBtn.style.display = '';
       goBtn.style.pointerEvents = '';
       document.getElementById('ai-loader').classList.remove('show');
       return;
@@ -1537,6 +1538,7 @@ async function doNLSearch() {
       document.getElementById('ai-response-box').classList.add('show');
       document.getElementById('res').innerHTML = '';
       goBtn.innerHTML = '✨ Ask AI';
+      goBtn.style.display = '';
       goBtn.style.pointerEvents = '';
       document.getElementById('ai-loader').classList.remove('show');
       return;
@@ -1587,6 +1589,7 @@ async function doNLSearch() {
   }
 
   goBtn.innerHTML = '✨ Ask AI';
+  goBtn.style.display = '';
   goBtn.style.pointerEvents = '';
   document.getElementById('ai-loader').classList.remove('show');
 }
