@@ -1274,7 +1274,7 @@ function shareSpot(site) {
     const data = btoa(unescape(encodeURIComponent(JSON.stringify(site))));
     const url = 'https://nomadai.us/spot?d=' + data;
     if (navigator.share) {
-      navigator.share({ title: site.name, text: 'Check out this campsite on NomadAI!', url });
+      navigator.share({ title: site.name, text: 'Check out ' + site.name + ' on NomadAI! ' + url, url });
     } else {
       navigator.clipboard.writeText(url).then(() => {
         // Show brief feedback
