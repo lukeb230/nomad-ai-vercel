@@ -707,13 +707,7 @@
         </div>
         <button class="settings-btn" id="settings-auth-btn" onclick="currentUser?signOut():openAuth()">Sign in</button>
       </div>
-      <div class="settings-row" id="settings-sync-row" style="display:none;">
-        <div class="settings-row-left">
-          <div class="settings-row-label">Sync now</div>
-          <div class="settings-row-sub">Push local data to cloud</div>
-        </div>
-        <button class="settings-btn" onclick="syncToSupabase().then(()=>{const b=event.target;b.textContent='✓ Synced';setTimeout(()=>b.textContent='Sync',1500)})">Sync</button>
-      </div>
+
     </div>
 
     <div class="settings-section">
@@ -847,7 +841,7 @@ function getNotes(name){try{return JSON.parse(localStorage.getItem('cf_notes')||
 function saveNote(name,text){try{const n=JSON.parse(localStorage.getItem('cf_notes')||'{}');n[name]=text;localStorage.setItem('cf_notes',JSON.stringify(n));}catch(e){}}
 function getVisited(){try{return JSON.parse(localStorage.getItem('cf_visited')||'[]');}catch(e){return[];}}
 function isVisited(name){return getVisited().includes(name);}
-function toggleVisited(name,btn){let v=getVisited();if(isVisited(name)){v=v.filter(n=>n!==name);btn.classList.remove('been');}else{v.push(name);btn.classList.add('been');}localStorage.setItem('cf_visited',JSON.stringify(v));if(passportOpen)renderPassport();}
+function toggleVisited(name,btn){let v=getVisited();if(isVisited(name)){v=v.filter(n=>n!==name);btn.classList.remove('been');}else{v.push(name);btn.classList.add('been');}localStorage.setItem('cf_visited',JSON.stringify(v));if(passportOpen)renderPassport();syncToSupabase();}
 
 // ── MAP ──
 let mapClickLatLng = null;
@@ -1329,11 +1323,11 @@ function openSettings(){
   if (currentUser) {
     document.getElementById('settings-account-label').textContent = currentUser.email;
     document.getElementById('settings-auth-btn').textContent = 'Sign out';
-    document.getElementById('settings-sync-row').style.display = 'flex';
+
   } else {
     document.getElementById('settings-account-label').textContent = 'Not signed in';
     document.getElementById('settings-auth-btn').textContent = 'Sign in';
-    document.getElementById('settings-sync-row').style.display = 'none';
+
   }
   document.getElementById('settings-overlay').classList.add('show');
   document.getElementById('settings-panel').classList.add('show');
