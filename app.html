@@ -56,7 +56,7 @@
     .autocomplete-item:last-child { border-bottom: none; }
     .autocomplete-item:hover, .autocomplete-item:active { background: rgba(255,255,255,0.06); }
     .autocomplete-item .ac-icon { font-size: 12px; color: var(--muted); flex-shrink: 0; }
-    .search-box { flex: 1; display: flex; align-items: center; gap: 10px; background: rgba(196,160,106,0.15); border-radius: 20px; padding: 0 14px; height: 120px; border: 1.5px solid rgba(196,160,106,0.4); }
+    .search-box { flex: 1; display: flex; align-items: flex-start; gap: 10px; background: rgba(196,160,106,0.15); border-radius: 20px; padding: 14px; min-height: 52px !important; height: auto !important; border: 1.5px solid rgba(196,160,106,0.4); }
     .search-box input { flex: 1; background: none; border: none; outline: none; font-size: 16px; color: var(--muted); font-family: 'Nunito', sans-serif; font-weight: 700; caret-color: var(--muted); }
     .search-box input::placeholder { color: rgba(154,112,64,0.55); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; }
     .slabel { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 0 16px 9px; }
@@ -319,6 +319,7 @@
       .search-mode-pills { flex-shrink: 0; width: auto; }
       .search-box-desktop { flex: 1; width: auto; }
     }
+    #nl-input:empty:before { content: attr(data-placeholder); color: rgba(154,112,64,0.55); pointer-events: none; }
     .saved-empty { text-align: center; padding: 48px 16px; color: var(--muted); font-size: 14px; line-height: 1.8; }
     .saved-filter-bar { display: flex; gap: 8px; padding: 0 16px 12px; align-items: center; flex-wrap: wrap; }
     .saved-filter-bar select { background: var(--card); border: 1.5px solid var(--slate); color: var(--sand); border-radius: 10px; padding: 7px 12px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; outline: none; flex: 1; }
@@ -556,7 +557,7 @@
       </div>
       <div class="search-box" id="nl-search-box" style="display:none;">
         <span style="font-size:15px;color:rgba(154,112,64,0.55);">✨</span>
-        <input id="nl-input" type="text" placeholder="Free spot near Moab with a fire ring..." autocomplete="off" style="flex:1;background:none;border:none;outline:none;font-size:16px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;caret-color:var(--muted);" onkeydown="if(event.key==='Enter')doNLSearch()" oninput="toggleNLClearBtn()" />
+        <div id="nl-input" contenteditable="true" data-placeholder="Free spot near Moab with a fire ring..." style="flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;caret-color:var(--muted);line-height:1.5;min-height:24px;word-break:break-word;overflow-wrap:break-word;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doNLSearch();}" oninput="toggleNLClearBtn()"></div>
         <div id="nl-clear-btn" onclick="clearNLSearch()" style="display:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">&#x2715;</div>
       </div>
       <div id="autocomplete-list" class="autocomplete-list" style="display:none;"></div>
@@ -1454,11 +1455,11 @@ function setSearchMode(mode) {
 }
 
 function toggleNLClearBtn(){
-  const val = document.getElementById('nl-input').value;
+  const val = (document.getElementById('nl-input').innerText || '').trim();
   document.getElementById('nl-clear-btn').style.display = val ? 'block' : 'none';
 }
 function clearNLSearch(){
-  document.getElementById('nl-input').value = '';
+  const nlEl = document.getElementById('nl-input'); nlEl.innerText = '';
   document.getElementById('nl-clear-btn').style.display = 'none';
   document.getElementById('ai-response-box').classList.remove('show');
   document.getElementById('res').innerHTML = '';
@@ -1467,7 +1468,7 @@ function clearNLSearch(){
 function handleSearch(){ if(currentSearchMode==='nl') doNLSearch(); else doSearch(); }
 
 async function doNLSearch() {
-  const query = document.getElementById('nl-input').value.trim();
+  const query = (document.getElementById('nl-input').innerText || document.getElementById('nl-input').textContent || '').trim().replace(/\n/g, ' ');
   if (!query) return;
 
   // Get user location for context
@@ -1485,7 +1486,7 @@ async function doNLSearch() {
 
   // Check if query is camping/travel related before sending
   // Detect if this is a question about the app vs a campsite search
-  const isAppQuestion = /what can you do|how do (i|you|this)|what (is|are) (your|this|nomad)|help|features|how (does|to)|what.*(search|find|use|work)|explain|tell me about/i.test(query);
+  const isAppQuestion = /what can|how do|how does|how to|what is|what are|what do|who are|tell me|explain|help me|features|capabilities|can you|do you|are you|how work|nomadai|about you|about this/i.test(query);
 
   let prompt;
   if (isAppQuestion) {
@@ -1739,8 +1740,9 @@ function clearDataConfirm(key, msg){
 // Load saved preferences on init
 function initPrefs(){
   const app = document.getElementById('app');
-  if(localStorage.getItem('cf_light_mode')==='1') app.classList.add('light');
-  else app.classList.remove('light');
+  const savedMode = localStorage.getItem('cf_light_mode');
+  if(savedMode === '0') app.classList.remove('light');
+  else app.classList.add('light');
   const savedRadius=localStorage.getItem('cf_default_radius');
   if(savedRadius) { radius=parseInt(savedRadius); }
 }
