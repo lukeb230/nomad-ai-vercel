@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/app", "destination": "/app.html" },
+    { "source": "/spot/:id", "destination": "/spot.html" },
     { "source": "/spot", "destination": "/spot.html" },
     { "source": "/api/claude", "destination": "/api/claude" },
     { "source": "/api/places", "destination": "/api/places" }
