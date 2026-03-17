@@ -1373,12 +1373,22 @@ function clearDataConfirm(key, msg){
 
 // Load saved preferences on init
 function initPrefs(){
-  if(localStorage.getItem('cf_light_mode')==='1') document.getElementById('app').classList.add('light');
-  else document.getElementById('app').classList.remove('light');
+  const app = document.getElementById('app');
+  if(localStorage.getItem('cf_light_mode')==='1') app.classList.add('light');
+  else app.classList.remove('light');
   const savedRadius=localStorage.getItem('cf_default_radius');
   if(savedRadius) { radius=parseInt(savedRadius); }
 }
-initPrefs(); // Apply from localStorage immediately
+initPrefs();
+
+// Watch for light class being removed unexpectedly and restore it
+const _lightObserver = new MutationObserver(() => {
+  const app = document.getElementById('app');
+  if(localStorage.getItem('cf_light_mode')==='1' && !app.classList.contains('light')) {
+    app.classList.add('light');
+  }
+});
+_lightObserver.observe(document.getElementById('app'), { attributes: true, attributeFilter: ['class'] });
 
 // ── PASSPORT ──
 let passportOpen = false;
