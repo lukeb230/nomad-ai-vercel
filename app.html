@@ -310,7 +310,7 @@
     /* User badge in topbar */
     .user-badge { display: flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--slate); border-radius: 50px; padding: 4px 10px 4px 6px; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; }
     .user-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--sand); font-weight: 800; }
-    .ai-response-box { background: var(--card); border: 1.5px solid var(--slate); border-radius: 16px; padding: 14px 16px; margin-bottom: 0; display: none; }
+    .ai-response-box { background: var(--card); border: 1.5px solid var(--slate); border-radius: 16px; padding: 14px 16px; margin-bottom: 0; display: none; width: 100%; box-sizing: border-box; }
     .ai-response-box.show { display: block; }
     .ai-response-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .ai-response-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--tan); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
@@ -472,15 +472,16 @@
       .topbar { padding: 24px 24px 16px; }
 
       /* Search controls */
-      .search-wrap { padding: 0 24px 16px; }
+      .search-wrap { padding: 0 24px 16px; overflow: visible; }
       .slabel { padding: 0 24px 9px; }
       .chips { padding: 0 24px 10px; }
       .filters { padding: 0 24px 14px; }
       .chip, .filter-chip { height: 38px !important; min-height: 38px !important; overflow: visible !important; display: inline-flex !important; align-items: center !important; flex-shrink: 0 !important; }
-      .chips, .filters, .search-history { display: flex !important; overflow-x: auto; flex-wrap: nowrap !important; align-items: center; height: auto !important; }
+      .chips, .filters, .search-history { display: flex !important; overflow-x: auto; flex-wrap: nowrap !important; align-items: center; height: auto !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .chips::-webkit-scrollbar, .filters::-webkit-scrollbar { display: none; }
       .rad-row { display: flex !important; flex-wrap: nowrap !important; }
       .history-pill { height: 34px; display: inline-flex !important; align-items: center !important; flex-shrink: 0 !important; }
-      #search-tab { contain: layout style; }
+      #search-tab { contain: none; }
       .rad-row { padding: 0 24px 18px; }
       .go-wrap { padding: 0 24px 20px; }
       .status-row { padding: 0 24px 10px; }
