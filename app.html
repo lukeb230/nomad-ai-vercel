@@ -728,15 +728,7 @@
         <button class="route-clear-btn" onclick="clearRoute()">Clear</button>
       </div>
     </div>
-    <div id="passport-panel">
-      <div class="passport-header">
-        <div>
-          <div class="passport-count" id="passport-count">0 camps visited</div>
-          <div class="passport-sub">Your camp passport</div>
-        </div>
-      </div>
-      <div class="passport-grid" id="passport-grid"></div>
-    </div>
+
     <div class="saved-filter-bar" id="saved-filter-bar" style="display:none;">
       <select id="saved-state-filter" onchange="renderSaved()">
         <option value="">All states</option>
@@ -1017,7 +1009,7 @@ function saveNote(name,text){try{const n=JSON.parse(localStorage.getItem('cf_not
 function getVisited(){try{return JSON.parse(localStorage.getItem('cf_visited')||'[]');}catch(e){return[];}}
 function getVisitedStates(){try{return JSON.parse(localStorage.getItem('cf_visited_states')||'[]');}catch(e){return[];}}
 function isVisited(name){return getVisited().includes(name);}
-function toggleVisited(name,btn,state){let v=getVisited();if(isVisited(name)){v=v.filter(n=>n!==name);btn.classList.remove('been');let vs=getVisitedStates().filter(s=>s.name!==name);localStorage.setItem('cf_visited_states',JSON.stringify(vs));}else{v.push(name);btn.classList.add('been');const resolvedState=state||((getSaved().find(s=>s.name===name)||{}).state||'');if(resolvedState){let vs=getVisitedStates();vs.push({name,state:resolvedState});localStorage.setItem('cf_visited_states',JSON.stringify(vs));}}localStorage.setItem('cf_visited',JSON.stringify(v));if(passportOpen)renderPassport();renderHomeStats();syncToSupabase();}
+function toggleVisited(name,btn,state){let v=getVisited();if(isVisited(name)){v=v.filter(n=>n!==name);btn.classList.remove('been');let vs=getVisitedStates().filter(s=>s.name!==name);localStorage.setItem('cf_visited_states',JSON.stringify(vs));}else{v.push(name);btn.classList.add('been');const resolvedState=state||((getSaved().find(s=>s.name===name)||{}).state||'');if(resolvedState){let vs=getVisitedStates();vs.push({name,state:resolvedState});localStorage.setItem('cf_visited_states',JSON.stringify(vs));}}localStorage.setItem('cf_visited',JSON.stringify(v));if(document.getElementById('passport-overlay').style.display==='block')openPassportModal();renderHomeStats();syncToSupabase();}
 
 // ── MAP ──
 let mapClickLatLng = null;
@@ -1668,7 +1660,7 @@ function switchTab(tab){
   if(tab==='home'){document.getElementById('home-tab').style.display='flex';document.getElementById('home-tab').style.flexDirection='column';document.getElementById('nav-home').classList.add('active');renderHome();}
   else if(tab==='search'){document.getElementById('search-tab').style.display='flex';document.getElementById('search-tab').style.flexDirection='column';document.getElementById('nav-search').classList.add('active');document.getElementById('err').innerHTML='';renderRecentSection();renderSearchHistory();if(currentSearchMode==='nl'&&!(document.getElementById('nl-input').innerText||'').trim()){document.getElementById('ai-response-text').innerHTML="Hey there! 👋 I'm NomadAI, your personal camping guide! I can help you find free and dispersed campsites on public lands, search by location or vibe, save favorites, plan trips, and share spots. I can also answer questions about camping areas, best seasons, overlanding tips, and more.<br><br>🗺️ <span style=\"color:var(--tan);font-weight:800;\">Driving somewhere?</span> Ask me for camps along your route — then check the Map tab to see all the spots pinned along the way.<br><br>Try asking: <span style=\"color:var(--tan);font-weight:800;\">\"free BLM spot near Moab with a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"campsites along I-70 from Denver to Grand Junction\"</span>";document.getElementById('ai-response-box').classList.add('show');}}
   else if(tab==='map'){document.getElementById('map-click-hint').style.display='block';document.getElementById('map-tab').style.display='flex';document.getElementById('map-tab').style.flexDirection='column';document.getElementById('nav-map').classList.add('active');initMap();refreshMap();}
-  else{document.getElementById('saved-tab').style.display='flex';document.getElementById('saved-tab').style.flexDirection='column';document.getElementById('nav-saved').classList.add('active');renderSaved();if(routeOpen)renderRoutePlanner();if(passportOpen)renderPassport();}
+  else{document.getElementById('saved-tab').style.display='flex';document.getElementById('saved-tab').style.flexDirection='column';document.getElementById('nav-saved').classList.add('active');renderSaved();if(routeOpen)renderRoutePlanner();if(document.getElementById('passport-overlay').style.display==='block')openPassportModal();}
 }
 
 function setR(el,r){radius=r;document.querySelectorAll('.rad-btn').forEach(x=>{x.classList.remove('on');x.style.background='';x.style.borderColor='';x.style.color='';});el.classList.add('on');el.style.background='';el.style.borderColor='';el.style.color='';}
@@ -2244,6 +2236,43 @@ function renderPassport() {
       ${loc ? `<div class="stamp-loc">📍 ${loc}</div>` : ''}
     </div>`;
   }).join('');
+}
+
+
+function openPassportModal() {
+  closeProfile();
+  const visited = getVisited();
+  const saved = getSaved();
+  document.getElementById('passport-modal-count').textContent = visited.length + ' camp' + (visited.length !== 1 ? 's' : '') + ' visited';
+  const grid = document.getElementById('passport-modal-grid');
+  if (!visited.length) {
+    grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;line-height:1.8;">✓ Mark campsites as visited<br>and they\'ll appear here as stamps.</div>';
+  } else {
+    const stamps = visited.map(name => {
+      const site = saved.find(s => s.name === name);
+      return { name, state: site?.state || '', city: site?.city || '' };
+    });
+    grid.innerHTML = stamps.map((s, i) => {
+      const color = STAMP_COLORS[i % STAMP_COLORS.length];
+      const loc = s.city && s.state ? s.city + ', ' + s.state : s.state || s.city || '';
+      const safeName = s.name.replace(/'/g, "\'");
+      return `<div class="stamp ${color}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div class="stamp-check">✓</div>
+          <div onclick="removeStamp('${safeName}');openPassportModal();" style="font-size:14px;color:var(--muted);cursor:pointer;padding:0 2px;line-height:1;" title="Remove">×</div>
+        </div>
+        <div class="stamp-name">${s.name}</div>
+        ${loc ? `<div class="stamp-loc">📍 ${loc}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('passport-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closePassportModal() {
+  document.getElementById('passport-overlay').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 // ── ROUTE PLANNER ──
@@ -3002,8 +3031,24 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
       <label class="profile-label">Display name</label>
       <input class="profile-input" id="profile-name-input" type="text" placeholder="Your name" maxlength="40"/>
       <button class="profile-save-btn" onclick="saveProfile()">Save profile</button>
-      <button class="profile-save-btn" onclick="closeProfile();switchTab('saved');setTimeout(()=>{if(!passportOpen)togglePassport();},100);" style="background:var(--card);border:1.5px solid var(--slate);color:var(--muted);margin-top:8px;">🪪 View passport</button>
+      <button class="profile-save-btn" onclick="openPassportModal()" style="background:var(--card);border:1.5px solid var(--slate);color:var(--muted);margin-top:8px;">🪪 View passport</button>
       <div class="profile-sign-out" onclick="signOut();closeProfile();">Sign out</div>
+    </div>
+  </div>
+
+
+  <!-- PASSPORT MODAL -->
+  <div id="passport-overlay" onclick="if(event.target===this)closePassportModal();" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1002;background:rgba(0,0,0,0.75);">
+    <div id="passport-modal" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--dark);border-radius:24px 24px 0 0;max-height:85vh;display:flex;flex-direction:column;">
+      <div style="width:36px;height:4px;background:var(--slate);border-radius:2px;margin:12px auto 0;flex-shrink:0;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;flex-shrink:0;">
+        <div>
+          <div style="font-size:18px;font-weight:800;color:var(--sand);">🪪 Camp Passport</div>
+          <div id="passport-modal-count" style="font-size:12px;color:var(--muted);font-weight:600;margin-top:2px;">0 camps visited</div>
+        </div>
+        <button onclick="closePassportModal()" style="width:32px;height:32px;border-radius:50%;background:var(--card);border:none;color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;">✕</button>
+      </div>
+      <div id="passport-modal-grid" style="overflow-y:auto;padding:8px 20px 32px;display:grid;grid-template-columns:1fr 1fr;gap:10px;-webkit-overflow-scrolling:touch;"></div>
     </div>
   </div>
 
