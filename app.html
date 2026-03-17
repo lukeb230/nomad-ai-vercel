@@ -304,6 +304,12 @@
     /* User badge in topbar */
     .user-badge { display: flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--slate); border-radius: 50px; padding: 4px 10px 4px 6px; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; }
     .user-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--sand); font-weight: 800; }
+    .ai-response-box { background: var(--card); border: 1.5px solid var(--slate); border-radius: 16px; padding: 14px 16px; margin-bottom: 14px; display: none; }
+    .ai-response-box.show { display: block; }
+    .ai-response-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .ai-response-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--tan); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .ai-response-name { font-size: 12px; font-weight: 800; color: var(--tan); }
+    .ai-response-text { font-size: 13px; color: var(--light); line-height: 1.65; }
     .saved-empty { text-align: center; padding: 48px 16px; color: var(--muted); font-size: 14px; line-height: 1.8; }
     .saved-filter-bar { display: flex; gap: 8px; padding: 0 16px 12px; align-items: center; flex-wrap: wrap; }
     .saved-filter-bar select { background: var(--card); border: 1.5px solid var(--slate); color: var(--sand); border-radius: 10px; padding: 7px 12px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; outline: none; flex: 1; }
@@ -575,6 +581,13 @@
     <div class="status-row"><div class="spin" id="spin"></div><span id="st"></span></div>
     <div id="err"></div>
     <div id="recent-section" style="padding:0 16px;display:flex;flex-direction:column;gap:10px;"></div>
+    <div class="ai-response-box" id="ai-response-box">
+      <div class="ai-response-header">
+        <div class="ai-response-avatar">🏕️</div>
+        <div class="ai-response-name">NomadAI</div>
+      </div>
+      <div class="ai-response-text" id="ai-response-text"></div>
+    </div>
     <div class="results" id="res"></div>
   </div>
 
@@ -1359,7 +1372,7 @@ function toggleClearBtn(){
   const val=document.getElementById('loc').value;
   document.getElementById('clear-btn').style.display=val?'block':'none';
 }
-function clearSearch(){
+function clearSearch(){document.getElementById('ai-response-box').classList.remove('show');
   document.getElementById('loc').value='';
   document.getElementById('clear-btn').style.display='none';
   document.getElementById('loc').focus();
@@ -1452,11 +1465,14 @@ async function doNLSearch() {
   // Check if query is camping/travel related before sending
   const prompt = 'Find real campsites matching this request: "' + query + '". ' + locationContext + ' Return ONLY a valid JSON array of up to 12 campsites. Each object: ' + fields + ' No fake results. JSON array only.';
 
+  // Build a prompt that returns both a message and JSON results
+  const fullPrompt = prompt + ' Also prepend your JSON array with a single friendly sentence (max 20 words) starting with "MSG:" that summarizes what you found. Format: MSG:Your message here\n[...json array...]';
+
   try {
     const r = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 4000, messages: [{ role: 'user', content: fullPrompt }] })
     });
     const d = await r.json();
 
@@ -1468,6 +1484,14 @@ async function doNLSearch() {
     }
 
     const txt = d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+
+    // Extract MSG prefix if present
+    const firstLine = txt.indexOf('MSG:') === 0 ? txt.substring(0, txt.indexOf('[')) : ''; const msgMatch = firstLine.length > 4 ? [null, firstLine.substring(4).trim()] : null;
+    if (msgMatch) {
+      document.getElementById('ai-response-text').textContent = msgMatch[1].trim();
+      document.getElementById('ai-response-box').classList.add('show');
+    }
+
     const idx = txt.indexOf('['); const idx2 = txt.lastIndexOf(']');
     if (idx === -1 || idx2 === -1) throw new Error('No results');
     const sites = JSON.parse(txt.substring(idx, idx2+1));
