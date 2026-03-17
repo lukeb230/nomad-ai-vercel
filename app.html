@@ -1541,13 +1541,13 @@ function renderJournal() {
           <div class="journal-card-name">${s.name}</div>
           ${loc ? `<div class="journal-card-loc">📍 ${loc}</div>` : ''}
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div class="journal-stars">${stars}</div>
-          <div onclick="deleteJournalEntry(this.dataset.name)" data-name="${s.name}" style="width:24px;height:24px;border-radius:50%;background:var(--dark);border:1.5px solid #7a3030;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#f0a0a0;flex-shrink:0;line-height:1;">−</div>
-        </div>
+        <div class="journal-stars">${stars}</div>
       </div>
       <textarea class="journal-note" id="${cardId}-note" placeholder="Add your notes about this spot...">${note}</textarea>
-      <button class="journal-save" onclick="saveNote('${s.name.replace(/'/g,"\'")}',document.getElementById('${cardId}-note').value);this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save note',1500)">Save note</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:7px;">
+      <button class="journal-save" style="margin-top:0;" onclick="saveNote('${s.name.replace(/'/g,"\'")}',document.getElementById('${cardId}-note').value);this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save note',1500)">Save note</button>
+      <div onclick="deleteJournalEntry(this.dataset.name)" data-name="${s.name}" style="width:30px;height:30px;border-radius:50%;background:var(--dark);border:1.5px solid #7a3030;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#f0a0a0;flex-shrink:0;line-height:1;">−</div>
+      </div>
     </div>`;
   }).join('');
 }
