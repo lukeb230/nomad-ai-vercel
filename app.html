@@ -2775,20 +2775,19 @@ async function syncToSupabase() {
     else console.log('Trips synced, current stops:', trip.length, 'completed:', completedTrips.length);
   } catch(e) { console.error('Trips sync error:', e); }
   // Save profile to dedicated table
-  const profile = getProfile();
-  if (profile.name !== undefined || profile.photo !== undefined) {
-    console.log('Saving profile to user_profiles table, user_id:', currentUser.id);
-    const delRes = await supa.from('user_profiles').delete().eq('user_id', currentUser.id);
-    if (delRes.error) console.error('Profile delete error:', delRes.error);
-    const insRes = await supa.from('user_profiles').insert({
-      user_id: currentUser.id,
-      display_name: profile.name || '',
-      photo: profile.photo || '',
-      updated_at: new Date().toISOString()
-    });
-    if (insRes.error) console.error('Profile insert error:', insRes.error);
-    else console.log('Profile saved successfully:', profile.name);
-  }
+  try {
+    const profile = getProfile();
+    if (profile.name !== undefined || profile.photo !== undefined) {
+      const { error: profileErr } = await supa.from('user_profiles').upsert({
+        user_id: currentUser.id,
+        display_name: profile.name || '',
+        photo: profile.photo || '',
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id', ignoreDuplicates: false });
+      if (profileErr) console.error('Profile upsert error:', JSON.stringify(profileErr));
+      else console.log('Profile synced:', profile.name);
+    }
+  } catch(e) { console.error('Profile sync error:', e); }
 
 }
 
