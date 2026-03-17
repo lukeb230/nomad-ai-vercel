@@ -1045,10 +1045,26 @@ function plotRoute(){
     mapMarkers.push(marker);
   });
 
-  // Draw route line
-  routePolyline=L.polyline(latlngs,{color:'#c4a06a',weight:3,opacity:0.7,dashArray:'6,8'}).addTo(map);
-
   if(bounds.length>0)map.fitBounds(bounds,{padding:[40,40]});
+
+  // Fetch road-following route from OSRM
+  if(latlngs.length>=2){
+    const coords=latlngs.map(ll=>ll[1]+','+ll[0]).join(';');
+    fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`)
+      .then(r=>r.json())
+      .then(d=>{
+        if(d.routes&&d.routes[0]){
+          const geojson=d.routes[0].geometry;
+          routePolyline=L.geoJSON(geojson,{style:{color:'#c4a06a',weight:3,opacity:0.75}}).addTo(map);
+        } else {
+          // Fallback to straight line if OSRM fails
+          routePolyline=L.polyline(latlngs,{color:'#c4a06a',weight:3,opacity:0.7,dashArray:'6,8'}).addTo(map);
+        }
+      })
+      .catch(()=>{
+        routePolyline=L.polyline(latlngs,{color:'#c4a06a',weight:3,opacity:0.7,dashArray:'6,8'}).addTo(map);
+      });
+  }
 }
 function refreshMap(){setTimeout(()=>{if(map)map.invalidateSize();setMapMode(mapMode);},100);}
 
