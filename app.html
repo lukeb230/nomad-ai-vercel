@@ -1478,15 +1478,22 @@ async function doNLSearch() {
     if (!sites.length) {
       document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">No campsites found. Try a different description.</div>';
     } else {
-      sites.forEach((s, i) => {
+      sites.forEach((s,i) => {
         if (userLat && userLng && s.coordinates?.lat && s.coordinates?.lng) {
-          const d = haversine(userLat, userLng, s.coordinates.lat, s.coordinates.lng);
-          s.distance = '~'+Math.round(d)+' miles';
+          s.distance = '~'+Math.round(haversine(userLat,userLng,s.coordinates.lat,s.coordinates.lng))+' miles';
         }
-        const card = document.createElement('div');
-        card.innerHTML = buildCard(s, i);
-        document.getElementById('res').appendChild(card.firstElementChild);
-        loadCardExtras(s, i);
+      });
+      const resEl = document.getElementById('res');
+      resEl.innerHTML = sites.map((s,i) => cardHTML(s,i,false)).join('');
+      sites.forEach((s,i) => {
+        const card = resEl.children[i];
+        if (!card) return;
+        const cid = card.getAttribute('data-cardid');
+        const lat = parseFloat(card.getAttribute('data-lat'));
+        const lng = parseFloat(card.getAttribute('data-lng'));
+        const loc = [s.city,s.state].filter(Boolean).join(', ');
+        setTimeout(() => loadPhotosForCard(cid,s,loc), i*200);
+        if (lat && lng) setTimeout(() => loadWeatherForCard(cid,lat,lng), i*300+100);
       });
     }
 
