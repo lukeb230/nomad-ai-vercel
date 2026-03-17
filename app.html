@@ -2680,7 +2680,7 @@ async function saveProfile() {
                 getProfile().photo || '';
   const profile = { name, photo };
   localStorage.setItem('cf_profile', JSON.stringify(profile));
-  console.log('Saving profile:', profile.name, 'photo length:', (profile.photo||'').length);
+  console.log('Saving profile:', profile.name, 'photo length:', (profile.photo||'').length, 'to dedicated user_profiles table');
   // Update badge
   updateUserBadge();
   // Sync to Supabase
@@ -2721,8 +2721,7 @@ async function syncToSupabase() {
     search_history: localStorage.getItem('cf_search_history')||'[]',
     completed_trips: localStorage.getItem('cf_completed_trips')||'[]',
     ratings: localStorage.getItem('cf_ratings')||'{}',
-    visited_states: localStorage.getItem('cf_visited_states')||'[]',
-    profile: localStorage.getItem('cf_profile')||'{}'
+    visited_states: localStorage.getItem('cf_visited_states')||'[]'
   };
   // Upsert saved spots
   await supa.from('saved_spots').delete().eq('user_id', currentUser.id);
@@ -2737,6 +2736,18 @@ async function syncToSupabase() {
   // Upsert user settings (single row)
   await supa.from('user_settings').delete().eq('user_id', currentUser.id);
   await supa.from('user_settings').insert([{ user_id: currentUser.id, data: { ...settings, trip } }]);
+  // Upsert profile to dedicated table
+  const profile = getProfile();
+  if (profile.name !== undefined || profile.photo !== undefined) {
+    const { error: profileError } = await supa.from('user_profiles').upsert({
+      user_id: currentUser.id,
+      display_name: profile.name || '',
+      photo: profile.photo || '',
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    if (profileError) console.error('Profile upsert error:', profileError);
+    else console.log('Profile saved to Supabase');
+  }
 
 }
 
@@ -2762,7 +2773,6 @@ async function syncFromSupabase() {
     if (s.completed_trips) localStorage.setItem('cf_completed_trips', s.completed_trips);
     if (s.ratings) localStorage.setItem('cf_ratings', s.ratings);
     if (s.visited_states) localStorage.setItem('cf_visited_states', s.visited_states);
-    if (s.profile) { localStorage.setItem('cf_profile', typeof s.profile === 'string' ? s.profile : JSON.stringify(s.profile)); updateUserBadge(); }
     // Apply light mode — use timeout to ensure it runs after any other DOM updates
     setTimeout(() => {
       const mode = (s.light_mode === '0') ? '0' : '1';
@@ -2779,6 +2789,19 @@ async function syncFromSupabase() {
     }, 50);
   }
 
+  // Fetch profile from dedicated table
+  const { data: profileData, error: profileFetchError } = await supa.from('user_profiles')
+    .select('display_name, photo')
+    .eq('user_id', currentUser.id)
+    .single();
+  if (profileFetchError) console.error('Profile fetch error:', profileFetchError);
+  if (profileData) {
+    const profile = { name: profileData.display_name || '', photo: profileData.photo || '' };
+    localStorage.setItem('cf_profile', JSON.stringify(profile));
+    console.log('Profile loaded from Supabase:', profile.name);
+    updateUserBadge();
+    renderHome();
+  }
   renderSaved();
   renderSearchHistory();
   initPrefs();
