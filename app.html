@@ -2256,6 +2256,10 @@ function renderPassport() {
 
 function openPassportModal() {
   closeProfile();
+  const isLight = document.getElementById('app').classList.contains('light');
+  const modal = document.getElementById('passport-modal');
+  modal.style.background = isLight ? '#f8f4ec' : '#2a3830';
+  modal.style.color = isLight ? '#2a3830' : '#e8d5b7';
   const visited = getVisited();
   const saved = getSaved();
   document.getElementById('passport-modal-count').textContent = visited.length + ' camp' + (visited.length !== 1 ? 's' : '') + ' visited';
@@ -2760,6 +2764,11 @@ function getProfile() { try { return JSON.parse(localStorage.getItem('cf_profile
 
 function openProfile() {
   if (!currentUser) { openAuth(); return; }
+  const isLight = document.getElementById('app').classList.contains('light');
+  const panel = document.getElementById('profile-panel');
+  panel.style.background = isLight ? '#f8f4ec' : '#2a3830';
+  panel.style.borderColor = isLight ? '#c8c0b0' : '#6a8c8a';
+  panel.style.color = isLight ? '#2a3830' : '#e8d5b7';
   const p = getProfile();
   document.getElementById('profile-email-display').textContent = currentUser.email;
   document.getElementById('profile-name-input').value = p.name || '';
