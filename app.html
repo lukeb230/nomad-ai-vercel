@@ -2280,7 +2280,9 @@ function openPassportModal() {
       </div>`;
     }).join('');
   }
-  document.getElementById('passport-overlay').style.display = 'block';
+  document.getElementById('passport-overlay').style.display = 'flex';
+  document.getElementById('passport-overlay').style.alignItems = 'flex-end';
+  document.getElementById('passport-overlay').style.justifyContent = 'center';
   document.body.style.overflow = 'hidden';
 }
 
@@ -2770,12 +2772,14 @@ function openProfile() {
     initial.textContent = letter;
     display.innerHTML = `<span style="font-size:32px;color:var(--muted);">${letter}</span>`;
   }
-  document.getElementById('profile-overlay').classList.add('show');
+  document.getElementById('profile-overlay').style.display = 'flex';
+  document.getElementById('profile-overlay').style.alignItems = 'center';
+  document.getElementById('profile-overlay').style.justifyContent = 'center';
   document.body.style.overflow = 'hidden';
 }
 
 function closeProfile() {
-  document.getElementById('profile-overlay').classList.remove('show');
+  document.getElementById('profile-overlay').style.display = 'none';
   document.body.style.overflow = '';
 }
 
