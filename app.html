@@ -269,8 +269,8 @@
     #app.light .refresh-btn { background: #e4ddd0; border-color: #c8c0b0; }
     #app.light #settings-panel { background: #e4ddd0; }
     /* PROFILE LIGHT MODE */
-    #passport-modal { background: var(--dark); }
-    #app.light #profile-panel { background: #f8f4ec !important; border-color: #c8c0b0 !important; color: #2a3830; }
+    #passport-modal { background: var(--card); border-top: 1px solid var(--slate); }
+    #app.light #profile-panel { border-color: #c8c0b0; color: #2a3830; }
     #app.light #profile-overlay { background: rgba(0,0,0,0.5); }
     #app.light .profile-input { background: #f0ebe0; border-color: #c8c0b0; color: #2a3830; }
     #app.light .profile-input::placeholder { color: #8aac8a; }
@@ -280,7 +280,7 @@
     #app.light .profile-avatar-hint { color: #5a7060; }
     #app.light .profile-sign-out { color: #5a7060; }
     #app.light .profile-save-btn:not([style*="background"]) { background: #9a7040; }
-    #app.light #passport-modal { background: #f8f4ec !important; color: #2a3830; }
+    #app.light #passport-modal { color: #2a3830; }
     #app.light #passport-modal button { background: #e4ddd0; }
     #app.light #passport-overlay { background: rgba(0,0,0,0.5); }
     #app.light .settings-close { background: #f0ebe0; }
@@ -590,7 +590,7 @@
     /* PROFILE MODAL */
     #profile-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1001; background: rgba(0,0,0,0.7); }
     #profile-overlay.show { display: flex; align-items: center; justify-content: center; padding: 20px; }
-    #profile-panel { background: var(--dark); border-radius: 24px; padding: 28px 24px; width: calc(100% - 40px); max-width: 380px; border: 1px solid var(--slate); position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    #profile-panel { background: var(--card); border-radius: 24px; padding: 28px 24px; width: calc(100% - 40px); max-width: 380px; border: 1px solid var(--slate); position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
     .profile-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--card); border: none; color: var(--muted); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; }
     .profile-avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; }
     .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--card); border: 2px solid var(--slate); object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--muted); overflow: hidden; cursor: pointer; position: relative; }
