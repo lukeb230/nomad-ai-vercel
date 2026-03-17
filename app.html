@@ -1319,6 +1319,7 @@ function addToTrip(site,btn){
     localStorage.setItem('cf_trip',JSON.stringify(getTrip().filter(s=>s.name!==site.name)));
     btn.classList.remove('added');
     if(routeOpen)renderRoutePlanner();
+    syncToSupabase();
     return;
   }
   let trip=getTrip();
@@ -1326,10 +1327,12 @@ function addToTrip(site,btn){
   localStorage.setItem('cf_trip',JSON.stringify(trip));
   btn.classList.add('added');
   if(routeOpen)renderRoutePlanner();
+  syncToSupabase();
 }
 function removeFromTrip(name){
   localStorage.setItem('cf_trip',JSON.stringify(getTrip().filter(s=>s.name!==name)));
   if(routeOpen)renderRoutePlanner();
+  syncToSupabase();
 }
 
 function removeSaved(name){localStorage.setItem('cf_saved',JSON.stringify(getSaved().filter(s=>s.name!==name)));removeFromTrip(name);renderSaved();if(routeOpen)renderRoutePlanner();syncToSupabase();}
@@ -2729,7 +2732,6 @@ async function syncToSupabase() {
     light_mode: localStorage.getItem('cf_light_mode')||'1',
     default_radius: localStorage.getItem('cf_default_radius')||'50',
     search_history: localStorage.getItem('cf_search_history')||'[]',
-    completed_trips: localStorage.getItem('cf_completed_trips')||'[]',
     ratings: localStorage.getItem('cf_ratings')||'{}',
     visited_states: localStorage.getItem('cf_visited_states')||'[]'
   };
@@ -2743,9 +2745,21 @@ async function syncToSupabase() {
   await supa.from('trip_notes').delete().eq('user_id', currentUser.id);
   const noteEntries = Object.entries(notes);
   if (noteEntries.length) await supa.from('trip_notes').insert(noteEntries.map(([spot_name, note]) => ({ user_id: currentUser.id, spot_name, note })));
-  // Upsert user settings (single row)
+  // Upsert user settings (single row - no trip data)
   await supa.from('user_settings').delete().eq('user_id', currentUser.id);
-  await supa.from('user_settings').insert([{ user_id: currentUser.id, data: { ...settings, trip } }]);
+  await supa.from('user_settings').insert([{ user_id: currentUser.id, data: settings }]);
+  // Save trips to dedicated table
+  const completedTrips = JSON.parse(localStorage.getItem('cf_completed_trips')||'[]');
+  const { error: tripDelErr } = await supa.from('user_trips').delete().eq('user_id', currentUser.id);
+  if (tripDelErr) console.error('Trip delete error:', tripDelErr);
+  const { error: tripInsErr } = await supa.from('user_trips').insert({
+    user_id: currentUser.id,
+    current_trip: trip,
+    completed_trips: completedTrips,
+    updated_at: new Date().toISOString()
+  });
+  if (tripInsErr) console.error('Trip insert error:', tripInsErr);
+  else console.log('Trips saved to Supabase, current stops:', trip.length, 'completed:', completedTrips.length);
   // Save profile to dedicated table
   const profile = getProfile();
   if (profile.name !== undefined || profile.photo !== undefined) {
@@ -2782,8 +2796,6 @@ async function syncFromSupabase() {
     localStorage.setItem('cf_light_mode', (s.light_mode === '0') ? '0' : '1');
     if (s.default_radius) localStorage.setItem('cf_default_radius', s.default_radius);
     if (s.search_history) localStorage.setItem('cf_search_history', s.search_history);
-    if (s.trip) localStorage.setItem('cf_trip', JSON.stringify(s.trip));
-    if (s.completed_trips) localStorage.setItem('cf_completed_trips', s.completed_trips);
     if (s.ratings) localStorage.setItem('cf_ratings', s.ratings);
     if (s.visited_states) localStorage.setItem('cf_visited_states', s.visited_states);
     // Apply light mode — use timeout to ensure it runs after any other DOM updates
@@ -2803,6 +2815,17 @@ async function syncFromSupabase() {
   }
 
   // Fetch profile from dedicated table
+  // Fetch trips from dedicated table
+  const { data: tripData, error: tripFetchErr } = await supa.from('user_trips')
+    .select('current_trip, completed_trips')
+    .eq('user_id', currentUser.id)
+    .maybeSingle();
+  if (tripFetchErr) console.error('Trip fetch error:', tripFetchErr);
+  if (tripData) {
+    if (tripData.current_trip) localStorage.setItem('cf_trip', JSON.stringify(tripData.current_trip));
+    if (tripData.completed_trips) localStorage.setItem('cf_completed_trips', JSON.stringify(tripData.completed_trips));
+    console.log('Trips loaded from Supabase, current stops:', (tripData.current_trip||[]).length, 'completed:', (tripData.completed_trips||[]).length);
+  }
   console.log('Fetching profile for user_id:', currentUser.id);
   const { data: profileData, error: profileFetchError } = await supa.from('user_profiles')
     .select('display_name, photo')
