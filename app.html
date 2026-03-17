@@ -1440,6 +1440,12 @@ function setSearchMode(mode) {
     goBtn.innerHTML = '✨ Ask AI';
     document.getElementById('autocomplete-list').style.display = 'none';
     document.getElementById('nl-input').focus();
+    // Show welcome message if box is empty
+    const nlVal = (document.getElementById('nl-input').innerText||'').trim();
+    if (!nlVal) {
+      document.getElementById('ai-response-text').innerHTML = "Hey there! 👋 I\'m NomadAI, your personal camping guide! I can help you find free and dispersed campsites on public lands, search by location or vibe, save favorites, plan trips, and share spots. I can also answer questions about camping areas, best seasons, overlanding tips, and more. Try asking: <span style=\"color:var(--tan);font-weight:800;\">\"free BLM spot near Moab with a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"what\'s camping like in Big Bend?\"</span>";
+      document.getElementById('ai-response-box').classList.add('show');
+    }
   } else {
     locBox.style.display = 'flex';
     nlBox.style.display = 'none';
@@ -1451,6 +1457,10 @@ function setSearchMode(mode) {
     nlBtn.style.color = 'var(--tan)';
     nlBtn.style.boxShadow = 'none';
     goBtn.innerHTML = '🔍 Find Campsites Tonight';
+    // Hide welcome message when switching to location mode
+    const aiBox = document.getElementById('ai-response-box');
+    const aiText = document.getElementById('ai-response-text').innerHTML;
+    if (aiText.includes('Hey there')) aiBox.classList.remove('show');
   }
 }
 
