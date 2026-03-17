@@ -1538,7 +1538,7 @@ function renderTripDash() {
     </div>
     <div class="trip-dash-actions">
       <a class="trip-dash-btn tan" href="${mapsUrl}" target="_blank">🗺️</a>
-      ${!isLast ? `<div class="trip-dash-btn next" onclick="nextTripStop()">Next stop →</div>` : `<div class="trip-dash-btn next" style="opacity:0.5;cursor:default;">Last stop</div>`}
+      ${!isLast ? `<div class="trip-dash-btn next" onclick="nextTripStop()">Next stop →</div>` : `<div class="trip-dash-btn next" onclick="completeTrip()" style="border-color:var(--sage);color:var(--sage);">✓ Complete trip</div>`}
       <div class="trip-dash-btn outline" onclick="switchTab('saved');setTimeout(()=>{if(!routeOpen)toggleRoutePlanner();},100);">Route</div>
     </div>
   </div>`;
