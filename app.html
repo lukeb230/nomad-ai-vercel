@@ -1486,11 +1486,11 @@ async function doNLSearch() {
 
   // Check if query is camping/travel related before sending
   // Detect if this is a question about the app vs a campsite search
-  const isAppQuestion = /what can|how do|how does|how to|what is|what are|what do|who are|tell me|explain|help me|features|capabilities|can you|do you|are you|how work|nomadai|about you|about this/i.test(query);
+  const isAppQuestion = /what can|how do|how does|how to|what is|what are|what do|who are|tell me|explain|help me|features|capabilities|can you|do you|are you|how work|nomadai|about you|about this|where is|what's in|what.*like|good time|best time|weather in|things to do|near.*what|recommend|suggest|tips for|far from|drive.*from|distance/i.test(query);
 
   let prompt;
   if (isAppQuestion) {
-    prompt = 'You are NomadAI, an AI-powered campsite finder app. The user is asking: "' + query + '". Answer their question helpfully and conversationally in 2-4 sentences. Describe what NomadAI can do: find BLM/dispersed/free campsites, search by location or natural language description, save spots, plan trips, track visited camps, share spots with friends, view weather and sunrise/sunset per campsite, and show satellite maps with campsite pins. Do NOT return JSON. Just answer naturally.';
+    prompt = 'You are NomadAI, an AI-powered campsite finder and outdoor travel assistant. The user is asking: "' + query + '". ' + locationContext + ' Answer helpfully and conversationally in 2-4 sentences. You can answer questions about: what NomadAI can do (find BLM/dispersed/free campsites, search by location or natural language, save spots, plan trips, share spots, view weather/sunrise/sunset, satellite maps), locations and regions (best areas to camp, what an area is like, distances, seasons, tips), and general camping/overlanding advice. Do NOT return JSON. Just answer naturally like a knowledgeable camping guide.';
   } else {
     prompt = 'Find real campsites matching this request: "' + query + '". ' + locationContext + ' Return ONLY a valid JSON array of up to 12 campsites. Each object: ' + fields + ' No fake results. JSON array only.';
   }
@@ -1748,14 +1748,7 @@ function initPrefs(){
 }
 initPrefs();
 
-// Watch for light class being removed unexpectedly and restore it
-const _lightObserver = new MutationObserver(() => {
-  const app = document.getElementById('app');
-  if(localStorage.getItem('cf_light_mode')==='1' && !app.classList.contains('light')) {
-    app.classList.add('light');
-  }
-});
-_lightObserver.observe(document.getElementById('app'), { attributes: true, attributeFilter: ['class'] });
+
 
 // ── PASSPORT ──
 let passportOpen = false;
@@ -2166,7 +2159,7 @@ async function syncFromSupabase() {
   if (settingsRes.data) {
     const s = settingsRes.data;
     // Save to localStorage first
-    localStorage.setItem('cf_light_mode', s.light_mode||'0');
+    localStorage.setItem('cf_light_mode', s.light_mode !== undefined ? s.light_mode : '1');
     if (s.default_radius) localStorage.setItem('cf_default_radius', s.default_radius);
     if (s.search_history) localStorage.setItem('cf_search_history', s.search_history);
     if (s.trip) localStorage.setItem('cf_trip', JSON.stringify(s.trip));
