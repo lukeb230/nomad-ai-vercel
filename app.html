@@ -1252,7 +1252,7 @@ function cardHTML(s,i,isSavedView=false){
       <span class="sc-badge ${src}">${s.sourceLabel||s.source}</span><span class="sc-fee">${s.fee||'Free'}</span>
     </div>
     <div class="sc-body">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;"><div class="sc-name" onclick="addRecent(${JSON.stringify(s).replace(/"/g,'&quot;')});renderRecentSection();" style="cursor:pointer;flex:1;margin-bottom:0;">${s.name}${isVisited(s.name)?' <span style="font-size:11px;color:var(--sage);font-weight:700;">✓ Visited</span>':''}</div><div onclick="shareSpot(${JSON.stringify(s).replace(/"/g,'&quot;')})" style="flex-shrink:0;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 4px;" title="Share">🔗</div></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;"><div class="sc-name" onclick="addRecent(${JSON.stringify(s).replace(/"/g,'&quot;')});renderRecentSection();" style="cursor:pointer;flex:1;margin-bottom:0;">${s.name}${isVisited(s.name)?' <span style="font-size:11px;color:var(--sage);font-weight:700;">✓ Visited</span>':''}</div><div onclick="shareSpot(${JSON.stringify(s).replace(/"/g,'&quot;')})" style="flex-shrink:0;color:var(--muted);font-size:11px;font-weight:800;cursor:pointer;padding:3px 8px;border:1px solid var(--slate);border-radius:6px;font-family:'Nunito',sans-serif;" title="Share">Share</div></div>
       <div class="sc-loc">📍 ${realDist(s)||'Nearby'}</div>
       <div class="sc-pills"><span class="pill">${s.reservable?'🗓 Reservable':'🟢 Walk-up'}</span>${s.directions?`<span class="pill">🧭 ${s.directions.substring(0,28)}</span>`:''}</div>
       ${coordsHtml}
@@ -1429,7 +1429,7 @@ function nextTripStop() {
   const dash = document.getElementById('home-trip-dash');
   if (dash && trip.length) {
     const flash = document.createElement('div');
-    flash.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(138,172,122,0.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--sage);pointer-events:none;';
+    flash.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(28,40,32,0.88);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#8aac7a;pointer-events:none;backdrop-filter:blur(2px);';
     flash.textContent = '✓ Marked as visited!';
     dash.style.position = 'relative';
     dash.appendChild(flash);
