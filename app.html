@@ -59,7 +59,6 @@
     .search-box { flex: 1; display: flex; align-items: center; gap: 10px; background: rgba(196,160,106,0.15); border-radius: 14px; padding: 0 14px; height: 48px; border: 1.5px solid rgba(196,160,106,0.4); }
     .search-box input { flex: 1; background: none; border: none; outline: none; font-size: 14px; color: var(--muted); font-family: 'Nunito', sans-serif; font-weight: 700; caret-color: var(--muted); }
     .search-box input::placeholder { color: rgba(154,112,64,0.55); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; }
-    .gps-btn { width: 48px; height: 48px; border-radius: 14px; background: rgba(196,160,106,0.15); border: 1.5px solid var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
     .slabel { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 0 16px 9px; }
     .search-history { display: flex; gap: 7px; padding: 0 16px 14px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
     .search-history::-webkit-scrollbar { display: none; }
@@ -545,16 +544,6 @@
         <input id="nl-input" type="text" placeholder="Free spot near Moab with a fire ring…" autocomplete="off" style="flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;caret-color:var(--muted);" onkeydown="if(event.key==='Enter')doNLSearch()" />
       </div>
       <div id="autocomplete-list" class="autocomplete-list" style="display:none;"></div>
-      <div class="gps-btn" onclick="gps()">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <circle cx="11" cy="11" r="7" stroke="#e8a0a0" stroke-width="1.8"/>
-          <circle cx="11" cy="11" r="2.2" fill="#e8a0a0"/>
-          <line x1="11" y1="1" x2="11" y2="4" stroke="#e8a0a0" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="11" y1="18" x2="11" y2="21" stroke="#e8a0a0" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="1" y1="11" x2="4" y2="11" stroke="#e8a0a0" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="18" y1="11" x2="21" y2="11" stroke="#e8a0a0" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </div>
     </div>
     <div id="search-history-wrap"></div>
     <div class="slabel">Sources</div>
@@ -581,7 +570,7 @@
       <div class="rad-btn" onclick="setR(this,200)">200 mi</div>
     </div>
     <div class="go-wrap">
-      <div id="go-btn" onclick="currentSearchMode===&quot;nl&quot;?doNLSearch():doSearch()" style="width:100%;height:52px;background:#c4a06a;color:#e8d5b7;border-radius:50px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;">🔍 Find Campsites Tonight</div>
+      <div id="go-btn" onclick="handleSearch()" style="width:100%;height:52px;background:#c4a06a;color:#e8d5b7;border-radius:50px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;">🔍 Find Campsites Tonight</div>
     </div>
     <div class="status-row"><div class="spin" id="spin"></div><span id="st"></span></div>
     <div id="err"></div>
@@ -1441,6 +1430,8 @@ function setSearchMode(mode) {
   }
 }
 
+function handleSearch(){ if(currentSearchMode==='nl') doNLSearch(); else doSearch(); }
+
 async function doNLSearch() {
   const query = document.getElementById('nl-input').value.trim();
   if (!query) return;
@@ -1459,24 +1450,6 @@ async function doNLSearch() {
   const fields = '{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"2 sentences","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"..."}';
 
   // Check if query is camping/travel related before sending
-  const campingKeywords = /camp|site|spot|tent|rv|overlander|overland|blm|dispersed|primitive|hookup|fire|trail|hike|forest|wilderness|desert|mountain|lake|river|beach|park|road|drive|trip|travel|outdoor|nature|night|stay|sleep|boondock|off.?road|4x4|jeep|van|nomad/i;
-  const isRelevant = campingKeywords.test(query);
-
-  if (!isRelevant) {
-    document.getElementById('results').innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted);line-height:1.8;">
-      <div style="font-size:2rem;margin-bottom:12px;">🏕️</div>
-      <div style="font-size:14px;font-weight:700;color:var(--sand);margin-bottom:8px;">I only know camping!</div>
-      <div style="font-size:13px;">Try something like:<br/>
-      <span style="color:var(--tan);">"Free BLM spot near Moab with a fire ring"</span><br/>
-      <span style="color:var(--tan);">"Quiet dispersed site in Colorado under $20"</span><br/>
-      <span style="color:var(--tan);">"Overlanding spot in Arizona with cell signal"</span>
-      </div>
-    </div>`;
-    goBtn.innerHTML = '✨ Ask AI';
-    goBtn.style.pointerEvents = '';
-    return;
-  }
-
   const prompt = `You are NomadAI, a campsite and outdoor travel assistant. You ONLY help with camping, overlanding, dispersed camping, RV travel, hiking, and outdoor adventure. You do NOT answer general questions unrelated to camping or outdoor travel.
 
 The user is asking: "\${query}".\${locationContext}
