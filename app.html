@@ -2214,13 +2214,24 @@ function togglePassport() {
 }
 
 function removeStamp(name) {
+  // Remove from visited
   let v = getVisited().filter(n => n !== name);
   localStorage.setItem('cf_visited', JSON.stringify(v));
-  renderPassport();
-  // Also update any visible visited buttons on cards
+  // Remove from visited states
+  let vs = getVisitedStates().filter(s => s.name !== name);
+  localStorage.setItem('cf_visited_states', JSON.stringify(vs));
+  // Update visited buttons on any visible cards
   document.querySelectorAll('.visited-btn').forEach(btn => {
-    if (btn.closest('[data-cardid]')) btn.classList.remove('been');
+    const card = btn.closest('[data-cardid]');
+    if (card) {
+      const cardName = card.querySelector('.sc-name');
+      if (cardName && cardName.textContent.includes(name)) btn.classList.remove('been');
+    }
   });
+  // Update all UI
+  renderHomeStats();
+  renderJournal();
+  syncToSupabase();
 }
 
 function renderPassport() {
@@ -2287,29 +2298,27 @@ function openPassportModal() {
       </div>`;
     }).join('');
   }
-  document.getElementById('passport-overlay').style.display = 'flex';
-  // Style stamp cards for light/dark
-  setTimeout(() => {
-    const isLt = window._passportIsLight;
-    document.querySelectorAll('#passport-modal-grid .stamp').forEach(el => {
-      el.style.background = isLt ? '#e8e0d0' : '';
-      el.style.borderColor = isLt ? '#c8c0b0' : '';
-      el.style.color = isLt ? '#2a3830' : '';
-      el.querySelectorAll('.stamp-name, .stamp-loc, .stamp-check').forEach(t => {
-        t.style.color = isLt ? '#9a7040' : '';
-      });
+  // Style stamp cards synchronously before showing
+  document.querySelectorAll('#passport-modal-grid .stamp').forEach(el => {
+    el.style.background = isLight ? '#e8e0d0' : '';
+    el.style.borderColor = isLight ? '#c8c0b0' : '';
+    el.style.color = isLight ? '#2a3830' : '';
+    el.querySelectorAll('.stamp-name, .stamp-loc, .stamp-check').forEach(t => {
+      t.style.color = isLight ? '#9a7040' : '';
     });
-    // Fix passport close button
-    const passportClose = document.querySelector('#passport-modal button');
-    if (passportClose) {
-      passportClose.style.background = isLt ? '#e4ddd0' : '';
-      passportClose.style.color = isLt ? '#2a3830' : '';
-    }
-    const countEl = document.getElementById('passport-modal-count');
-    if (countEl) countEl.style.color = isLt ? '#5a7060' : '';
-  }, 50);
-  document.getElementById('passport-overlay').style.alignItems = 'flex-end';
-  document.getElementById('passport-overlay').style.justifyContent = 'center';
+  });
+  const passportClose = document.querySelector('#passport-modal .profile-close');
+  if (passportClose) {
+    passportClose.style.background = isLight ? '#e4ddd0' : '';
+    passportClose.style.color = isLight ? '#2a3830' : '';
+  }
+  const countEl = document.getElementById('passport-modal-count');
+  if (countEl) countEl.style.color = isLight ? '#5a7060' : '';
+  // Now show the modal — everything is already styled
+  const overlay = document.getElementById('passport-overlay');
+  overlay.style.alignItems = 'flex-end';
+  overlay.style.justifyContent = 'center';
+  overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
 
