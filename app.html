@@ -1444,7 +1444,7 @@ async function doNLSearch() {
   goBtn.innerHTML = '⏳ Asking AI...';
   goBtn.style.pointerEvents = 'none';
 
-  document.getElementById('results').innerHTML = '';
+  document.getElementById('res').innerHTML = '';
   showSkeletons('results', 6);
 
   const fields = '{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"2 sentences","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"..."}';
@@ -1461,7 +1461,7 @@ async function doNLSearch() {
     const d = await r.json();
 
     if (d.error) {
-      document.getElementById('results').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">⚠️ '+(d.error.message||'Something went wrong')+'</div>';
+      document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">⚠️ '+(d.error.message||'Something went wrong')+'</div>';
       goBtn.innerHTML = '✨ Ask AI';
       goBtn.style.pointerEvents = '';
       return;
@@ -1473,10 +1473,10 @@ async function doNLSearch() {
     const sites = JSON.parse(txt.substring(idx, idx2+1));
 
     lastSearchResults = sites;
-    document.getElementById('results').innerHTML = '';
+    document.getElementById('res').innerHTML = '';
 
     if (!sites.length) {
-      document.getElementById('results').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">No campsites found. Try a different description.</div>';
+      document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">No campsites found. Try a different description.</div>';
     } else {
       sites.forEach((s, i) => {
         if (userLat && userLng && s.coordinates?.lat && s.coordinates?.lng) {
@@ -1485,7 +1485,7 @@ async function doNLSearch() {
         }
         const card = document.createElement('div');
         card.innerHTML = buildCard(s, i);
-        document.getElementById('results').appendChild(card.firstElementChild);
+        document.getElementById('res').appendChild(card.firstElementChild);
         loadCardExtras(s, i);
       });
     }
@@ -1495,7 +1495,7 @@ async function doNLSearch() {
 
   } catch(e) {
     console.error(e);
-    document.getElementById('results').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">Something went wrong. Try again.</div>';
+    document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">Something went wrong. Try again.</div>';
   }
 
   goBtn.innerHTML = '✨ Ask AI';
