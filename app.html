@@ -352,7 +352,13 @@
     .route-toggle-btn.active { background: var(--tan); border-color: var(--tan); color: var(--sand); }
     #route-planner { display: none; margin: 0 16px 14px; background: var(--card); border-radius: 16px; border: 1px solid var(--slate); overflow: hidden; box-sizing: border-box; }
     #route-planner.show { display: block; }
-    .route-header { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 12px; color: var(--muted); font-weight: 600; }
+    .route-header { padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 12px; color: var(--muted); font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .route-loc-toggle { display: flex; align-items: center; gap: 7px; cursor: pointer; user-select: none; font-size: 11px; font-weight: 700; color: var(--muted); flex-shrink: 0; }
+    .route-loc-toggle.on { color: var(--sage); }
+    .route-loc-dot { width: 28px; height: 16px; border-radius: 50px; background: var(--dark); border: 1.5px solid var(--slate); position: relative; transition: background .2s; flex-shrink: 0; }
+    .route-loc-dot::after { content: ''; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--muted); transition: left .2s, background .2s; }
+    .route-loc-toggle.on .route-loc-dot { background: rgba(138,172,122,0.2); border-color: var(--sage); }
+    .route-loc-toggle.on .route-loc-dot::after { left: 14px; background: var(--sage); }
     .route-list { padding: 8px 0; max-height: 260px; overflow-y: auto; overflow-x: hidden; }
     .route-item { display: flex; align-items: center; gap: 8px; padding: 8px 14px; user-select: none; min-width: 0; }
     .route-item.dragging { opacity: 0.4; }
@@ -610,7 +616,7 @@
       </div>
     </div>
     <div id="route-planner">
-      <div class="route-header">Use ↑ ↓ to reorder your stops</div>
+      <div class="route-header"><span>Use ↑ ↓ to reorder your stops</span><div class="route-loc-toggle" id="route-loc-toggle" onclick="toggleRouteFromLocation()"><div class="route-loc-dot"></div>📍 Start from me</div></div>
       <div class="route-list" id="route-list"></div>
       <div class="route-actions">
         <a class="route-go-btn" id="route-go-btn" href="#" target="_blank">🧭 Open in Maps</a>
@@ -827,7 +833,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let radius=50, map=null, mapMode='results', mapMarkers=[], routePolyline=null;
+let radius=50, map=null, mapMode='results', mapMarkers=[], routePolyline=null, routeFromLocation=false;
 const active=new Set(['dyrt','iover','rec','disp','camp','paid']);
 const carouselState={};
 let lastSearchResults=[];
@@ -1031,6 +1037,15 @@ function plotRoute(){
   if(!withCoords.length)return;
   const bounds=[];
   const latlngs=[];
+  // Prepend user location if toggled
+  if(routeFromLocation&&userLat&&userLng){
+    latlngs.push([userLat,userLng]);
+    bounds.push([userLat,userLng]);
+    const locIcon=L.divIcon({className:'',html:'<div style="width:20px;height:20px;border-radius:50%;background:var(--sage);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+    const locMarker=L.marker([userLat,userLng],{icon:locIcon}).addTo(map);
+    locMarker.bindPopup('<div class="popup-name">📍 Your location</div>');
+    mapMarkers.push(locMarker);
+  }
 
   withCoords.forEach((s,i)=>{
     const lat=s.coordinates.lat, lng=s.coordinates.lng;
@@ -1901,6 +1916,13 @@ function toggleRoutePlanner() {
   if (routeOpen) renderRoutePlanner();
 }
 
+function toggleRouteFromLocation() {
+  if (!userLat || !userLng) { alert("Your location isn't available yet. Try tapping the GPS button on the Search tab first."); return; }
+  routeFromLocation = !routeFromLocation;
+  document.getElementById('route-loc-toggle').classList.toggle('on', routeFromLocation);
+  renderRoutePlanner();
+}
+
 function renderRoutePlanner() {
   const sites = getTrip();
   const list = document.getElementById('route-list');
@@ -1927,16 +1949,16 @@ function updateRouteLink(sites) {
   const tripSites = getTrip();
   const withCoords = tripSites.filter(s => s.coordinates?.lat && s.coordinates?.lng);
   if (!withCoords.length) { document.getElementById('route-go-btn').href = '#'; return; }
-  const waypoints = withCoords.map((s,i) => {
-    const coord = `${s.coordinates.lat},${s.coordinates.lng}`;
-    if (i === 0) return `saddr=${coord}`;
-    if (i === withCoords.length - 1) return `daddr=${coord}`;
-    return coord;
-  });
-  // Build Google Maps directions URL with waypoints
-  const origin = `${withCoords[0].coordinates.lat},${withCoords[0].coordinates.lng}`;
-  const dest = `${withCoords[withCoords.length-1].coordinates.lat},${withCoords[withCoords.length-1].coordinates.lng}`;
-  const middle = withCoords.slice(1,-1).map(s=>`${s.coordinates.lat},${s.coordinates.lng}`).join('|');
+  let origin, dest, middle;
+  if (routeFromLocation && userLat && userLng) {
+    origin = `${userLat},${userLng}`;
+    dest = `${withCoords[withCoords.length-1].coordinates.lat},${withCoords[withCoords.length-1].coordinates.lng}`;
+    middle = withCoords.slice(0,-1).map(s=>`${s.coordinates.lat},${s.coordinates.lng}`).join('|');
+  } else {
+    origin = `${withCoords[0].coordinates.lat},${withCoords[0].coordinates.lng}`;
+    dest = `${withCoords[withCoords.length-1].coordinates.lat},${withCoords[withCoords.length-1].coordinates.lng}`;
+    middle = withCoords.slice(1,-1).map(s=>`${s.coordinates.lat},${s.coordinates.lng}`).join('|');
+  }
   let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`;
   if (middle) url += `&waypoints=${middle}`;
   document.getElementById('route-go-btn').href = url;
