@@ -983,8 +983,9 @@ async function loadWeatherForCard(cardId,lat,lng){
 function getNotes(name){try{return JSON.parse(localStorage.getItem('cf_notes')||'{}')[name]||'';}catch(e){return '';}}
 function saveNote(name,text){try{const n=JSON.parse(localStorage.getItem('cf_notes')||'{}');n[name]=text;localStorage.setItem('cf_notes',JSON.stringify(n));}catch(e){}}
 function getVisited(){try{return JSON.parse(localStorage.getItem('cf_visited')||'[]');}catch(e){return[];}}
+function getVisitedStates(){try{return JSON.parse(localStorage.getItem('cf_visited_states')||'[]');}catch(e){return[];}}
 function isVisited(name){return getVisited().includes(name);}
-function toggleVisited(name,btn){let v=getVisited();if(isVisited(name)){v=v.filter(n=>n!==name);btn.classList.remove('been');}else{v.push(name);btn.classList.add('been');}localStorage.setItem('cf_visited',JSON.stringify(v));if(passportOpen)renderPassport();syncToSupabase();}
+function toggleVisited(name,btn,state){let v=getVisited();if(isVisited(name)){v=v.filter(n=>n!==name);btn.classList.remove('been');let vs=getVisitedStates().filter(s=>s.name!==name);localStorage.setItem('cf_visited_states',JSON.stringify(vs));}else{v.push(name);btn.classList.add('been');const resolvedState=state||((getSaved().find(s=>s.name===name)||{}).state||'');if(resolvedState){let vs=getVisitedStates();vs.push({name,state:resolvedState});localStorage.setItem('cf_visited_states',JSON.stringify(vs));}}localStorage.setItem('cf_visited',JSON.stringify(v));if(passportOpen)renderPassport();renderHomeStats();syncToSupabase();}
 
 // ── MAP ──
 let mapClickLatLng = null;
@@ -1249,7 +1250,8 @@ function cardHTML(s,i,isSavedView=false){
   const tripClass=inTrip(s.name)?'trip-btn added':'trip-btn';
   const tripBtn=isSavedView?`<div class="fb ${tripClass}" onclick="addToTrip(${JSON.stringify(s).replace(/"/g,'&quot;')},this)" title="Add to trip">+</div>`:'';
   const actionBtn=isSavedView?`<div class="fb delete-btn" onclick="removeSaved('${s.name.replace(/'/g,"\\'")}')">🗑️</div>`:`<div class="fb ${savedClass}" onclick="toggleSave(${JSON.stringify(s).replace(/"/g,'&quot;')},this)">🔖</div>`;
-  const visitBtn=`<div class="fb ${visitedClass}" onclick="toggleVisited('${s.name.replace(/'/g,"\\'")}',this)">✓</div>`;
+
+  const visitBtn=`<div class="fb ${visitedClass}" onclick="toggleVisited('${s.name.replace(/'/g,"\\'")}',' + "'" + (s.state||'') + "'" + ',this)">✓</div>`;
   const note=getNotes(s.name);
   const notesSection=isSavedView?`<div class="notes-section"><div class="notes-label">Trip notes</div><textarea class="notes-input" id="${cardId}-note" placeholder="Add notes about this spot...">${note}</textarea><button class="notes-save" onclick="saveNote('${s.name.replace(/'/g,"\\'")}',document.getElementById('${cardId}-note').value);this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save note',1500)">Save note</button></div>`:'';
   const coordsHtml=(s.coordinates&&s.coordinates.lat)?`<div class="weather-strip" id="${cardId}-weather"><span class="w-desc" style="color:var(--muted);font-size:11px;">Loading weather...</span></div><div class="sun-strip" id="${cardId}-sun"><span style="color:var(--muted);font-size:10px;">Loading sunrise/sunset...</span></div>`:'';
@@ -1488,8 +1490,8 @@ function getCompletedTrips(){try{return JSON.parse(localStorage.getItem('cf_comp
 function renderHomeStats() {
   const saved = getSaved();
   const visited = getVisited();
-  const visitedSites = saved.filter(s => visited.includes(s.name) && s.state);
-  const states = [...new Set(visitedSites.map(s=>s.state))];
+  const visitedStates = getVisitedStates();
+  const states = [...new Set(visitedStates.map(s=>s.state).filter(Boolean))];
   const trips = getCompletedTrips().filter(t => t.count >= 3);
   const el1 = document.getElementById('home-stat-visited');
   const el2 = document.getElementById('home-stat-trips');
@@ -2309,6 +2311,7 @@ function clearStatsConfirm() {
     localStorage.removeItem('cf_completed_trips');
     localStorage.removeItem('cf_notes');
     localStorage.removeItem('cf_visited');
+    localStorage.removeItem('cf_visited_states');
     renderHome();
     syncToSupabase();
     alert('Stats and journal cleared!');
@@ -2615,7 +2618,8 @@ async function syncToSupabase() {
     default_radius: localStorage.getItem('cf_default_radius')||'50',
     search_history: localStorage.getItem('cf_search_history')||'[]',
     completed_trips: localStorage.getItem('cf_completed_trips')||'[]',
-    ratings: localStorage.getItem('cf_ratings')||'{}'
+    ratings: localStorage.getItem('cf_ratings')||'{}',
+    visited_states: localStorage.getItem('cf_visited_states')||'[]'
   };
   // Upsert saved spots
   await supa.from('saved_spots').delete().eq('user_id', currentUser.id);
@@ -2653,6 +2657,7 @@ async function syncFromSupabase() {
     if (s.trip) localStorage.setItem('cf_trip', JSON.stringify(s.trip));
     if (s.completed_trips) localStorage.setItem('cf_completed_trips', s.completed_trips);
     if (s.ratings) localStorage.setItem('cf_ratings', s.ratings);
+    if (s.visited_states) localStorage.setItem('cf_visited_states', s.visited_states);
     // Apply light mode — use timeout to ensure it runs after any other DOM updates
     setTimeout(() => {
       const mode = (s.light_mode === '0') ? '0' : '1';
