@@ -23,13 +23,13 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--darker); min-height: 100vh; min-height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    #app { font-family: 'Nunito', sans-serif; background: transparent; color: var(--sand); max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+    #app { font-family: 'Nunito', sans-serif; background: transparent; color: var(--sand); max-width: 480px; margin: 0 auto; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
     /* SPLASH */
 
     /* TABS */
     #home-tab   { display: none; flex-direction: column; flex: 1; padding-bottom: 80px; overflow-y: visible; }
-    #search-tab { display: none; flex-direction: column; flex: 1; padding-bottom: 80px; overflow-y: visible; }
+    #search-tab { display: none; flex-direction: column; overflow-y: auto; padding-bottom: 80px; }
     #map-tab    { display: none; flex-direction: column; height: calc(100dvh - 64px - env(safe-area-inset-bottom)); overflow: hidden; }
     #saved-tab  { display: none; flex-direction: column; flex: 1; padding-bottom: 80px; overflow-y: visible; }
 
@@ -325,7 +325,7 @@
     /* User badge in topbar */
     .user-badge { display: flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--slate); border-radius: 50px; padding: 4px 10px 4px 6px; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; }
     .user-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--sand); font-weight: 800; }
-    .ai-response-box { background: var(--card); border: 1.5px solid var(--slate); border-radius: 16px; padding: 14px 16px; margin-bottom: 0; display: none; width: 100%; box-sizing: border-box; }
+    .ai-response-box { display: none; width: 100%; box-sizing: border-box; }
     .ai-response-box.show { display: block; }
     .ai-response-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .ai-response-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--tan); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
@@ -606,7 +606,7 @@
 
   
     /* CHAT */
-    .chat-thread { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 8px; max-height: 400px; overflow-y: auto; scroll-behavior: smooth; }
+    .chat-thread { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 8px; overflow-y: visible; scroll-behavior: smooth; }
     .chat-msg { display: flex; flex-direction: column; gap: 4px; }
     .chat-msg.user { align-items: flex-end; }
     .chat-msg.ai { align-items: flex-start; }
@@ -666,59 +666,56 @@
   <!-- SEARCH TAB -->
   <div id="search-tab">
     <div class="topbar"><div class="topbar-left"><div class="topbar-title">NomadAI 🏕️</div><div class="topbar-sub">Find your next adventure</div></div></div>
-    <div class="search-wrap" id="search-wrap-outer">
-      <div style="display:flex;gap:6px;margin-bottom:8px;background:var(--darker);border-radius:50px;padding:4px;">
+
+    <!-- Mode toggle -->
+    <div style="padding:0 16px 8px;flex-shrink:0;">
+      <div style="display:flex;gap:6px;background:var(--darker);border-radius:50px;padding:4px;">
         <div id="mode-nl-btn" onclick="setSearchMode('nl')" style="flex:1;height:38px;border-radius:50px;background:var(--tan);color:#e8d5b7;border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;white-space:nowrap;padding:0 16px;">✨ Ask AI</div>
         <div id="mode-location-btn" onclick="setSearchMode('location')" style="flex:1;height:38px;border-radius:50px;background:var(--card);color:var(--tan);border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.2s;white-space:nowrap;padding:0 16px;">📍 Location</div>
       </div>
-      <div class="search-box" id="location-search-box" style="display:none;">
+    </div>
+
+    <!-- LOCATION MODE -->
+    <div id="location-mode-wrap" style="display:none;flex:1;overflow-y:auto;padding:0 16px 80px;">
+      <div class="search-box" id="location-search-box">
         <span style="font-size:15px;color:rgba(154,112,64,0.55);">🔍</span>
         <input id="loc" type="text" placeholder="City, zip, or address…" oninput="toggleClearBtn();acSearch(this.value)" onkeydown="handleAcKey(event)" autocomplete="off" />
         <div id="clear-btn" onclick="clearSearch()" style="display:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">✕</div>
       </div>
-      <div class="search-box" id="nl-search-box">
-        <span style="font-size:15px;color:rgba(154,112,64,0.55);">🔍</span>
-        <div id="nl-input" contenteditable="true" data-placeholder="Free spot near Moab with a fire ring..." style="flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;caret-color:var(--muted);line-height:1.5;min-height:24px;word-break:break-word;overflow-wrap:break-word;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doNLSearch();}" oninput="toggleNLClearBtn();"></div>
-        <div id="nl-clear-btn" onclick="clearNLSearch()" style="display:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">&#x2715;</div>
-      </div>
       <div id="autocomplete-list" class="autocomplete-list" style="display:none;"></div>
-      <div class="ai-response-box" id="ai-response-box" style="margin-top:8px;margin-bottom:0;">
+      <div id="search-history-wrap"></div>
+      <div class="slabel">Sources</div>
+      <div class="chips"><div class="chip on rec" onclick="tog(this,'rec')">🛶 Recreation.gov</div><div class="chip on iover" onclick="tog(this,'iover')">⛺️ iOverlander</div><div class="chip on dyrt" onclick="tog(this,'dyrt')">🗺️ The Dyrt</div><div class="chip on camp" onclick="tog(this,'camp')">🏕️ Campendium</div></div>
+      <div class="slabel">Filters</div>
+      <div class="filters"><div class="filter-chip on disp" onclick="togf(this,'disp')">🌲 Dispersed/BLM</div><div class="filter-chip on paid" onclick="togf(this,'paid')">🏗️ Paid w/ Facilities</div><div class="filter-chip over" onclick="togf(this,'over')">⛰️ Overlanding</div><div class="filter-chip car" onclick="togf(this,'car')">🚗 Car Camping</div><div class="filter-chip rv" onclick="togf(this,'rv')">🚌 RV Friendly</div><div class="filter-chip walk" onclick="togf(this,'walk')">🥾 Walk-in Only</div></div>
+      <div class="slabel">Search radius</div>
+      <div class="rad-row"><div class="rad-btn" onclick="setR(this,25)">25 mi</div><div class="rad-btn on" onclick="setR(this,50)">50 mi</div><div class="rad-btn" onclick="setR(this,100)">100 mi</div><div class="rad-btn" onclick="setR(this,200)">200 mi</div></div>
+      <div class="go-wrap"><div id="go-btn" onclick="handleSearch()" style="width:100%;height:52px;background:#c4a06a;color:#e8d5b7;border-radius:50px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;">🔍 Search</div></div>
+      <div class="status-row"><div class="spin" id="spin"></div><span id="st"></span></div>
+      <div id="err"></div>
+      <div class="results" id="res"></div>
+    </div>
+
+    <!-- AI CHAT MODE -->
+    <div id="nl-mode-wrap" style="display:flex;flex-direction:column;height:360px;border:1.5px solid var(--slate);border-radius:16px;margin:0 16px 12px;background:var(--card);">
+      <!-- Scrollable chat -->
+      <div id="chat-scroll-area" style="flex:1;overflow-y:auto;padding:12px 12px 4px;-webkit-overflow-scrolling:touch;min-height:0;">
         <div class="chat-clear" id="chat-clear-btn" onclick="clearChat()" style="display:none;">Clear chat</div>
         <div class="chat-thread" id="chat-thread"></div>
+        <div id="ai-loader" style="display:none;padding:8px 0;"><div class="ai-loader-ring"></div><span class="ai-loader-text">Asking AI…</span></div>
+        <div id="recent-section" style="display:flex;flex-direction:column;gap:10px;padding-bottom:4px;"></div>
+      </div>
+      <!-- Input bar stuck to bottom of chat box -->
+      <div id="nl-input-bar" style="flex-shrink:0;padding:8px 10px 10px;border-top:1px solid var(--slate);">
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <div id="nl-search-box" style="flex:1;display:flex;align-items:center;background:var(--darker);border-radius:12px;padding:8px 12px;min-height:40px;">
+            <div id="nl-input" contenteditable="true" data-placeholder="Ask about campsites..." style="flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--sand);font-family:'Nunito',sans-serif;font-weight:600;caret-color:var(--sand);line-height:1.5;min-height:20px;max-height:80px;overflow-y:auto;word-break:break-word;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doNLSearch();}" oninput="toggleNLClearBtn();"></div>
+            <div id="nl-clear-btn" onclick="clearNLSearch()" style="display:none;cursor:pointer;font-size:13px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">&#x2715;</div>
+          </div>
+          <div onclick="doNLSearch()" style="height:40px;padding:0 14px;background:var(--tan);color:#e8d5b7;border-radius:12px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;font-weight:800;white-space:nowrap;">✨ Ask AI</div>
+        </div>
       </div>
     </div>
-    <div id="search-history-wrap"></div>
-    <div class="slabel">Sources</div>
-    <div class="chips" style="max-width:100%;box-sizing:border-box;">
-      <div class="chip on rec"   onclick="tog(this,'rec')">🛶 Recreation.gov</div>
-      <div class="chip on iover" onclick="tog(this,'iover')">⛺️ iOverlander</div>
-      <div class="chip on dyrt"  onclick="tog(this,'dyrt')">🗺️ The Dyrt</div>
-      <div class="chip on camp" onclick="tog(this,'camp')">🏕️ Campendium</div>
-    </div>
-    <div class="slabel">Filters</div>
-    <div class="filters" style="max-width:100%;box-sizing:border-box;">
-      <div class="filter-chip on disp" onclick="togf(this,'disp')">🌲 Dispersed/BLM</div>
-      <div class="filter-chip on paid" onclick="togf(this,'paid')">🏗️ Paid w/ Facilities</div>
-      <div class="filter-chip over"    onclick="togf(this,'over')">⛰️ Overlanding</div>
-      <div class="filter-chip car"     onclick="togf(this,'car')">🚗 Car Camping</div>
-      <div class="filter-chip rv"      onclick="togf(this,'rv')">🚌 RV Friendly</div>
-      <div class="filter-chip walk"    onclick="togf(this,'walk')">🥾 Walk-in Only</div>
-    </div>
-    <div class="slabel">Search radius</div>
-    <div class="rad-row">
-      <div class="rad-btn" onclick="setR(this,25)">25 mi</div>
-      <div class="rad-btn on" onclick="setR(this,50)">50 mi</div>
-      <div class="rad-btn" onclick="setR(this,100)">100 mi</div>
-      <div class="rad-btn" onclick="setR(this,200)">200 mi</div>
-    </div>
-    <div class="go-wrap">
-      <div id="go-btn" onclick="handleSearch()" style="width:100%;height:52px;background:#c4a06a;color:#e8d5b7;border-radius:50px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;">✨ Ask AI</div>
-    </div>
-    <div class="status-row"><div class="spin" id="spin"></div><span id="st"></span></div>
-    <div id="ai-loader"><div class="ai-loader-ring"></div><span class="ai-loader-text">Asking AI…</span></div>
-    <div id="err"></div>
-    <div id="recent-section" style="padding:0 16px;display:flex;flex-direction:column;gap:10px;"></div>
-    <div class="results" id="res"></div>
   </div>
 
   <!-- MAP TAB -->
@@ -1776,7 +1773,7 @@ function toggleClearBtn(){
   const val=document.getElementById('loc').value;
   document.getElementById('clear-btn').style.display=val?'block':'none';
 }
-function clearSearch(){document.getElementById('ai-response-box').classList.remove('show');
+function clearSearch(){/* ai-response-box always visible */
   document.getElementById('loc').value='';
   document.getElementById('clear-btn').style.display='none';
   document.getElementById('loc').focus();
@@ -1814,43 +1811,35 @@ let currentSearchMode = 'nl';
 
 function setSearchMode(mode) {
   currentSearchMode = mode;
-  const locBox = document.getElementById('location-search-box');
-  const nlBox = document.getElementById('nl-search-box');
+  const locWrap = document.getElementById('location-mode-wrap');
+  const nlWrap = document.getElementById('nl-mode-wrap');
+  const nlInputBar = document.getElementById('nl-input-bar');
   const locBtn = document.getElementById('mode-location-btn');
   const nlBtn = document.getElementById('mode-nl-btn');
-  const goBtn = document.getElementById('go-btn');
 
   if (mode === 'nl') {
-    locBox.style.display = 'none';
-    nlBox.style.display = 'flex';
+    locWrap.style.display = 'none';
+    nlWrap.style.display = 'flex';
+    nlInputBar.style.display = 'block';
     locBtn.style.background = 'var(--card)';
     locBtn.style.color = 'var(--tan)';
     locBtn.style.boxShadow = 'none';
     nlBtn.style.background = 'var(--tan)';
     nlBtn.style.color = '#e8d5b7';
     nlBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-    nlBtn.style.borderRadius = '50px';
-    goBtn.innerHTML = '✨ Ask AI';
-    document.getElementById('autocomplete-list').style.display = 'none';
-    // Show welcome message if box is empty
-    const nlVal = (document.getElementById('nl-input').innerText||'').trim();
-    if (!nlVal) {
-      if(!chatHistory.length){showWelcomeMessage();}
-    }
+    if (!chatHistory.length) showWelcomeMessage();
   } else {
-    locBox.style.display = 'flex';
-    nlBox.style.display = 'none';
+    locWrap.style.display = 'block';
+    nlWrap.style.display = 'none';
+    nlInputBar.style.display = 'none';
     locBtn.style.background = 'var(--tan)';
     locBtn.style.color = '#e8d5b7';
     locBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-    locBtn.style.borderRadius = '50px';
     nlBtn.style.background = 'var(--card)';
     nlBtn.style.color = 'var(--tan)';
     nlBtn.style.boxShadow = 'none';
-    goBtn.innerHTML = '✨ Ask AI';
-    // Hide welcome message when switching to location mode
-    const aiBox = document.getElementById('ai-response-box');
-    if (!chatHistory.length) aiBox.classList.remove('show');
+    const goBtn = document.getElementById('go-btn');
+    if (goBtn) goBtn.innerHTML = '🔍 Search';
   }
 }
 
@@ -1867,11 +1856,37 @@ function clearNLSearch(){
 function handleSearch(){ if(currentSearchMode==='nl') doNLSearch(); else doSearch(); }
 
 
+
+function initChatScroll() {
+  const el = document.getElementById('chat-scroll-area');
+  if (!el) return;
+  el.addEventListener('wheel', function(e) {
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+    const atTop = el.scrollTop <= 0;
+    if ((e.deltaY > 0 && atBottom) || (e.deltaY < 0 && atTop)) {
+      e.preventDefault();
+      const tab = document.getElementById('search-tab');
+      if (tab) tab.scrollTop += e.deltaY;
+    }
+  }, { passive: false });
+  // Touch support
+  let touchStartY = 0;
+  el.addEventListener('touchstart', function(e) { touchStartY = e.touches[0].clientY; }, { passive: true });
+  el.addEventListener('touchmove', function(e) {
+    const dy = touchStartY - e.touches[0].clientY;
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+    const atTop = el.scrollTop <= 0;
+    if ((dy > 0 && atBottom) || (dy < 0 && atTop)) {
+      const tab = document.getElementById('search-tab');
+      if (tab) tab.scrollTop += dy;
+    }
+  }, { passive: true });
+}
 function clearChat() {
   chatHistory = [];
   const t = document.getElementById('chat-thread');
   if(t) t.innerHTML = '';
-  document.getElementById('ai-response-box').classList.remove('show');
+  /* ai-response-box always visible */
   const cb = document.getElementById('chat-clear-btn');
   if(cb) cb.style.display = 'none';
   document.getElementById('res').innerHTML = '';
@@ -1884,7 +1899,7 @@ function showWelcomeMessage() {
   if (!thread) return;
   thread.innerHTML = '';
   appendChatMsg('ai', "Hey there! 👋 I'm NomadAI, your personal camping guide! I can help you find free and dispersed campsites on public lands, search by location or vibe, save favorites, plan trips, and share spots.<br><br>🗺️ <span style=\"color:var(--tan);font-weight:800;\">Driving somewhere?</span> Ask me for camps along your route — then check the Map tab to see all the spots pinned along the way.<br><br>Try asking: <span style=\"color:var(--tan);font-weight:800;\">\"free BLM spot near Moab with a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"campsites along I-70 from Denver to Grand Junction\"</span>");
-  document.getElementById('ai-response-box').classList.add('show');
+  /* ai-response-box always visible */
 }
 
 function appendChatMsg(role, html) {
@@ -1902,7 +1917,7 @@ function appendChatMsg(role, html) {
   msg.appendChild(bubble);
   thread.appendChild(msg);
   thread.scrollTop = thread.scrollHeight;
-  document.getElementById('ai-response-box').classList.add('show');
+  /* ai-response-box always visible */
   const ccb = document.getElementById('chat-clear-btn');
   if (ccb) ccb.style.display = 'block';
 }
@@ -1924,7 +1939,7 @@ async function doNLSearch() {
   const goBtn = document.getElementById('go-btn');
   goBtn.style.display = 'none';
   goBtn.style.pointerEvents = 'none';
-  document.getElementById('ai-loader').classList.add('show');
+  const aiLoader = document.getElementById('ai-loader'); if(aiLoader){aiLoader.style.display='flex';}
 
   document.getElementById('res').innerHTML = '';
   skeletonCards(6, 'res');
@@ -1977,7 +1992,7 @@ async function doNLSearch() {
       goBtn.innerHTML = '✨ Ask AI';
       goBtn.style.display = 'flex';
       goBtn.style.pointerEvents = '';
-      document.getElementById('ai-loader').classList.remove('show');
+      const aiLoader = document.getElementById('ai-loader'); if(aiLoader){aiLoader.style.display='none';}
       return;
     }
 
@@ -1992,7 +2007,7 @@ async function doNLSearch() {
       goBtn.innerHTML = '✨ Ask AI';
       goBtn.style.display = 'flex';
       goBtn.style.pointerEvents = '';
-      document.getElementById('ai-loader').classList.remove('show');
+      const aiLoader = document.getElementById('ai-loader'); if(aiLoader){aiLoader.style.display='none';}
       return;
     }
 
@@ -2053,7 +2068,7 @@ async function doNLSearch() {
   goBtn.innerHTML = '✨ Ask AI';
   goBtn.style.display = 'flex';
   goBtn.style.pointerEvents = '';
-  document.getElementById('ai-loader').classList.remove('show');
+  const aiLoaderEl = document.getElementById('ai-loader'); if(aiLoaderEl){aiLoaderEl.style.display='none';}
 }
 
 async function doSearch(){
@@ -3129,6 +3144,7 @@ async function syncFromSupabase() {
 
 showMain();
 initAuth();
+setTimeout(initChatScroll, 500);
 
 // ── SHARED SPOT URL HANDLER ──
 (async function() {
