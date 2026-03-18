@@ -23,7 +23,7 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--darker); min-height: 100vh; min-height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    #app { font-family: 'Nunito', sans-serif; background: transparent; color: var(--sand); max-width: 480px; margin: 0 auto; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+    #app { font-family: 'Nunito', sans-serif; background: transparent; color: var(--sand); max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 
     /* SPLASH */
 
@@ -31,7 +31,7 @@
     #home-tab   { display: none; flex-direction: column; flex: 1; padding-bottom: 80px; overflow-y: visible; }
     #search-tab { display: none; flex-direction: column; overflow-y: auto; padding-bottom: 80px; }
     #map-tab    { display: none; flex-direction: column; height: calc(100dvh - 64px - env(safe-area-inset-bottom)); overflow: hidden; }
-    #saved-tab  { display: none; flex-direction: column; flex: 1; padding-bottom: 80px; overflow-y: visible; }
+    #saved-tab  { display: none; flex-direction: column; overflow-y: auto; padding-bottom: 80px; }
 
     /* BOTTOM NAV */
     .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: rgba(28,40,32,0.95); border-top: 1px solid var(--slate); display: none; grid-template-columns: 1fr 1fr 1fr 1fr; z-index: 100; }
@@ -94,10 +94,12 @@
     .go-wrap { padding: 0 16px 20px; }
     .status-row { display: flex; align-items: center; gap: 8px; padding: 0 16px 10px; font-size: 13px; color: var(--muted); min-height: 20px; }
     .spin { width: 13px; height: 13px; border: 2px solid var(--card); border-top-color: var(--tan); border-radius: 50%; animation: sp .7s linear infinite; display: none; flex-shrink: 0; }
-    #ai-loader { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 24px 0 8px; }
-    #ai-loader.show { display: flex; }
-    .ai-loader-ring { width: 40px; height: 40px; border: 3px solid var(--card); border-top-color: var(--tan); border-radius: 50%; animation: sp .8s linear infinite; }
-    .ai-loader-text { font-size: 12px; font-weight: 800; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+    #ai-loader { display: none; padding: 4px 0 8px; }
+    .typing-bubble { display: inline-flex; align-items: center; gap: 5px; background: var(--card); border: 1px solid var(--slate); border-radius: 16px; border-bottom-left-radius: 4px; padding: 10px 14px; }
+    .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: typing-bounce 1.2s ease-in-out infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
     .spin.on { display: block; }
     @keyframes sp { to { transform: rotate(360deg); } }
     .results { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
@@ -703,7 +705,12 @@
       </div>
       <div id="chat-scroll-area" style="flex:1;overflow-y:auto;padding:4px 12px 4px;-webkit-overflow-scrolling:touch;min-height:0;">
         <div class="chat-thread" id="chat-thread"></div>
-        <div id="ai-loader" style="display:none;padding:8px 0;"><div class="ai-loader-ring"></div><span class="ai-loader-text">Asking AI…</span></div>
+        <div id="ai-loader" style="display:none;padding:4px 0 8px;">
+          <div class="chat-msg ai">
+            <div class="chat-msg-label">NomadAI</div>
+            <div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+          </div>
+        </div>
         <div id="recent-section" style="display:flex;flex-direction:column;gap:10px;padding-bottom:4px;"></div>
       </div>
       <!-- Input bar stuck to bottom of chat box -->
@@ -1820,10 +1827,12 @@ function setSearchMode(mode) {
   const locBtn = document.getElementById('mode-location-btn');
   const nlBtn = document.getElementById('mode-nl-btn');
 
+  const resDiv = document.getElementById('res');
   if (mode === 'nl') {
     locWrap.style.display = 'none';
     nlWrap.style.display = 'flex';
     nlInputBar.style.display = 'block';
+    if (resDiv) resDiv.style.display = 'block';
     locBtn.style.background = 'var(--card)';
     locBtn.style.color = 'var(--tan)';
     locBtn.style.boxShadow = 'none';
@@ -1835,6 +1844,7 @@ function setSearchMode(mode) {
     locWrap.style.display = 'block';
     nlWrap.style.display = 'none';
     nlInputBar.style.display = 'none';
+    if (resDiv) resDiv.style.display = 'none';
     locBtn.style.background = 'var(--tan)';
     locBtn.style.color = '#e8d5b7';
     locBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
@@ -1947,7 +1957,7 @@ async function doNLSearch() {
   const goBtn = document.getElementById('go-btn');
   goBtn.style.display = 'none';
   goBtn.style.pointerEvents = 'none';
-  const aiLoader = document.getElementById('ai-loader'); if(aiLoader){aiLoader.style.display='flex';}
+  const aiLoader = document.getElementById('ai-loader'); if(aiLoader){aiLoader.style.display='block'; const sa=document.getElementById('chat-scroll-area'); if(sa)setTimeout(()=>{sa.scrollTop=sa.scrollHeight;},50);}
 
   document.getElementById('res').innerHTML = '';
   skeletonCards(6, 'res');
@@ -3202,19 +3212,31 @@ setTimeout(initChatScroll, 500);
 })();
 
 // ── BACK TO TOP ──
+function getActiveTab(){
+  const tabs=['home-tab','search-tab','saved-tab','map-tab'];
+  for(const id of tabs){const el=document.getElementById(id);if(el&&el.style.display!=='none')return el;}
+  return null;
+}
 function scrollToTop(){
+  const tab=getActiveTab();
+  if(tab)tab.scrollTo({top:0,behavior:'smooth'});
   window.scrollTo({top:0,behavior:'smooth'});
-  document.documentElement.scrollTo({top:0,behavior:'smooth'});
 }
 function updateBackToTop(){
   const btn=document.getElementById('back-to-top');
   if(!btn)return;
-  const scrolled=(window.scrollY||document.documentElement.scrollTop)>300;
+  const tab=getActiveTab();
+  const scrolled=tab?tab.scrollTop>300:(window.scrollY||document.documentElement.scrollTop)>300;
   btn.classList.toggle('show',scrolled);
 }
 window.addEventListener('scroll',updateBackToTop,{passive:true});
 document.addEventListener('touchmove',updateBackToTop,{passive:true});
 document.addEventListener('touchend',updateBackToTop,{passive:true});
+// Also listen to tab scroll events
+['home-tab','search-tab','saved-tab'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)el.addEventListener('scroll',updateBackToTop,{passive:true});
+});
 
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').classList.add('show');});
