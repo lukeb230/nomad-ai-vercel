@@ -23,6 +23,8 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--darker); min-height: 100vh; min-height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    * { scrollbar-width: none; -ms-overflow-style: none; }
+    *::-webkit-scrollbar { display: none; }
     #app { font-family: 'Nunito', sans-serif; background: transparent; color: var(--sand); max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 
     /* SPLASH */
@@ -40,7 +42,7 @@
     .nav-btn svg { width: 20px; height: 20px; }
     .nav-btn.active { color: var(--tan); }
 
-    .topbar { padding: 22px 20px 14px; display: flex; align-items: center; justify-content: space-between; background: var(--bg); position: sticky; top: 0; z-index: 50; }
+    .topbar { padding: 22px 20px 14px; display: flex; align-items: center; justify-content: space-between; background: var(--darker); position: sticky; top: 0; z-index: 50; }
     .topbar-left { display: flex; flex-direction: column; }
     .topbar-title { font-size: 20px; font-weight: 800; color: var(--sand); }
     .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -98,7 +100,7 @@
     .ai-loader-ring { width: 22px; height: 22px; border: 2.5px solid var(--slate); border-top-color: var(--tan); border-radius: 50%; animation: sp .8s linear infinite; display: inline-block; }
     .spin.on { display: block; }
     @keyframes sp { to { transform: rotate(360deg); } }
-    .results { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 22px; }
+    .results { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 16px; }
     .home-results { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
     .saved-list { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
     .divider { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--tan); padding: 2px 0 10px; }
@@ -666,7 +668,7 @@
     <div class="topbar"><div class="topbar-left"><div class="topbar-title">NomadAI 🏕️</div><div class="topbar-sub">Find your next adventure</div></div></div>
 
     <!-- Mode toggle -->
-    <div style="padding:0 16px 8px;flex-shrink:0;position:sticky;top:72px;z-index:49;background:var(--bg);">
+    <div style="padding:0 16px 8px;flex-shrink:0;position:sticky;top:72px;z-index:49;background:var(--darker);">
       <div style="display:flex;gap:6px;background:var(--darker);border-radius:50px;padding:4px;">
         <div id="mode-nl-btn" onclick="setSearchMode('nl')" style="flex:1;height:38px;border-radius:50px;background:var(--tan);color:#e8d5b7;border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;white-space:nowrap;padding:0 16px;">✨ Ask AI</div>
         <div id="mode-location-btn" onclick="setSearchMode('location')" style="flex:1;height:38px;border-radius:50px;background:var(--card);color:var(--tan);border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.2s;white-space:nowrap;padding:0 16px;">📍 Location</div>
@@ -1684,7 +1686,8 @@ function showMain(){
 }
 
 function switchTab(tab){
-  ['home-tab','search-tab','map-tab','saved-tab'].forEach(id=>{document.getElementById(id).style.display='none';});document.getElementById('map-click-hint').style.display='none';document.getElementById('map-search-btn').classList.remove('show');
+  ['home-tab','search-tab','map-tab','saved-tab'].forEach(id=>{document.getElementById(id).style.display='none';});
+  setTimeout(updateBackToTop, 100);document.getElementById('map-click-hint').style.display='none';document.getElementById('map-search-btn').classList.remove('show');
   ['nav-home','nav-search','nav-map','nav-saved'].forEach(id=>document.getElementById(id).classList.remove('active'));
   if(tab==='home'){document.getElementById('home-tab').style.display='flex';document.getElementById('home-tab').style.flexDirection='column';document.getElementById('nav-home').classList.add('active');renderHome();}
   else if(tab==='search'){document.getElementById('search-tab').style.display='flex';document.getElementById('search-tab').style.flexDirection='column';document.getElementById('nav-search').classList.add('active');document.getElementById('err').innerHTML='';renderRecentSection();renderSearchHistory();if(currentSearchMode==='nl'&&!chatHistory.length){showWelcomeMessage();}}
