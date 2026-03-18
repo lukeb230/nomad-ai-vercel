@@ -668,7 +668,7 @@
     <div class="topbar"><div class="topbar-left"><div class="topbar-title">NomadAI 🏕️</div><div class="topbar-sub">Find your next adventure</div></div></div>
 
     <!-- Mode toggle -->
-    <div style="padding:0 16px 8px;position:sticky;top:68px;z-index:49;background:var(--darker);">
+    <div style="padding:0 16px 8px;">
       <div style="display:flex;gap:6px;background:var(--darker);border-radius:50px;padding:4px;">
         <div id="mode-nl-btn" onclick="setSearchMode('nl')" style="flex:1;height:38px;border-radius:50px;background:var(--tan);color:#e8d5b7;border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;white-space:nowrap;padding:0 16px;">✨ Ask AI</div>
         <div id="mode-location-btn" onclick="setSearchMode('location')" style="flex:1;height:38px;border-radius:50px;background:var(--card);color:var(--tan);border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.2s;white-space:nowrap;padding:0 16px;">📍 Location</div>
@@ -1309,7 +1309,7 @@ function cardHTML(s,i,isSavedView=false){
 
   const visitBtn=`<div class="fb ${visitedClass}" onclick="toggleVisited(this.dataset.name,this)" data-name="${s.name}">✓</div>`;
   const note=getNotes(s.name);
-  const notesSection=isSavedView?`<div class="notes-section"><div class="notes-label">Trip notes</div><textarea class="notes-input" id="${cardId}-note" placeholder="Add notes about this spot...">${note}</textarea><button class="notes-save" onclick="saveNote('${s.name.replace(/'/g,"\\'")}',document.getElementById('${cardId}-note').value);this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save note',1500)">Save note</button></div>`:'';
+  const notesSection='';
   const coordsHtml=(s.coordinates&&s.coordinates.lat)?`<div class="weather-strip" id="${cardId}-weather"><span class="w-desc" style="color:var(--muted);font-size:11px;">Loading weather...</span></div><div class="sun-strip" id="${cardId}-sun"><span style="color:var(--muted);font-size:10px;">Loading sunrise/sunset...</span></div>`:'';
   return `<div class="sc" style="animation-delay:${i*.06}s" data-cardid="${cardId}" data-lat="${s.coordinates?.lat||''}" data-lng="${s.coordinates?.lng||''}">
     <div style="position:relative;">
