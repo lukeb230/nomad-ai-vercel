@@ -40,7 +40,7 @@
     .nav-btn svg { width: 20px; height: 20px; }
     .nav-btn.active { color: var(--tan); }
 
-    .topbar { padding: 22px 20px 14px; display: flex; align-items: center; justify-content: space-between; background: transparent; }
+    .topbar { padding: 22px 20px 14px; display: flex; align-items: center; justify-content: space-between; background: var(--bg); position: sticky; top: 0; z-index: 50; }
     .topbar-left { display: flex; flex-direction: column; }
     .topbar-title { font-size: 20px; font-weight: 800; color: var(--sand); }
     .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -98,7 +98,7 @@
     .ai-loader-ring { width: 22px; height: 22px; border: 2.5px solid var(--slate); border-top-color: var(--tan); border-radius: 50%; animation: sp .8s linear infinite; display: inline-block; }
     .spin.on { display: block; }
     @keyframes sp { to { transform: rotate(360deg); } }
-    .results { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+    .results { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 22px; }
     .home-results { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
     .saved-list { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
     .divider { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--tan); padding: 2px 0 10px; }
@@ -666,7 +666,7 @@
     <div class="topbar"><div class="topbar-left"><div class="topbar-title">NomadAI 🏕️</div><div class="topbar-sub">Find your next adventure</div></div></div>
 
     <!-- Mode toggle -->
-    <div style="padding:0 16px 8px;flex-shrink:0;">
+    <div style="padding:0 16px 8px;flex-shrink:0;position:sticky;top:72px;z-index:49;background:var(--bg);">
       <div style="display:flex;gap:6px;background:var(--darker);border-radius:50px;padding:4px;">
         <div id="mode-nl-btn" onclick="setSearchMode('nl')" style="flex:1;height:38px;border-radius:50px;background:var(--tan);color:#e8d5b7;border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;white-space:nowrap;padding:0 16px;">✨ Ask AI</div>
         <div id="mode-location-btn" onclick="setSearchMode('location')" style="flex:1;height:38px;border-radius:50px;background:var(--card);color:var(--tan);border:none;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all 0.2s;white-space:nowrap;padding:0 16px;">📍 Location</div>
@@ -716,7 +716,10 @@
       </div>
     </div>
     <!-- Results appear here for both modes -->
-    <div class="results" id="res" style="padding:0 16px;"></div>
+    <div id="res-section" style="display:none;">
+      <div class="slabel" style="padding-top:8px;">Results</div>
+      <div class="results" id="res" style="padding:0 16px;"></div>
+    </div>
   </div>
 
   <!-- MAP TAB -->
@@ -1824,6 +1827,7 @@ function setSearchMode(mode) {
     nlWrap.style.display = 'flex';
     nlInputBar.style.display = 'block';
     if (resDiv) resDiv.style.display = 'block';
+    const resSec = document.getElementById('res-section'); if(resSec) resSec.style.display = resDiv && resDiv.innerHTML.trim() ? 'block' : 'none';
     locBtn.style.background = 'var(--card)';
     locBtn.style.color = 'var(--tan)';
     locBtn.style.boxShadow = 'none';
@@ -1836,6 +1840,7 @@ function setSearchMode(mode) {
     nlWrap.style.display = 'none';
     nlInputBar.style.display = 'none';
     if (resDiv) resDiv.style.display = 'none';
+    const resSec2 = document.getElementById('res-section'); if(resSec2) resSec2.style.display = 'none';
     locBtn.style.background = 'var(--tan)';
     locBtn.style.color = '#e8d5b7';
     locBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
@@ -1950,6 +1955,7 @@ async function doNLSearch() {
   goBtn.style.pointerEvents = 'none';
   const aiLoader = document.getElementById('ai-loader'); if(aiLoader){aiLoader.style.display='block'; const sa=document.getElementById('chat-scroll-area'); if(sa)setTimeout(()=>{sa.scrollTop=sa.scrollHeight;},50);}
 
+  setResSection(false);
   document.getElementById('res').innerHTML = '';
   skeletonCards(6, 'res');
 
@@ -2035,8 +2041,10 @@ async function doNLSearch() {
     document.getElementById('res').innerHTML = '';
 
     if (!sites.length) {
+      setResSection(true);
       document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">No campsites found. Try a different description.</div>';
     } else {
+      setResSection(true);
       recalcDistances(sites);
       const resEl = document.getElementById('res');
       resEl.innerHTML = sites.map((s,i) => cardHTML(s,i,false)).join('');
@@ -2067,7 +2075,6 @@ async function doNLSearch() {
     }
 
     // Add to search history
-    addSearchHistory(query);
 
   } catch(e) {
     console.error(e);
@@ -3203,6 +3210,10 @@ setTimeout(initChatScroll, 500);
 })();
 
 // ── BACK TO TOP ──
+function setResSection(show) {
+  const s = document.getElementById('res-section');
+  if (s) s.style.display = show ? 'block' : 'none';
+}
 function getActiveTab(){
   const tabs=['home-tab','search-tab','saved-tab','map-tab'];
   for(const id of tabs){const el=document.getElementById(id);if(el&&el.style.display!=='none')return el;}
