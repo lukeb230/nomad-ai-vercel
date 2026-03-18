@@ -604,6 +604,21 @@
     .profile-sign-out { text-align: center; margin-top: 14px; font-size: 13px; color: var(--muted); cursor: pointer; font-weight: 700; }
     .profile-sign-out:hover { color: #f0a0a0; }
 
+  
+    /* CHAT */
+    .chat-thread { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 8px; max-height: 400px; overflow-y: auto; scroll-behavior: smooth; }
+    .chat-msg { display: flex; flex-direction: column; gap: 4px; }
+    .chat-msg.user { align-items: flex-end; }
+    .chat-msg.ai { align-items: flex-start; }
+    .chat-bubble { max-width: 85%; padding: 10px 13px; border-radius: 16px; font-size: 13px; line-height: 1.6; font-weight: 600; }
+    .chat-msg.user .chat-bubble { background: var(--tan); color: #e8d5b7; border-bottom-right-radius: 4px; }
+    .chat-msg.ai .chat-bubble { background: var(--card); color: var(--light); border: 1px solid var(--slate); border-bottom-left-radius: 4px; }
+    .chat-msg-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 0 4px; }
+    .chat-clear { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); cursor: pointer; text-align: right; padding: 2px 2px 6px; }
+    .chat-clear:hover { color: var(--tan); }
+    #app.light .chat-msg.user .chat-bubble { background: #9a7040; }
+    #app.light .chat-msg.ai .chat-bubble { background: #f0ebe0; border-color: #c8c0b0; color: #2a3830; }
+
   </style>
 
   <script defer src="/_vercel/insights/script.js"></script>
@@ -663,16 +678,13 @@
       </div>
       <div class="search-box" id="nl-search-box">
         <span style="font-size:15px;color:rgba(154,112,64,0.55);">🔍</span>
-        <div id="nl-input" contenteditable="true" data-placeholder="Free spot near Moab with a fire ring..." style="flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;caret-color:var(--muted);line-height:1.5;min-height:24px;word-break:break-word;overflow-wrap:break-word;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doNLSearch();}" oninput="toggleNLClearBtn();if((this.innerText||'').trim()){const b=document.getElementById('ai-response-box');if(b.classList.contains('show')&&document.getElementById('ai-response-text').innerHTML.includes('Hey there'))b.classList.remove('show');}"></div>
+        <div id="nl-input" contenteditable="true" data-placeholder="Free spot near Moab with a fire ring..." style="flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;caret-color:var(--muted);line-height:1.5;min-height:24px;word-break:break-word;overflow-wrap:break-word;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doNLSearch();}" oninput="toggleNLClearBtn();"></div>
         <div id="nl-clear-btn" onclick="clearNLSearch()" style="display:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">&#x2715;</div>
       </div>
       <div id="autocomplete-list" class="autocomplete-list" style="display:none;"></div>
       <div class="ai-response-box" id="ai-response-box" style="margin-top:8px;margin-bottom:0;">
-        <div class="ai-response-header">
-          <div class="ai-response-avatar">🏕️</div>
-          <div class="ai-response-name">NomadAI</div>
-        </div>
-        <div class="ai-response-text" id="ai-response-text"></div>
+        <div class="chat-clear" id="chat-clear-btn" onclick="clearChat()" style="display:none;">Clear chat</div>
+        <div class="chat-thread" id="chat-thread"></div>
       </div>
     </div>
     <div id="search-history-wrap"></div>
@@ -954,6 +966,7 @@ let radius=50, map=null, mapMode='results', mapMarkers=[], routePolyline=null, r
 const active=new Set(['dyrt','iover','rec','disp','camp','paid']);
 const carouselState={};
 let lastSearchResults=[];
+let chatHistory = []; // [{role:'user'|'assistant', content:'...'}]
 let userLat=null, userLng=null;
 
 // ── HAVERSINE DISTANCE ──
@@ -1673,7 +1686,7 @@ function switchTab(tab){
   ['home-tab','search-tab','map-tab','saved-tab'].forEach(id=>{document.getElementById(id).style.display='none';});document.getElementById('map-click-hint').style.display='none';document.getElementById('map-search-btn').classList.remove('show');
   ['nav-home','nav-search','nav-map','nav-saved'].forEach(id=>document.getElementById(id).classList.remove('active'));
   if(tab==='home'){document.getElementById('home-tab').style.display='flex';document.getElementById('home-tab').style.flexDirection='column';document.getElementById('nav-home').classList.add('active');renderHome();}
-  else if(tab==='search'){document.getElementById('search-tab').style.display='flex';document.getElementById('search-tab').style.flexDirection='column';document.getElementById('nav-search').classList.add('active');document.getElementById('err').innerHTML='';renderRecentSection();renderSearchHistory();if(currentSearchMode==='nl'&&!(document.getElementById('nl-input').innerText||'').trim()){document.getElementById('ai-response-text').innerHTML="Hey there! 👋 I'm NomadAI, your personal camping guide! I can help you find free and dispersed campsites on public lands, search by location or vibe, save favorites, plan trips, and share spots. I can also answer questions about camping areas, best seasons, overlanding tips, and more.<br><br>🗺️ <span style=\"color:var(--tan);font-weight:800;\">Driving somewhere?</span> Ask me for camps along your route — then check the Map tab to see all the spots pinned along the way.<br><br>Try asking: <span style=\"color:var(--tan);font-weight:800;\">\"free BLM spot near Moab with a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"campsites along I-70 from Denver to Grand Junction\"</span>";document.getElementById('ai-response-box').classList.add('show');}}
+  else if(tab==='search'){document.getElementById('search-tab').style.display='flex';document.getElementById('search-tab').style.flexDirection='column';document.getElementById('nav-search').classList.add('active');document.getElementById('err').innerHTML='';renderRecentSection();renderSearchHistory();if(currentSearchMode==='nl'&&!chatHistory.length){showWelcomeMessage();}}
   else if(tab==='map'){document.getElementById('map-click-hint').style.display='block';document.getElementById('map-tab').style.display='flex';document.getElementById('map-tab').style.flexDirection='column';document.getElementById('nav-map').classList.add('active');initMap();refreshMap();}
   else{document.getElementById('saved-tab').style.display='flex';document.getElementById('saved-tab').style.flexDirection='column';document.getElementById('nav-saved').classList.add('active');renderSaved();if(routeOpen)renderRoutePlanner();if(document.getElementById('passport-overlay').style.display==='block')openPassportModal();}
 }
@@ -1822,8 +1835,7 @@ function setSearchMode(mode) {
     // Show welcome message if box is empty
     const nlVal = (document.getElementById('nl-input').innerText||'').trim();
     if (!nlVal) {
-      document.getElementById('ai-response-text').innerHTML = "Hey there! 👋 I'm NomadAI, your personal camping guide! I can help you find free and dispersed campsites on public lands, search by location or vibe, save favorites, plan trips, and share spots. I can also answer questions about camping areas, best seasons, overlanding tips, and more.<br><br>🗺️ <span style=\"color:var(--tan);font-weight:800;\">Driving somewhere?</span> Ask me for camps along your route — then check the Map tab to see all the spots pinned along the way.<br><br>Try asking: <span style=\"color:var(--tan);font-weight:800;\">\"free BLM spot near Moab with a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"campsites along I-70 from Denver to Grand Junction\"</span>";
-      document.getElementById('ai-response-box').classList.add('show');
+      if(!chatHistory.length){showWelcomeMessage();}
     }
   } else {
     locBox.style.display = 'flex';
@@ -1838,8 +1850,7 @@ function setSearchMode(mode) {
     goBtn.innerHTML = '✨ Ask AI';
     // Hide welcome message when switching to location mode
     const aiBox = document.getElementById('ai-response-box');
-    const aiText = document.getElementById('ai-response-text').innerHTML;
-    if (aiText.includes('Hey there')) aiBox.classList.remove('show');
+    if (!chatHistory.length) aiBox.classList.remove('show');
   }
 }
 
@@ -1850,15 +1861,61 @@ function toggleNLClearBtn(){
 function clearNLSearch(){
   const nlEl = document.getElementById('nl-input'); nlEl.innerText = '';
   document.getElementById('nl-clear-btn').style.display = 'none';
-  document.getElementById('ai-response-box').classList.remove('show');
   document.getElementById('res').innerHTML = '';
   document.getElementById('nl-input').focus();
 }
 function handleSearch(){ if(currentSearchMode==='nl') doNLSearch(); else doSearch(); }
 
+
+function clearChat() {
+  chatHistory = [];
+  const t = document.getElementById('chat-thread');
+  if(t) t.innerHTML = '';
+  document.getElementById('ai-response-box').classList.remove('show');
+  const cb = document.getElementById('chat-clear-btn');
+  if(cb) cb.style.display = 'none';
+  document.getElementById('res').innerHTML = '';
+  lastSearchResults = [];
+  showWelcomeMessage();
+}
+
+function showWelcomeMessage() {
+  const thread = document.getElementById('chat-thread');
+  if (!thread) return;
+  thread.innerHTML = '';
+  appendChatMsg('ai', "Hey there! 👋 I'm NomadAI, your personal camping guide! I can help you find free and dispersed campsites on public lands, search by location or vibe, save favorites, plan trips, and share spots.<br><br>🗺️ <span style=\"color:var(--tan);font-weight:800;\">Driving somewhere?</span> Ask me for camps along your route — then check the Map tab to see all the spots pinned along the way.<br><br>Try asking: <span style=\"color:var(--tan);font-weight:800;\">\"free BLM spot near Moab with a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"campsites along I-70 from Denver to Grand Junction\"</span>");
+  document.getElementById('ai-response-box').classList.add('show');
+}
+
+function appendChatMsg(role, html) {
+  const thread = document.getElementById('chat-thread');
+  if (!thread) return;
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + role;
+  const label = document.createElement('div');
+  label.className = 'chat-msg-label';
+  label.textContent = role === 'user' ? 'You' : 'NomadAI';
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble';
+  bubble.innerHTML = html;
+  msg.appendChild(label);
+  msg.appendChild(bubble);
+  thread.appendChild(msg);
+  thread.scrollTop = thread.scrollHeight;
+  document.getElementById('ai-response-box').classList.add('show');
+  const ccb = document.getElementById('chat-clear-btn');
+  if (ccb) ccb.style.display = 'block';
+}
+
 async function doNLSearch() {
   const query = (document.getElementById('nl-input').innerText || document.getElementById('nl-input').textContent || '').trim().replace(/\n/g, ' ');
   if (!query) return;
+
+  // Add user message to chat
+  appendChatMsg('user', query);
+  // Clear input
+  document.getElementById('nl-input').innerText = '';
+  toggleNLClearBtn();
 
   // Get user location for context
   let locationContext = '';
@@ -1874,31 +1931,49 @@ async function doNLSearch() {
 
   const fields = '{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"2 sentences","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"..."}';
 
-  // Check if query is camping/travel related before sending
-  // Detect if this is a question about the app vs a campsite search
-  const isAppQuestion = /what can|how do|how does|how to|what is|what are|what do|who are|tell me|explain|help me|features|capabilities|can you|do you|are you|how work|nomadai|about you|about this|where is|what's in|what.*like|good time|best time|weather in|things to do|near.*what|recommend|suggest|tips for|far from|drive.*from|distance/i.test(query);
+  const isAppQuestion = /what can|how do|how does|how to|what is|what are|what do|who are|tell me|explain|help me|features|capabilities|can you|do you|are you|how work|nomadai|about you|about this|where is|what.s in|what.*like|good time|best time|weather in|things to do|near.*what|recommend|suggest|tips for|far from|drive.*from|distance/i.test(query);
   const isRouteQuery = /along|on the way|on my way|en route|between .* and|from .* to|drive.*through|road trip|highway|interstate|\bI-\d|\bUS-\d|\bhwy\b|\broute\b.*\d/i.test(query);
 
-  let prompt;
+  // System prompt — tells the AI its role and to maintain conversation context
+  const systemPrompt = 'You are NomadAI, an expert camping guide and campsite finder. You help users find campsites, plan trips, and answer outdoor/camping questions. You remember the conversation history — if the user says things like "tell me more about the first one", "what about that spot", or "something closer", you understand they are referring to previous results. If the user is clearly asking about a new location or topic, treat it as a fresh search. Keep responses friendly and concise.' + locationContext;
+
+  // Build user content for this turn
+  let userContent;
   if (isAppQuestion) {
-    prompt = 'You are NomadAI, an AI-powered campsite finder and outdoor travel assistant. The user is asking: "' + query + '". ' + locationContext + ' Answer helpfully and conversationally in 2-4 sentences. You can answer questions about: what NomadAI can do (find BLM/dispersed/free campsites, search by location or natural language, save spots, plan trips, share spots, view weather/sunrise/sunset, satellite maps), locations and regions (best areas to camp, what an area is like, distances, seasons, tips), and general camping/overlanding advice. Do NOT return JSON. Just answer naturally like a knowledgeable camping guide.';
+    userContent = query;
   } else {
-    prompt = 'Find real campsites matching this request: "' + query + '". ' + locationContext + ' Return ONLY a valid JSON array of up to 12 campsites. Each object: ' + fields + ' No fake results. JSON array only.';
+    userContent = 'Find real campsites matching: "' + query + '". ' + locationContext + ' Return ONLY a JSON array of up to 12 campsites. Each: ' + fields + ' No fake results. Start with MSG: followed by one friendly sentence (max 15 words), then newline, then JSON array only.';
   }
 
-  // Build a prompt that returns both a message and JSON results
-  const fullPrompt = isAppQuestion ? prompt : prompt + ' Start your response with MSG: followed by one friendly sentence (max 15 words) summarizing results. Then on a new line return the raw JSON array. No code fences. Example: MSG:Found 8 free BLM spots near Moab with great views.\n[{...}]';
+  // Add to history
+  chatHistory.push({ role: 'user', content: userContent });
+
+  // Build single message with full context — most reliable approach
+  const historyText = chatHistory.slice(-7, -1).map(m =>
+    (m.role === 'user' ? 'User' : 'NomadAI') + ': ' + m.content
+  ).join('\n\n');
+  const fullMessage = systemPrompt
+    + (historyText ? '\n\nPrevious conversation:\n' + historyText + '\n\nNow respond to the latest message:' : '')
+    + '\n\n' + userContent;
 
   try {
+    const messages = [{ role: 'user', content: fullMessage }];
+
     const r = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 4000, messages: [{ role: 'user', content: fullPrompt }] })
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 4000, messages })
     });
-    const d = await r.json();
+    const rawText = await r.text();
+    if (!r.ok || rawText.trim().startsWith('<')) {
+      console.error('API returned non-JSON:', r.status, rawText.substring(0, 200));
+      throw new Error('API error ' + r.status);
+    }
+    const d = JSON.parse(rawText);
 
     if (d.error) {
-      document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">⚠️ '+(d.error.message||'Something went wrong')+'</div>';
+      appendChatMsg('ai', '⚠️ ' + (d.error.message||'Something went wrong. Try again.'));
+      document.getElementById('res').innerHTML = '';
       goBtn.innerHTML = '✨ Ask AI';
       goBtn.style.display = 'flex';
       goBtn.style.pointerEvents = '';
@@ -1908,10 +1983,11 @@ async function doNLSearch() {
 
     const txt = d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
 
-    // If it's an app question, just show the response and stop
+    // If it's an app question, show in chat and stop
     if (isAppQuestion) {
-      document.getElementById('ai-response-text').textContent = txt.trim();
-      document.getElementById('ai-response-box').classList.add('show');
+      const reply = txt.trim();
+      chatHistory.push({ role: 'assistant', content: reply });
+      appendChatMsg('ai', reply);
       document.getElementById('res').innerHTML = '';
       goBtn.innerHTML = '✨ Ask AI';
       goBtn.style.display = 'flex';
@@ -1920,11 +1996,11 @@ async function doNLSearch() {
       return;
     }
 
-    // Extract MSG prefix if present
+    // Extract MSG prefix
     const msgLine = txt.indexOf('MSG:') === 0 ? txt.substring(4, txt.indexOf('\n') > 0 ? txt.indexOf('\n') : 80) : ''; const cleanMsg = msgLine.replace(/```json|```/g,'').replace(/\[.*$/,'').trim(); const msgMatch = cleanMsg.length > 2 ? [null, cleanMsg] : null;
     if (msgMatch) {
-      document.getElementById('ai-response-text').textContent = msgMatch[1];
-      document.getElementById('ai-response-box').classList.add('show');
+      chatHistory.push({ role: 'assistant', content: msgMatch[1] });
+      appendChatMsg('ai', msgMatch[1]);
     }
 
     const idx = txt.indexOf('['); const idx2 = txt.lastIndexOf(']');
@@ -1962,11 +2038,7 @@ async function doNLSearch() {
         if (typeof renderRoutePlanner === 'function') renderRoutePlanner();
         if (typeof renderSaved === 'function') renderSaved();
         // Show a hint in the AI response box
-        const routeHint = document.getElementById('ai-response-text');
-        const aiBox = document.getElementById('ai-response-box');
-        const current = routeHint.innerHTML;
-        routeHint.innerHTML = current + '<br><br>🧭 <span style="color:var(--sage);font-weight:800;">Route added!</span> Head to Saved → Plan a trip to see your stops, or check the Map → My route tab.';
-        aiBox.classList.add('show');
+        appendChatMsg('ai', '🧭 <span style="color:var(--sage);font-weight:800;">Route added!</span> Head to Saved → Plan a trip to see your stops, or check the Map → My route tab.');
       }
     }
 
@@ -2613,7 +2685,7 @@ function useSearchHistory(loc){
     toggleNLClearBtn();
     // Hide welcome message
     const aiBox = document.getElementById('ai-response-box');
-    if (aiBox.classList.contains('show') && document.getElementById('ai-response-text').innerHTML.includes('Hey there')) {
+    if (aiBox.classList.contains('show') && !chatHistory.length) {
       aiBox.classList.remove('show');
     }
     doNLSearch();
