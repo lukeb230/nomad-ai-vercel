@@ -94,12 +94,8 @@
     .go-wrap { padding: 0 16px 20px; }
     .status-row { display: flex; align-items: center; gap: 8px; padding: 0 16px 10px; font-size: 13px; color: var(--muted); min-height: 20px; }
     .spin { width: 13px; height: 13px; border: 2px solid var(--card); border-top-color: var(--tan); border-radius: 50%; animation: sp .7s linear infinite; display: none; flex-shrink: 0; }
-    #ai-loader { display: none; padding: 4px 0 8px; }
-    .typing-bubble { display: inline-flex; align-items: center; gap: 5px; background: var(--card); border: 1px solid var(--slate); border-radius: 16px; border-bottom-left-radius: 4px; padding: 10px 14px; }
-    .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: typing-bounce 1.2s ease-in-out infinite; }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typing-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
+    #ai-loader { display: none; padding: 4px 0 8px; text-align: right; padding-right: 4px; }
+    .ai-loader-ring { width: 22px; height: 22px; border: 2.5px solid var(--slate); border-top-color: var(--tan); border-radius: 50%; animation: sp .8s linear infinite; display: inline-block; }
     .spin.on { display: block; }
     @keyframes sp { to { transform: rotate(360deg); } }
     .results { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
@@ -705,12 +701,7 @@
       </div>
       <div id="chat-scroll-area" style="flex:1;overflow-y:auto;padding:4px 12px 4px;-webkit-overflow-scrolling:touch;min-height:0;">
         <div class="chat-thread" id="chat-thread"></div>
-        <div id="ai-loader" style="display:none;padding:4px 0 8px;">
-          <div class="chat-msg ai">
-            <div class="chat-msg-label">NomadAI</div>
-            <div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
-          </div>
-        </div>
+        <div id="ai-loader" style="display:none;padding:4px 4px 8px;text-align:right;"><div class="ai-loader-ring"></div></div>
         <div id="recent-section" style="display:flex;flex-direction:column;gap:10px;padding-bottom:4px;"></div>
       </div>
       <!-- Input bar stuck to bottom of chat box -->
@@ -3232,11 +3223,13 @@ function updateBackToTop(){
 window.addEventListener('scroll',updateBackToTop,{passive:true});
 document.addEventListener('touchmove',updateBackToTop,{passive:true});
 document.addEventListener('touchend',updateBackToTop,{passive:true});
-// Also listen to tab scroll events
-['home-tab','search-tab','saved-tab'].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el)el.addEventListener('scroll',updateBackToTop,{passive:true});
-});
+// Listen to tab scroll events
+setTimeout(()=>{
+  ['home-tab','search-tab','saved-tab'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('scroll',updateBackToTop,{passive:true});
+  });
+},500);
 
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').classList.add('show');});
