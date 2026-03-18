@@ -1184,7 +1184,6 @@ function plotRoute(){
     // Numbered marker
     const marker=L.marker([lat,lng],{icon:makeIcon('#e85555')}).addTo(map);
     marker.bindPopup(`<div class="popup-name">${i+1}. ${s.name}</div><div class="popup-meta">${s.distance||''}</div><div style="margin-top:6px;"><a class="popup-btn" href="#" onclick="event.preventDefault();openCardModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">View details</a></div>`);
-    marker.on('click', function() { openCardModal(s); });
     mapMarkers.push(marker);
   });
 
@@ -1746,7 +1745,7 @@ async function shareSpot(site) {
   const shareUrl = 'https://nomadai.us/app?spot=' + encoded;
 
   if (navigator.share) {
-    navigator.share({ title: site.name, text: 'Check out ' + site.name + ' on NomadAI!', url: shareUrl });
+    navigator.share({ title: 'Check out this campsite!', text: 'Check out ' + site.name + ' on NomadAI!', url: shareUrl });
   } else {
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -3047,6 +3046,53 @@ async function syncFromSupabase() {
 
 showMain();
 initAuth();
+
+// ── SHARED SPOT URL HANDLER ──
+(async function() {
+  // Handle /spot/[uuid] URLs
+  const path = window.location.pathname;
+  const spotMatch = path.match(/\/spot\/([a-f0-9-]{36})/i);
+  const spotId = spotMatch ? spotMatch[1] : null;
+
+  // Also handle ?spot= encoded fallback
+  const params = new URLSearchParams(window.location.search);
+  const encodedSpot = params.get('spot');
+
+  if (spotId) {
+    // Fetch from Supabase shared_spots table
+    try {
+      const { data, error } = await supa.from('shared_spots').select('*').eq('id', spotId).single();
+      if (!error && data) {
+        const site = {
+          name: data.name,
+          source: data.source,
+          sourceLabel: data.source_label,
+          fee: data.fee,
+          reservable: data.reservable,
+          description: data.description,
+          tags: data.tags || [],
+          directions: data.directions,
+          coordinates: data.coordinates,
+          city: data.city,
+          state: data.state
+        };
+        setTimeout(() => openCardModal(site), 800);
+      }
+    } catch(e) { console.error('Failed to load shared spot:', e); }
+  } else if (encodedSpot) {
+    // Decode fallback URL
+    try {
+      const slim = JSON.parse(decodeURIComponent(escape(atob(encodedSpot))));
+      const site = {
+        name: slim.n, source: slim.s, sourceLabel: slim.sl,
+        fee: slim.f, reservable: slim.r, description: slim.d,
+        tags: slim.t || [], directions: slim.dir,
+        coordinates: slim.c, city: slim.ci, state: slim.st
+      };
+      setTimeout(() => openCardModal(site), 800);
+    } catch(e) { console.error('Failed to decode shared spot:', e); }
+  }
+})();
 
 // ── BACK TO TOP ──
 function scrollToTop(){
