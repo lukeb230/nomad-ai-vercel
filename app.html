@@ -1183,7 +1183,8 @@ function plotRoute(){
     bounds.push([lat,lng]);
     // Numbered marker
     const marker=L.marker([lat,lng],{icon:makeIcon('#e85555')}).addTo(map);
-    marker.bindPopup(`<div class="popup-name">${i+1}. ${s.name}</div><div class="popup-meta">${s.distance||''}</div>`);
+    marker.bindPopup(`<div class="popup-name">${i+1}. ${s.name}</div><div class="popup-meta">${s.distance||''}</div><div style="margin-top:6px;"><a class="popup-btn" href="#" onclick="event.preventDefault();openCardModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">View details</a></div>`);
+    marker.on('click', function() { openCardModal(s); });
     mapMarkers.push(marker);
   });
 
@@ -1736,50 +1737,26 @@ document.addEventListener('click', e => {
 });
 
 async function shareSpot(site) {
-  // Show loading feedback
   const shareEl = event.target.closest('[title="Share"]') || event.target;
   const orig = shareEl.textContent;
-  shareEl.textContent = '⏳';
 
-  try {
-    // Save to Supabase shared_spots table
-    const { data, error } = await supa.from('shared_spots').insert([{
-      name: site.name,
-      source: site.source||'',
-      source_label: site.sourceLabel||'',
-      url: site.url||'',
-      fee: site.fee||'Free',
-      reservable: site.reservable||false,
-      description: site.description||'',
-      tags: site.tags||[],
-      directions: site.directions||'',
-      coordinates: site.coordinates||null,
-      city: site.city||'',
-      state: site.state||''
-    }]).select('id').single();
+  // Build share URL from site data
+  const slim = { n: site.name, s: site.source, sl: site.sourceLabel, f: site.fee||'Free', r: site.reservable||false, d: site.description||'', t: (site.tags||[]).slice(0,3), dir: site.directions||'', c: site.coordinates||null, ci: site.city||'', st: site.state||'' };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(slim))));
+  const shareUrl = 'https://nomadai.us/app?spot=' + encoded;
 
-    if (error) throw error;
-
-    const shareUrl = 'https://nomadai.us/spot/' + data.id;
-    shareEl.textContent = orig;
-
-    if (navigator.share) {
-      navigator.share({ title: site.name, text: 'Check out ' + site.name + ' on NomadAI!', url: shareUrl });
-    } else {
+  if (navigator.share) {
+    navigator.share({ title: site.name, text: 'Check out ' + site.name + ' on NomadAI!', url: shareUrl });
+  } else {
+    try {
       await navigator.clipboard.writeText(shareUrl);
-      shareEl.textContent = '✓';
+      shareEl.textContent = '✓ Copied!';
       shareEl.style.color = 'var(--sage)';
       setTimeout(() => { shareEl.textContent = orig; shareEl.style.color = ''; }, 1500);
+    } catch(e) {
+      // Final fallback — prompt with URL
+      prompt('Copy this link to share:', shareUrl);
     }
-  } catch(e) {
-    console.error(e);
-    shareEl.textContent = orig;
-    // Fallback to old method
-    const slim = { n: site.name, s: site.source, sl: site.sourceLabel, u: site.url||'', f: site.fee||'Free', r: site.reservable||false, d: site.description||'', t: (site.tags||[]).slice(0,3), dir: site.directions||'', c: site.coordinates||null, ci: site.city||'', st: site.state||'' };
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(slim))));
-    const fallbackUrl = 'https://nomadai.us/spot?d=' + encoded;
-    if (navigator.share) navigator.share({ title: site.name, text: 'Check out ' + site.name + ' on NomadAI!', url: fallbackUrl });
-    else navigator.clipboard.writeText(fallbackUrl);
   }
 }
 
@@ -2275,9 +2252,11 @@ function openPassportModal() {
   window._passportIsLight = isLight;
   const visited = getVisited();
   const saved = getSaved();
-  document.getElementById('passport-modal-count').textContent = visited.length + ' camp' + (visited.length !== 1 ? 's' : '') + ' visited';
+  // Count will be updated after building stampMap below
+  const _countEl = document.getElementById('passport-modal-count');
   const grid = document.getElementById('passport-modal-grid');
   if (!visited.length) {
+    _countEl.textContent = '0 camps visited';
     grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;line-height:1.8;">✓ Mark campsites as visited<br>and they\'ll appear here as stamps.</div>';
   } else {
     const stamps = visited.map(name => {
@@ -2618,8 +2597,20 @@ function renderSearchHistory(){
   <div class="search-history">${h.map(loc=>`<div class="history-pill" onclick="useSearchHistory('${loc.replace(/'/g,"\\'")}')">🕐 ${loc}<span class="h-x" onclick="event.stopPropagation();removeSearchHistory('${loc.replace(/'/g,"\\'")}')">×</span></div>`).join('')}</div>`;
 }
 function useSearchHistory(loc){
-  document.getElementById('loc').value=loc;
-  doSearch();
+  if (currentSearchMode === 'nl') {
+    const nlInput = document.getElementById('nl-input');
+    nlInput.innerText = loc;
+    toggleNLClearBtn();
+    // Hide welcome message
+    const aiBox = document.getElementById('ai-response-box');
+    if (aiBox.classList.contains('show') && document.getElementById('ai-response-text').innerHTML.includes('Hey there')) {
+      aiBox.classList.remove('show');
+    }
+    doNLSearch();
+  } else {
+    document.getElementById('loc').value = loc;
+    doSearch();
+  }
 }
 
 // ── RECENTLY VIEWED ──
