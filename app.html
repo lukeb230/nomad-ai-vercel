@@ -2258,21 +2258,32 @@ function openPassportModal() {
     _countEl.textContent = '0 camps visited';
     grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;line-height:1.8;">✓ Mark campsites as visited<br>and they\'ll appear here as stamps.</div>';
   } else {
-    const stamps = visited.map(name => {
+    const npKeywords = /national park|national monument|national forest|national recreation area|national seashore|national lakeshore|national preserve|national wildlife/i;
+    const stampMap = new Map();
+    visited.forEach(name => {
       const site = saved.find(s => s.name === name);
-      return { name, state: site?.state || '', city: site?.city || '' };
+      const state = site?.state || '';
+      if (npKeywords.test(name)) {
+        if (!stampMap.has('np:' + name)) stampMap.set('np:' + name, { type: 'np', name, state });
+      } else if (state) {
+        if (!stampMap.has('state:' + state)) {
+          stampMap.set('state:' + state, { type: 'state', name: state, state, count: 0 });
+        }
+        stampMap.get('state:' + state).count++;
+      } else {
+        if (!stampMap.has('other:' + name)) stampMap.set('other:' + name, { type: 'other', name, state: '' });
+      }
     });
+    const stamps = [...stampMap.values()];
+    _countEl.textContent = visited.length + ' camp' + (visited.length !== 1 ? 's' : '') + ' · ' + stamps.length + ' stamp' + (stamps.length !== 1 ? 's' : '');
     grid.innerHTML = stamps.map((s, i) => {
       const color = STAMP_COLORS[i % STAMP_COLORS.length];
-      const loc = s.city && s.state ? s.city + ', ' + s.state : s.state || s.city || '';
-      const safeName = s.name.replace(/'/g, "\'");
+      const icon = s.type === 'np' ? '🏔️' : '📍';
+      const subtitle = s.type === 'state' ? s.count + ' camp' + (s.count !== 1 ? 's' : '') + ' visited' : (s.state || '');
       return `<div class="stamp ${color}">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <div class="stamp-check">✓</div>
-          <div onclick="removeStamp('${safeName}');openPassportModal();" style="font-size:14px;color:var(--muted);cursor:pointer;padding:0 2px;line-height:1;" title="Remove">×</div>
-        </div>
+        <div class="stamp-check">${icon}</div>
         <div class="stamp-name">${s.name}</div>
-        ${loc ? `<div class="stamp-loc">📍 ${loc}</div>` : ''}
+        ${subtitle ? `<div class="stamp-loc">${subtitle}</div>` : ''}
       </div>`;
     }).join('');
   }
