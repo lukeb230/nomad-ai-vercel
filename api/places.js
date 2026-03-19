@@ -2,7 +2,6 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const GKEY = process.env.GOOGLE_PLACES_KEY;
@@ -12,17 +11,13 @@ export default async function handler(req, res) {
 
   if (type === 'search') {
     try {
-      const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(input)}&inputtype=textquery&fields=place_id&key=${GKEY}`;
+      // Single call — Find Place with photos field directly, no Details needed
+      const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(input)}&inputtype=textquery&fields=photos&key=${GKEY}`;
       const r = await fetch(url);
       const d = await r.json();
-      if (!d.candidates || !d.candidates[0]) {
-        return res.status(200).json({ candidates: [] });
-      }
-      const placeId = d.candidates[0].place_id;
-      const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=photos&key=${GKEY}`;
-      const dr = await fetch(detailUrl);
-      const dd = await dr.json();
-      const photos = (dd.result && dd.result.photos) ? dd.result.photos.slice(0, 5) : [];
+      const photos = (d.candidates && d.candidates[0] && d.candidates[0].photos)
+        ? d.candidates[0].photos.slice(0, 5)
+        : [];
       return res.status(200).json({ candidates: [{ photos }] });
     } catch (e) {
       return res.status(500).json({ error: e.message });
