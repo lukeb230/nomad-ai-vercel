@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lost in the Woods — NomadAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--sand:#e8d5b7;--sage:#8aac7a;--tan:#c4a06a;--dark:#1c2820;--darker:#151e18;--card:#2a3830;--muted:#7a9a88}
+body{font-family:'Nunito',sans-serif;background:var(--darker);color:var(--sand);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;}
+
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;font-size:18px;color:var(--sand);margin-bottom:48px;text-decoration:none;}
+
+.scene{font-size:72px;margin-bottom:24px;animation:sway 3s ease-in-out infinite;}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+
+.code{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin-bottom:12px;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,48px);font-weight:900;color:var(--sand);margin-bottom:14px;line-height:1.15;}
+h1 em{color:var(--sage);font-style:italic;}
+p{font-size:15px;color:var(--muted);line-height:1.75;max-width:400px;margin:0 auto 40px;}
+
+.actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+.btn-primary{background:var(--tan);color:var(--darker);padding:14px 32px;border-radius:50px;font-weight:800;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .2s,opacity .2s;}
+.btn-primary:hover{transform:translateY(-2px);opacity:.92;}
+.btn-secondary{background:rgba(255,255,255,0.06);color:var(--sand);border:1.5px solid rgba(255,255,255,0.12);padding:14px 32px;border-radius:50px;font-weight:700;font-size:14px;text-decoration:none;transition:background .2s;}
+.btn-secondary:hover{background:rgba(255,255,255,0.1);}
+
+.footer-note{margin-top:56px;font-size:11px;color:var(--muted);}
+.footer-note a{color:var(--muted);text-decoration:none;font-weight:700;}
+.footer-note a:hover{color:var(--tan);}
+</style>
+</head>
+<body>
+
+<a class="logo" href="/">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 680" width="28" height="28">
+    <rect x="90" y="90" width="500" height="500" rx="110" fill="#8aac7a"/>
+    <polygon points="340,180 530,480 150,480" fill="#d4706a"/>
+    <polygon points="340,310 400,480 280,480" fill="#5a7a4a"/>
+    <rect x="140" y="475" width="400" height="18" rx="9" fill="#5a7a4a" opacity="0.6"/>
+  </svg>
+  NomadAI
+</a>
+
+<div class="scene">🌲</div>
+<div class="code">404 — Page not found</div>
+<h1>Looks like you took<br>a wrong <em>trail.</em></h1>
+<p>This page doesn't exist — but your next campsite does. Head back and let NomadAI find it.</p>
+
+<div class="actions">
+  <a href="/app" class="btn-primary">🏕️ Find my camp</a>
+  <a href="/" class="btn-secondary">← Back to home</a>
+</div>
+
+<div class="footer-note">
+  <a href="/privacy">Privacy</a> &nbsp;·&nbsp; <a href="/terms">Terms</a> &nbsp;·&nbsp; <a href="mailto:hello@nomadai.us">Contact</a>
+</div>
+
+</body>
+</html>
