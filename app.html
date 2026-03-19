@@ -1285,16 +1285,30 @@ const _localPhotoCache = {};
 async function getPhotoCache(name) {
   if (_localPhotoCache[name]) return _localPhotoCache[name];
   try {
-    const { data } = await supa.from('photo_cache').select('photos').eq('campsite_name', name).maybeSingle();
-    if (data?.photos) { _localPhotoCache[name] = data.photos; return data.photos; }
+    const { data } = await supa.from('photo_cache').select('photos, source, cached_at').eq('campsite_name', name).maybeSingle();
+    if (data?.photos) {
+      // Google photos expire after 7 days
+      if (data.source === 'google') {
+        const age = Date.now() - new Date(data.cached_at).getTime();
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        if (age > sevenDays) return null; // treat as expired
+      }
+      _localPhotoCache[name] = data.photos;
+      return data.photos;
+    }
   } catch(e) {}
   return null;
 }
 
-async function setPhotoCache(name, photos) {
+async function setPhotoCache(name, photos, source = 'unknown') {
   _localPhotoCache[name] = photos;
   try {
-    await supa.from('photo_cache').upsert({ campsite_name: name, photos }, { onConflict: 'campsite_name' });
+    await supa.from('photo_cache').upsert({
+      campsite_name: name,
+      photos,
+      source,
+      cached_at: new Date().toISOString()
+    }, { onConflict: 'campsite_name' });
   } catch(e) {}
 }
 
@@ -1357,7 +1371,7 @@ async function fetchPlacePhotos(name, location, site) {
     const sat = mapboxPhoto(lat, lng);
     if (sat) {
       const photos = [sat];
-      setPhotoCache(name, photos);
+      setPhotoCache(name, photos, 'mapbox');
       return photos;
     }
     return null;
@@ -1369,14 +1383,14 @@ async function fetchPlacePhotos(name, location, site) {
     const d = await r.json();
     if (d.candidates&&d.candidates[0]&&d.candidates[0].photos&&d.candidates[0].photos.length>0) {
       const photos = d.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
-      setPhotoCache(name, photos);
+      setPhotoCache(name, photos, 'google');
       return photos;
     }
     const r2 = await fetch(`/api/places?type=search&input=${encodeURIComponent(name)}`);
     const d2 = await r2.json();
     if (d2.candidates&&d2.candidates[0]&&d2.candidates[0].photos&&d2.candidates[0].photos.length>0) {
       const photos = d2.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
-      setPhotoCache(name, photos);
+      setPhotoCache(name, photos, 'google');
       return photos;
     }
   } catch(e) {}
