@@ -1351,7 +1351,7 @@ async function fetchWikimediaPhotos(name, lat, lng) {
 
 async function fetchPlacePhotos(name, location, site) {
   // 1. Check cache first
-  const cached = getPhotoCache(name);
+  const cached = await getPhotoCache(name);
   if (cached) return cached;
 
   // 2. Try Wikimedia Commons for everything (free, no API key)
@@ -1422,15 +1422,27 @@ function addSwipe(carousel, id) {
 async function loadPhotosForCard(cardId,site,location){
   const carousel=document.getElementById(`${cardId}-carousel`);if(!carousel)return;
   const fetched=await fetchPlacePhotos(site.name,location,site);
-  const isFallback = !fetched;
-  const isWikimedia = fetched && fetched[0] && (fetched[0].includes('wikipedia.org') || fetched[0].includes('wikimedia.org'));
-  const photos=fetched||fallbackPhotos(site);
+  // For dispersed/BLM with no photos found, use Mapbox satellite instead of Unsplash
+  let photos, isFallback = false, isWikimedia = false, isMapbox = false;
+  if (fetched) {
+    photos = fetched;
+    isWikimedia = fetched[0] && (fetched[0].includes('wikipedia.org') || fetched[0].includes('wikimedia.org'));
+    isMapbox = fetched[0] && fetched[0].includes('mapbox.com');
+  } else if (isDispersed(site) && site.coordinates?.lat && site.coordinates?.lng) {
+    const sat = mapboxPhoto(site.coordinates.lat, site.coordinates.lng);
+    photos = sat ? [sat] : fallbackPhotos(site);
+    isMapbox = !!sat;
+    isFallback = !sat;
+  } else {
+    photos = fallbackPhotos(site);
+    isFallback = true;
+  }
   const track=carousel.querySelector('.carousel-track');const dots=carousel.querySelector('.carousel-dots');
   track.innerHTML=photos.map((url,pi)=>`<div class="carousel-slide"><span class="ph-loader">🏕️</span><img src="${url}" loading="lazy" style="cursor:zoom-in;" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none';" onclick="openLightbox(${JSON.stringify(photos).replace(/"/g,'&quot;')},${pi});event.stopPropagation();" /></div>`).join('');
-  if (isFallback || isWikimedia) {
+  if (isFallback || isWikimedia || isMapbox) {
     const badge = document.createElement('div');
     badge.style.cssText = 'position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.7);font-size:9px;font-weight:700;padding:3px 8px;border-radius:50px;pointer-events:none;letter-spacing:.04em;backdrop-filter:blur(4px);';
-    badge.textContent = isFallback ? '📷 Illustrative photo' : '📷 Area photo';
+    badge.textContent = isMapbox ? '🛰️ Satellite view' : isWikimedia ? '📷 Area photo' : '📷 Illustrative photo';
     carousel.style.position = 'relative';
     carousel.appendChild(badge);
   }
