@@ -3433,8 +3433,11 @@ function toggleCardPin(siteName, el) {
   if (!window._pendingRouteSelId) return;
   while (el && !el.classList?.contains('route-pin-btn')) el = el.parentElement;
   if (!el) return;
+  // Debounce — ignore if fired within 300ms of last toggle
+  const now = Date.now();
+  if (el._lastPinToggle && now - el._lastPinToggle < 300) return;
+  el._lastPinToggle = now;
   const key = window._pendingRouteSelId + '-' + siteName;
-  // Use data attribute as single source of truth — never read from DOM text
   const isPinned = el.dataset.pinned === '1';
   if (isPinned) {
     el.dataset.pinned = '0';
