@@ -3428,22 +3428,24 @@ function checkSearchLimit() {
 
 
 
-function toggleCardPin(siteName, btn) {
+function toggleCardPin(siteName, el) {
   if (!window._routePinState) window._routePinState = {};
   if (!window._pendingRouteSelId) return;
-  // Walk up to the actual button div in case click landed on text node
-  while (btn && !btn.classList?.contains('route-pin-btn')) btn = btn.parentElement;
-  if (!btn) return;
+  while (el && !el.classList?.contains('route-pin-btn')) el = el.parentElement;
+  if (!el) return;
   const key = window._pendingRouteSelId + '-' + siteName;
-  const isPinned = window._routePinState[key] === 'pinned';
+  // Use data attribute as single source of truth — never read from DOM text
+  const isPinned = el.dataset.pinned === '1';
   if (isPinned) {
+    el.dataset.pinned = '0';
+    el.innerHTML = '📍';
+    el.classList.remove('pinned');
     window._routePinState[key] = 'unpinned';
-    btn.textContent = '📍';
-    btn.classList.remove('pinned');
   } else {
+    el.dataset.pinned = '1';
+    el.innerHTML = '📌';
+    el.classList.add('pinned');
     window._routePinState[key] = 'pinned';
-    btn.textContent = '📌';
-    btn.classList.add('pinned');
   }
 }
 
@@ -3454,7 +3456,8 @@ function pinAllCards() {
     window._routePinState[selId + '-' + s.name] = 'pinned';
   });
   document.querySelectorAll('.route-pin-btn').forEach(btn => {
-    btn.textContent = '📌';
+    btn.dataset.pinned = '1';
+    btn.innerHTML = '📌';
     btn.classList.add('pinned');
   });
 }
