@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Privacy Policy — NomadAI</title>
+<link rel="canonical" href="https://nomadai.us/privacy" />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--sand:#e8d5b7;--tan:#c4a06a;--dark:#1c2820;--darker:#151e18;--card:#2a3830;--muted:#7a9a88;}
+body{font-family:'Nunito',sans-serif;background:var(--darker);color:var(--sand);line-height:1.7;padding:0;}
+nav{padding:18px 32px;background:rgba(28,40,32,0.95);border-bottom:1px solid rgba(138,172,122,0.12);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.nav-logo{font-weight:800;font-size:17px;color:var(--sand);text-decoration:none;}
+.nav-back{color:var(--tan);text-decoration:none;font-weight:700;font-size:13px;}
+.container{max-width:680px;margin:0 auto;padding:48px 24px 80px;}
+h1{font-size:28px;font-weight:900;color:var(--sand);margin-bottom:8px;}
+.date{font-size:13px;color:var(--muted);margin-bottom:40px;}
+h2{font-size:16px;font-weight:800;color:var(--tan);margin:32px 0 10px;text-transform:uppercase;letter-spacing:.06em;}
+p{font-size:14px;color:#c8b89a;margin-bottom:14px;}
+ul{font-size:14px;color:#c8b89a;margin:0 0 14px 20px;}
+li{margin-bottom:6px;}
+a{color:var(--tan);}
+.footer{text-align:center;padding:32px;font-size:12px;color:var(--muted);}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="/">NomadAI 🏕️</a>
+  <a class="nav-back" href="/">← Back to home</a>
+</nav>
+<div class="container">
+  <h1>Privacy Policy</h1>
+  <div class="date">Last updated: March 18, 2026</div>
+
+  <p>NomadAI ("we", "our", or "us") operates the NomadAI website and application at nomadai.us. This policy explains what data we collect, how we use it, and your rights.</p>
+
+  <h2>Information We Collect</h2>
+  <p>When you use NomadAI, we may collect:</p>
+  <ul>
+    <li><strong>Account information</strong> — your email address and display name when you create an account.</li>
+    <li><strong>Profile data</strong> — your optional profile photo and display name.</li>
+    <li><strong>Location data</strong> — your approximate GPS location, used only to find nearby campsites. We do not store your location history.</li>
+    <li><strong>Usage data</strong> — saved campsites, visited spots, trip routes, search history, and notes you create within the app.</li>
+    <li><strong>Device data</strong> — browser type and device type for analytics purposes via Vercel Analytics.</li>
+  </ul>
+
+  <h2>How We Use Your Information</h2>
+  <ul>
+    <li>To provide campsite search and recommendations powered by AI.</li>
+    <li>To sync your saved spots, trips, and preferences across devices.</li>
+    <li>To improve the app and understand how it's being used (via anonymous analytics).</li>
+    <li>To allow you to share specific campsites with others via share links.</li>
+  </ul>
+
+  <h2>Data Storage</h2>
+  <p>Your account data is stored securely using Supabase, a cloud database provider. Data is encrypted in transit and at rest. Each user can only access their own data — this is enforced at the database level using Row Level Security.</p>
+
+  <h2>AI Search Queries</h2>
+  <p>When you use the Ask AI feature, your queries are sent to Anthropic's Claude API to generate campsite recommendations. Queries are not stored by us beyond the current session. Please review <a href="https://www.anthropic.com/privacy" target="_blank">Anthropic's privacy policy</a> for how they handle API requests.</p>
+
+  <h2>Analytics</h2>
+  <p>We use Vercel Analytics to collect anonymous, aggregated data about page views and visitor counts. This data does not include personally identifiable information and cannot be used to track individual users.</p>
+
+  <h2>Data Sharing</h2>
+  <p>We do not sell your personal data. We do not share your data with third parties except:</p>
+  <ul>
+    <li>Supabase (database infrastructure)</li>
+    <li>Anthropic (AI search processing)</li>
+    <li>Vercel (hosting and analytics)</li>
+  </ul>
+  <p>All third-party providers are bound by their own privacy policies and data protection agreements.</p>
+
+  <h2>Shared Spot Links</h2>
+  <p>When you share a campsite using the Share button, basic campsite information (name, location, description, fees) is stored in our database to generate a shareable link. This information is publicly accessible to anyone with the link.</p>
+
+  <h2>Your Rights</h2>
+  <p>You have the right to:</p>
+  <ul>
+    <li>Access the personal data we hold about you.</li>
+    <li>Request deletion of your account and all associated data.</li>
+    <li>Export your saved data.</li>
+    <li>Opt out of analytics by using a browser with ad/tracking blockers.</li>
+  </ul>
+  <p>To request account deletion or data export, contact us at <a href="mailto:hello@nomadai.us">hello@nomadai.us</a>.</p>
+
+  <h2>Children's Privacy</h2>
+  <p>NomadAI is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13.</p>
+
+  <h2>Changes to This Policy</h2>
+  <p>We may update this policy from time to time. We will notify users of significant changes by updating the date at the top of this page.</p>
+
+  <h2>Contact</h2>
+  <p>If you have questions about this privacy policy, contact us at <a href="mailto:hello@nomadai.us">hello@nomadai.us</a>.</p>
+</div>
+<div class="footer">© 2026 NomadAI · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></div>
+</body>
+</html>
