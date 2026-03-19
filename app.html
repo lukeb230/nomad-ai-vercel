@@ -1329,10 +1329,17 @@ async function fetchPlacePhotos(name, location, site) {
   const cached = getPhotoCache(name);
   if (cached) return cached;
 
-  // 2. Dispersed/BLM → Mapbox satellite, skip Google entirely
+  // 2. Try Wikimedia Commons for everything (free, no API key)
+  const lat = site?.coordinates?.lat;
+  const lng = site?.coordinates?.lng;
+  const wiki = await fetchWikimediaPhotos(name, lat, lng);
+  if (wiki && wiki.length > 0) {
+    setPhotoCache(name, wiki);
+    return wiki;
+  }
+
+  // 3. Dispersed/BLM with no Wikimedia → Mapbox satellite
   if (site && isDispersed(site)) {
-    const lat = site.coordinates?.lat;
-    const lng = site.coordinates?.lng;
     const sat = mapboxPhoto(lat, lng);
     if (sat) {
       const photos = [sat];
@@ -1340,15 +1347,6 @@ async function fetchPlacePhotos(name, location, site) {
       return photos;
     }
     return null;
-  }
-
-  // 3. Try Wikimedia Commons (free, no API key)
-  const lat = site?.coordinates?.lat;
-  const lng = site?.coordinates?.lng;
-  const wiki = await fetchWikimediaPhotos(name, lat, lng);
-  if (wiki && wiki.length > 0) {
-    setPhotoCache(name, wiki);
-    return wiki;
   }
 
   // 4. Google Places as last resort
