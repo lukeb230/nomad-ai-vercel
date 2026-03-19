@@ -2252,6 +2252,13 @@ async function doNLSearch() {
       setResSection(true);
       recalcDistances(sites);
       const resEl = document.getElementById('res');
+      // Set route pin mode BEFORE rendering cards so pin buttons appear
+      if (isRouteQuery) {
+        const selId = 'route-sel-' + Date.now();
+        window._pendingRouteSelId = selId;
+        window._routePinState = {};
+        window._pendingRouteSites = sites.filter(s => s.coordinates?.lat && s.coordinates?.lng);
+      }
       resEl.innerHTML = sites.map((s,i) => cardHTML(s,i,false)).join('');
       // Re-render distances after short delay in case location just came in
       setTimeout(() => { recalcDistances(sites); resEl.querySelectorAll('[data-cardid]').forEach((card,i) => { const s=sites[i]; if(s) { const locEl=card.querySelector('.sc-loc'); if(locEl&&s.distance) locEl.textContent='📍 '+s.distance; } }); }, 2000);
