@@ -1,11 +1,12 @@
 {
   "rewrites": [
     { "source": "/app", "destination": "/app.html" },
-    { "source": "/spot/:id", "destination": "/spot.html" },
-    { "source": "/spot", "destination": "/spot.html" },
+    { "source": "/spot/:id", "destination": "/app.html" },
+    { "source": "/spot", "destination": "/app.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
-    { "source": "/terms", "destination": "/terms.html" },
-    { "source": "/api/claude", "destination": "/api/claude" },
-    { "source": "/api/places", "destination": "/api/places" }
+    { "source": "/terms", "destination": "/terms.html" }
+  ],
+  "errorHandling": [
+    { "error": 404, "destination": "/404.html" }
   ]
 }
