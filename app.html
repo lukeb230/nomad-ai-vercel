@@ -802,6 +802,7 @@
       <input class="auth-input" id="auth-email" type="email" placeholder="Email address" autocomplete="email"/>
       <input class="auth-input" id="auth-password" type="password" placeholder="Password" autocomplete="current-password"/>
       <button class="auth-btn" id="auth-submit-btn" onclick="authSubmit()">Sign in</button>
+      <div id="auth-legal" style="display:none;text-align:center;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6;">By creating an account you agree to our<br><a href="/terms" target="_blank" style="color:var(--tan);font-weight:700;">Terms of Service</a> and <a href="/privacy" target="_blank" style="color:var(--tan);font-weight:700;">Privacy Policy</a></div>
       <div class="auth-switch" id="auth-switch">Don't have an account? <span onclick="toggleAuthMode()">Sign up</span></div>
       <div class="auth-skip"><span onclick="closeAuth()">Continue without account</span></div>
     </div>
@@ -2898,6 +2899,7 @@ function closeAuth() {
 function toggleAuthMode() {
   authMode = authMode === 'signin' ? 'signup' : 'signin';
   document.getElementById('auth-submit-btn').textContent = authMode === 'signin' ? 'Sign in' : 'Create account';
+  document.getElementById('auth-legal').style.display = authMode === 'signup' ? 'block' : 'none';
   document.getElementById('auth-sub').textContent = authMode === 'signin' ? 'Sign in to sync your saved spots across all your devices.' : 'Create a free account to sync your spots everywhere.';
   document.getElementById('auth-switch').innerHTML = authMode === 'signin' ? "Don't have an account? <span onclick='toggleAuthMode()'>Sign up</span>" : "Already have an account? <span onclick='toggleAuthMode()'>Sign in</span>";
   document.getElementById('auth-error').style.display = 'none';
