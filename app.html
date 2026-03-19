@@ -1314,7 +1314,6 @@ async function setPhotoCache(name, photos, source = 'unknown') {
 
 async function fetchWikimediaPhotos(name, lat, lng) {
   try {
-    // Helper to check if a URL looks like a real photo (not a document/PDF/svg)
     function isPhoto(url) {
       if (!url) return false;
       const u = url.toLowerCase();
@@ -1322,24 +1321,37 @@ async function fetchWikimediaPhotos(name, lat, lng) {
         && !u.includes('pdf') && !u.includes('svg') && !u.includes('document') && !u.includes('archive');
     }
 
-    // 1. Try exact Wikipedia article name
-    const r = await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages&piprop=original&pithumbsize=800&pilimit=5&format=json&origin=*`);
-    const d = await r.json();
-    const page = Object.values(d.query?.pages || {})[0];
-    if (page && !page.missing && isPhoto(page.original?.source)) return [page.original.source];
+    // Strip common prefixes like "Dispersed Camping - ", "BLM Dispersed - ", "Primitive Camping - "
+    const cleanName = name
+      .replace(/^(dispersed camping|primitive camping|blm dispersed|blm land|usfs|free camping|campsite|camping)\s*[-–:]\s*/i, '')
+      .replace(/\s*(site \d+|campsite \d+|area \d+)$/i, '')
+      .trim();
 
-    // 2. Try shortened name (first 3 words)
-    const shortName = name.split(/[-–,]/)[0].trim().split(' ').slice(0, 4).join(' ');
-    if (shortName !== name && shortName.length > 4) {
-      const r2 = await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(shortName)}&prop=pageimages&piprop=original&pithumbsize=800&pilimit=5&format=json&origin=*`);
-      const d2 = await r2.json();
-      const page2 = Object.values(d2.query?.pages || {})[0];
-      if (page2 && !page2.missing && isPhoto(page2.original?.source)) return [page2.original.source];
+    // Build list of search candidates from most to least specific
+    const candidates = [cleanName];
+    // Also try splitting on " - " to get the location part e.g. "Inyo National Forest" from "Dispersed - Inyo National Forest"
+    if (name.includes(' - ')) candidates.push(name.split(' - ').slice(1).join(' - ').trim());
+    // Try first 4 words of clean name
+    const short = cleanName.split(' ').slice(0, 4).join(' ');
+    if (short !== cleanName) candidates.push(short);
+    // Try first 3 words
+    const shorter = cleanName.split(' ').slice(0, 3).join(' ');
+    if (shorter !== short) candidates.push(shorter);
+
+    // Deduplicate
+    const tried = new Set();
+    for (const candidate of candidates) {
+      if (tried.has(candidate) || candidate.length < 4) continue;
+      tried.add(candidate);
+      const r = await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(candidate)}&prop=pageimages&piprop=original&pithumbsize=800&pilimit=5&format=json&origin=*`);
+      const d = await r.json();
+      const page = Object.values(d.query?.pages || {})[0];
+      if (page && !page.missing && isPhoto(page.original?.source)) return [page.original.source];
     }
 
-    // 3. Try by coordinates — only Wikipedia geo articles (not Commons documents)
+    // Try by coordinates — Wikipedia geo articles near the spot
     if (lat && lng) {
-      const gr = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=8000&gscoord=${lat}|${lng}&gslimit=5&format=json&origin=*`);
+      const gr = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gscoord=${lat}|${lng}&gslimit=5&format=json&origin=*`);
       const gd = await gr.json();
       for (const hit of (gd.query?.geosearch || [])) {
         const ir = await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(hit.title)}&prop=pageimages&piprop=original&pithumbsize=800&pilimit=3&format=json&origin=*`);
