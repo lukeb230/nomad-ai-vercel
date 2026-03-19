@@ -638,7 +638,6 @@
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<div id="offline-banner">📵 No internet connection — some features may not work</div>
 <div id="app" style="position:relative;z-index:1;">
   <!-- HOME TAB -->
   <div id="home-tab">
@@ -3212,11 +3211,8 @@ async function syncFromSupabase() {
 // ── OFFLINE DETECTION ──
 function updateOnlineStatus() {
   const banner = document.getElementById('offline-banner');
-  if (!navigator.onLine) {
-    banner.classList.add('show');
-  } else {
-    banner.classList.remove('show');
-  }
+  if (!banner) return;
+  banner.classList.toggle('show', !navigator.onLine);
 }
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
@@ -3356,5 +3352,6 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
     </div>
   </div>
 
+<div id="offline-banner">📵 No internet connection — some features may not work</div>
 </body>
 </html>
