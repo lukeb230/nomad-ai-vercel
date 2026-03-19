@@ -2271,18 +2271,18 @@ async function doNLSearch() {
         // Build selection UI in chat
         const selId = 'route-sel-' + Date.now();
         const checkboxes = withCoords.map((s, i) => `
-          <label style="display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:var(--darker);border-radius:10px;cursor:pointer;margin-bottom:6px;">
-            <input type="checkbox" id="${selId}-${i}" checked style="margin-top:3px;flex-shrink:0;accent-color:var(--tan);width:16px;height:16px;cursor:pointer;">
-            <div>
+          <div id="${selId}-item-${i}" onclick="toggleRoutePin('${selId}',${i})" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--darker);border-radius:10px;cursor:pointer;margin-bottom:6px;user-select:none;">
+            <span id="${selId}-pin-${i}" style="font-size:18px;transition:opacity .15s;">📍</span>
+            <div style="flex:1;">
               <div style="font-size:13px;font-weight:800;color:var(--sand);">${s.name}</div>
               <div style="font-size:11px;color:var(--muted);">${[s.city,s.state].filter(Boolean).join(', ')}${s.fee ? ' · ' + s.fee : ''}</div>
             </div>
-          </label>`).join('');
-        const html = `🧭 <span style="color:var(--sage);font-weight:800;">Found ${withCoords.length} stops along your route.</span> Check the ones you want to add:<br><br>
+          </div>`).join('');
+        const html = `🧭 <span style="color:var(--sage);font-weight:800;">Found ${withCoords.length} stops along your route.</span><br><br>Tap the 📍 to remove a stop — pinned stops get added to your route. When you're happy with the selection hit <strong>Build my route</strong>.<br><br>
           <div id="${selId}" style="display:flex;flex-direction:column;gap:2px;margin:8px 0;">${checkboxes}</div>
           <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
             <div onclick="buildRouteFromSelection('${selId}',${withCoords.length})" style="background:var(--tan);color:#e8d5b7;padding:8px 18px;border-radius:50px;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">🧭 Build my route</div>
-            <div onclick="selectAllRoute('${selId}',${withCoords.length},true)" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">Select all</div>
+            <div onclick="selectAllRoute('${selId}',${withCoords.length},true)" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">Pin all</div>
             <div onclick="selectAllRoute('${selId}',${withCoords.length},false)" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">Clear all</div>
           </div>`;
         appendChatMsg('ai', html);
@@ -3428,10 +3428,27 @@ function checkSearchLimit() {
 }
 
 
+// Track pin state (all pinned by default)
+const _routePinState = {};
+
+function toggleRoutePin(selId, i) {
+  const key = selId + '-' + i;
+  _routePinState[key] = (_routePinState[key] === false) ? true : false;
+  const pinEl = document.getElementById(selId + '-pin-' + i);
+  const itemEl = document.getElementById(selId + '-item-' + i);
+  const pinned = _routePinState[key] !== false;
+  if (pinEl) pinEl.style.opacity = pinned ? '1' : '0.25';
+  if (itemEl) itemEl.style.opacity = pinned ? '1' : '0.5';
+}
+
 function selectAllRoute(selId, count, checked) {
   for (let i = 0; i < count; i++) {
-    const el = document.getElementById(selId + '-' + i);
-    if (el) el.checked = checked;
+    const key = selId + '-' + i;
+    _routePinState[key] = checked;
+    const pinEl = document.getElementById(selId + '-pin-' + i);
+    const itemEl = document.getElementById(selId + '-item-' + i);
+    if (pinEl) pinEl.style.opacity = checked ? '1' : '0.25';
+    if (itemEl) itemEl.style.opacity = checked ? '1' : '0.5';
   }
 }
 
@@ -3439,8 +3456,9 @@ function buildRouteFromSelection(selId, count) {
   const sites = window._pendingRouteSites || [];
   const selected = [];
   for (let i = 0; i < count; i++) {
-    const el = document.getElementById(selId + '-' + i);
-    if (el && el.checked && sites[i]) selected.push(sites[i]);
+    const key = selId + '-' + i;
+    const pinned = _routePinState[key] !== false; // default true
+    if (pinned && sites[i]) selected.push(sites[i]);
   }
   if (!selected.length) {
     appendChatMsg('ai', 'No stops selected — check at least one to build your route.');
