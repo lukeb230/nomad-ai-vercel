@@ -6,7 +6,8 @@
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" }
   ],
-  "errorHandling": [
-    { "error": 404, "destination": "/404.html" }
+  "routes": [
+    { "handle": "error" },
+    { "status": 404, "dest": "/404.html" }
   ]
 }
