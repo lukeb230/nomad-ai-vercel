@@ -11,7 +11,6 @@ export default async function handler(req, res) {
 
   if (type === 'search') {
     try {
-      // Single call — Find Place with photos field directly, no Details needed
       const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(input)}&inputtype=textquery&fields=photos&key=${GKEY}`;
       const r = await fetch(url);
       const d = await r.json();
