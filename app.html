@@ -1259,21 +1259,75 @@ function plotRoute(){
 function refreshMap(){setTimeout(()=>{if(map)map.invalidateSize();setMapMode(mapMode);},100);}
 
 // ── PHOTOS ──
-async function fetchPlacePhotos(name,location){
-  try{
-    // Try with full name first
-    const r=await fetch(`/api/places?type=search&input=${encodeURIComponent(name+' campground '+location)}`);
-    const d=await r.json();
-    if(d.candidates&&d.candidates[0]&&d.candidates[0].photos&&d.candidates[0].photos.length>0){
-      return d.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
+// Mapbox token — add yours here or set as env var
+const MAPBOX_TOKEN = 'pk.eyJ1Ijoibm9tYWQtYWkiLCJhIjoiY21td3VxbDh6MncxZjJyb3J5cjcxZ3dqbSJ9.W5Z8U3ZOzE0lEd3IVGmEyw';
+
+// Check if a site is dispersed/BLM (skip Google for these)
+function isDispersed(site) {
+  const dispersedKeywords = /blm|dispersed|primitive|forest service|national forest|bureau of land|boondock|free camp/i;
+  const name = (site.name || '').toLowerCase();
+  const source = (site.source || '').toLowerCase();
+  const tags = (site.tags || []).join(' ').toLowerCase();
+  return dispersedKeywords.test(name) || dispersedKeywords.test(tags) || source === 'blm' || source === 'ioverlander';
+}
+
+// Mapbox satellite thumbnail for a coordinate
+function mapboxPhoto(lat, lng) {
+  if (!lat || !lng || !MAPBOX_TOKEN || MAPBOX_TOKEN.includes('placeholder')) return null;
+  const zoom = 14;
+  return `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${lng},${lat},${zoom},0/600x300@2x?access_token=${MAPBOX_TOKEN}`;
+}
+
+// Photo cache in localStorage
+function getPhotoCache(name) {
+  try { const c = JSON.parse(localStorage.getItem('cf_photo_cache')||'{}'); return c[name] || null; } catch(e) { return null; }
+}
+function setPhotoCache(name, photos) {
+  try {
+    const c = JSON.parse(localStorage.getItem('cf_photo_cache')||'{}');
+    c[name] = photos;
+    // Keep cache under 100 entries
+    const keys = Object.keys(c);
+    if (keys.length > 100) delete c[keys[0]];
+    localStorage.setItem('cf_photo_cache', JSON.stringify(c));
+  } catch(e) {}
+}
+
+async function fetchPlacePhotos(name, location, site) {
+  // 1. Check cache first
+  const cached = getPhotoCache(name);
+  if (cached) return cached;
+
+  // 2. Dispersed/BLM → use Mapbox satellite, skip Google entirely
+  if (site && isDispersed(site)) {
+    const lat = site.coordinates?.lat;
+    const lng = site.coordinates?.lng;
+    const sat = mapboxPhoto(lat, lng);
+    if (sat) {
+      const photos = [sat];
+      setPhotoCache(name, photos);
+      return photos;
     }
-    // Try with just the name
-    const r2=await fetch(`/api/places?type=search&input=${encodeURIComponent(name)}`);
-    const d2=await r2.json();
-    if(d2.candidates&&d2.candidates[0]&&d2.candidates[0].photos&&d2.candidates[0].photos.length>0){
-      return d2.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
+    return null;
+  }
+
+  // 3. Established campground → Google Places (with cache)
+  try {
+    const r = await fetch(`/api/places?type=search&input=${encodeURIComponent(name+' campground '+location)}`);
+    const d = await r.json();
+    if (d.candidates&&d.candidates[0]&&d.candidates[0].photos&&d.candidates[0].photos.length>0) {
+      const photos = d.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
+      setPhotoCache(name, photos);
+      return photos;
     }
-  }catch(e){}
+    const r2 = await fetch(`/api/places?type=search&input=${encodeURIComponent(name)}`);
+    const d2 = await r2.json();
+    if (d2.candidates&&d2.candidates[0]&&d2.candidates[0].photos&&d2.candidates[0].photos.length>0) {
+      const photos = d2.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
+      setPhotoCache(name, photos);
+      return photos;
+    }
+  } catch(e) {}
   return null;
 }
 function fallbackPhotos(site){const q=encodeURIComponent((site.tags||['camping']).slice(0,2).join(' ')+' campsite');return[0,1,2].map(i=>`https://source.unsplash.com/800x400/?${q}&sig=${i+Math.floor(Math.random()*500)}`);}
@@ -1304,7 +1358,7 @@ function addSwipe(carousel, id) {
 }
 async function loadPhotosForCard(cardId,site,location){
   const carousel=document.getElementById(`${cardId}-carousel`);if(!carousel)return;
-  const photos=await fetchPlacePhotos(site.name,location)||fallbackPhotos(site);
+  const photos=await fetchPlacePhotos(site.name,location,site)||fallbackPhotos(site);
   const track=carousel.querySelector('.carousel-track');const dots=carousel.querySelector('.carousel-dots');
   track.innerHTML=photos.map((url,pi)=>`<div class="carousel-slide"><span class="ph-loader">🏕️</span><img src="${url}" loading="lazy" style="cursor:zoom-in;" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none';" onclick="openLightbox(${JSON.stringify(photos).replace(/"/g,'&quot;')},${pi});event.stopPropagation();" /></div>`).join('');
   dots.innerHTML=photos.map((_,i)=>`<div class="dot${i===0?' active':''}" id="${cardId}-dot-${i}"></div>`).join('');
