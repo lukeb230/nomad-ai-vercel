@@ -1516,7 +1516,7 @@ function cardHTML(s,i,isSavedView=false){
       <div class="sc-tags">${(s.city||s.state)?'<span class="tag-loc">📍 '+(s.city?s.city+', ':'')+''+( s.state||'')+'</span>':''  }${tags}</div>
       ${notesSection}
       ${(s.coordinates&&s.coordinates.lat)?'<div onclick="copyCoords('+s.coordinates.lat+','+s.coordinates.lng+',this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:var(--dark);border:1.5px solid var(--slate);border-radius:8px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;margin-top:14px;margin-bottom:10px;user-select:none;">📍 '+s.coordinates.lat.toFixed(4)+', '+s.coordinates.lng.toFixed(4)+'</div>':''}
-      <div class="sc-foot" style="margin-top:${notesSection?'10px':'0'};grid-template-columns:${isRoutePinMode?'1fr 1fr 44px 44px 44px':isSavedView?'1fr 1fr 44px 44px 44px':'1fr 1fr 44px 44px'}">${listingBtn}<a class="fb outline" href="${mapsUrl}" target="_blank">🗺 Directions</a>${visitBtn}${isRoutePinMode?pinBtn:isSavedView?tripBtn:''}${actionBtn}</div>
+      <div class="sc-foot" style="margin-top:${notesSection?'10px':'0'};grid-template-columns:${isSavedView?'1fr 1fr 44px 44px 44px':isRoutePinMode?'1fr 1fr 44px 44px':'1fr 1fr 44px 44px'}">${listingBtn}<a class="fb outline" href="${mapsUrl}" target="_blank">🗺 Directions</a>${isRoutePinMode?pinBtn:isSavedView?visitBtn:''}${isSavedView?tripBtn:''}${actionBtn}</div>
     </div>
   </div>`;
 }
