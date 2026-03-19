@@ -3438,15 +3438,16 @@ function toggleCardPin(siteName, el) {
   if (el._lastPinToggle && now - el._lastPinToggle < 300) return;
   el._lastPinToggle = now;
   const key = window._pendingRouteSelId + '-' + siteName;
+  if (!el.dataset.pinned) el.dataset.pinned = '0';
   const isPinned = el.dataset.pinned === '1';
   if (isPinned) {
     el.dataset.pinned = '0';
-    el.innerHTML = '📍';
+    el.innerHTML = '📌';
     el.classList.remove('pinned');
     window._routePinState[key] = 'unpinned';
   } else {
     el.dataset.pinned = '1';
-    el.innerHTML = '📌';
+    el.innerHTML = '📍';
     el.classList.add('pinned');
     window._routePinState[key] = 'pinned';
   }
@@ -3460,7 +3461,7 @@ function pinAllCards() {
   });
   document.querySelectorAll('.route-pin-btn').forEach(btn => {
     btn.dataset.pinned = '1';
-    btn.innerHTML = '📌';
+    btn.innerHTML = '📍';
     btn.classList.add('pinned');
   });
 }
