@@ -2070,7 +2070,11 @@ async function doNLSearch() {
   if (isAppQuestion) {
     userContent = query;
   } else {
-    userContent = 'Find real campsites matching: "' + query + '". ' + locationContext + ' Return ONLY a JSON array of up to 12 campsites. Each: ' + fields + ' No fake results. Start with MSG: followed by one friendly sentence (max 15 words), then newline, then JSON array only.';
+    const wantsEstablished = /hookup|full.hook|electric|water.hookup|rv.park|reservation|reserv|shower|dump station|glamping|cabin|resort|hotel|motel|amenities|wifi|flush.toilet/i.test(query);
+    const mixInstruction = wantsEstablished
+      ? 'Focus on established campgrounds with amenities as requested.'
+      : 'IMPORTANT: At least half the results (6 of 12) must be free dispersed, BLM, or primitive sites unless the area genuinely has none. Mix in established campgrounds for variety but always prioritize dispersed/free options first.';
+    userContent = 'Find real campsites matching: "' + query + '". ' + locationContext + ' ' + mixInstruction + ' Return ONLY a JSON array of up to 12 campsites. Each: ' + fields + ' No fake results. Start with MSG: followed by one friendly sentence (max 15 words), then newline, then JSON array only.';
   }
 
   // Add to history
