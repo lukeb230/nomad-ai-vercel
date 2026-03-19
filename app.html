@@ -142,13 +142,6 @@
     .carousel-track { display: flex; height: 100%; transition: transform 0.35s ease; }
     .carousel-slide { min-width: 100%; height: 100%; background: var(--dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; }
     .carousel-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    @media (max-width: 768px) {
-  .carousel-slide img {
-    object-fit: contain;
-    object-position: center;
-    background: #000; /* or your dark color */
-  }
-}
     .ph-loader { position: absolute; font-size: 2rem; opacity: .3; pointer-events: none; }
     .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; background: rgba(28,40,32,0.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; font-size: 14px; color: var(--sand); user-select: none; }
     .carousel-btn.prev { left: 8px; }
@@ -217,6 +210,11 @@
     #lightbox-prev { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     #lightbox-next { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     #lightbox-counter { position: absolute; bottom: 24px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; }
+
+    @media (max-width: 768px) {
+      .carousel { height: 220px; }
+      .carousel-slide img { object-fit: cover; object-position: center center; }
+    }
     /* FULL CARD MODAL */
     #card-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999; background: rgba(0,0,0,0.7); overflow-y: auto; }
     #card-modal.show { display: block; }
