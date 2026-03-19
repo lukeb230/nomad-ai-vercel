@@ -128,8 +128,8 @@
     #map-search-btn { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; background: var(--tan); color: var(--sand); border: none; border-radius: 50px; padding: 12px 26px; font-size: 14px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5); white-space: nowrap; }
     #map-search-btn.show { display: block; }
     #map-click-hint { position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%); z-index: 9999; background: var(--card); color: var(--muted); border: 1px solid var(--slate); border-radius: 50px; padding: 6px 16px; font-size: 11px; font-weight: 700; font-family: 'Nunito', sans-serif; pointer-events: none; white-space: nowrap; }
-    .leaflet-popup-content-wrapper { background: #324438; border: 1px solid #6a8c8a; border-radius: 12px; color: #e8d5b7; font-family: 'Nunito', sans-serif; }
-    .leaflet-popup-tip { background: #324438; }
+    .leaflet-popup-content-wrapper { background: var(--card); border: 1px solid var(--slate); border-radius: 12px; color: var(--sand); font-family: 'Nunito', sans-serif; }
+    .leaflet-popup-tip { background: var(--card); }
     .leaflet-popup-content { margin: 12px 14px; }
     .popup-name { font-size: 14px; font-weight: 800; color: var(--sand); margin-bottom: 4px; }
     .popup-meta { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
@@ -2459,6 +2459,7 @@ function toggleLightMode(){
   const app=document.getElementById('app');
   const btn=document.getElementById('light-mode-toggle');
   app.classList.toggle('light');
+  document.body.classList.toggle('light', app.classList.contains('light'));
   btn.classList.toggle('on');
   localStorage.setItem('cf_light_mode', app.classList.contains('light')?'1':'0');
   syncToSupabase();
@@ -2487,7 +2488,7 @@ function initPrefs(){
   const app = document.getElementById('app');
   const savedMode = localStorage.getItem('cf_light_mode');
   if(savedMode === '0') { app.classList.remove('light'); localStorage.setItem('cf_light_mode','0'); }
-  else { app.classList.add('light'); localStorage.setItem('cf_light_mode','1'); }
+  else { app.classList.add('light'); document.body.classList.add('light'); localStorage.setItem('cf_light_mode','1'); }
   const savedRadius=localStorage.getItem('cf_default_radius');
   if(savedRadius) { radius=parseInt(savedRadius); }
 }
@@ -3363,7 +3364,7 @@ async function syncFromSupabase() {
       localStorage.setItem('cf_light_mode', mode);
       const app = document.getElementById('app');
       const toggle = document.getElementById('light-mode-toggle');
-      if (mode === '1') { app.classList.add('light'); if(toggle) toggle.classList.add('on'); }
+      if (mode === '1') { app.classList.add('light'); document.body.classList.add('light'); if(toggle) toggle.classList.add('on'); }
       else { app.classList.remove('light'); if(toggle) toggle.classList.remove('on'); }
     }, 50);
   } else if (settingsRes.error) console.error('Settings fetch error:', settingsRes.error.message);
