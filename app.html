@@ -212,8 +212,13 @@
     #lightbox-counter { position: absolute; bottom: 24px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; }
 
     @media (max-width: 768px) {
-      .carousel { height: 220px; }
-      .carousel-slide img { object-fit: cover; object-position: center center; }
+      .carousel { height: 180px; background: var(--card); }
+      .carousel-slide { background: var(--card); }
+      .carousel-slide img {
+        object-fit: contain;
+        object-position: center center;
+        background: transparent;
+      }
     }
     /* FULL CARD MODAL */
     #card-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999; background: rgba(0,0,0,0.7); overflow-y: auto; }
