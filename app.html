@@ -1854,8 +1854,12 @@ function openTripsHistory() {
         </div>
       </div>`).join('');
   }
+  const isLight = document.getElementById('app').classList.contains('light');
+  const panel = document.getElementById('trips-panel');
+  panel.style.background = isLight ? '#f8f4ec' : '#2a3830';
+  panel.style.color = isLight ? '#2a3830' : '#e8d5b7';
   document.getElementById('trips-overlay').style.display = 'block';
-  document.getElementById('trips-panel').style.display = 'block';
+  panel.style.display = 'block';
   document.body.style.overflow = 'hidden';
 }
 
