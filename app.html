@@ -2279,10 +2279,10 @@ async function doNLSearch() {
       const withCoords = sites.filter(s => s.coordinates?.lat && s.coordinates?.lng);
       if (withCoords.length) {
         const activeSelId = window._pendingRouteSelId;
-        const html = `🧭 <span style="color:var(--sage);font-weight:800;">Found ${withCoords.length} stops along your route.</span><br><br>Tap 📍 on the cards below to pin the stops you want, then hit <strong>Build my route</strong>.<br><br>
+        const html = `🧭 <span style="color:var(--sage);font-weight:800;">Found ${withCoords.length} stops along your route.</span><br><br>Tap 📌 on the cards below to pin the stops you want, then hit <strong>Build my route</strong>.<br><br>
           <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
             <div onclick="buildRouteFromSelection('${activeSelId}',${withCoords.length})" style="background:var(--tan);color:#e8d5b7;padding:8px 18px;border-radius:50px;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">🧭 Build my route</div>
-            <div onclick="pinAllCards()" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">📍 Pin all</div>
+            <div onclick="pinAllCards()" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">📌 Pin all</div>
           </div>`;
         appendChatMsg('ai', html);
       }
@@ -3492,7 +3492,7 @@ function buildRouteFromSelection(selId, count) {
   const pinState = window._routePinState || {};
   const selected = sites.filter(s => pinState[selId + '-' + s.name] === 'pinned');
   if (!selected.length) {
-    appendChatMsg('ai', '📍 Tap the pin button on at least one card below to add it to your route, then hit Build my route.');
+    appendChatMsg('ai', '📌 Tap the pin button on at least one card below to add it to your route, then hit Build my route.');
     return;
   }
   // Auto-optimize selected stops
