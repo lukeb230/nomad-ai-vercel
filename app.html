@@ -1490,6 +1490,11 @@ function cardHTML(s,i,isSavedView=false){
   const savedClass=isSaved(s.name)?'save-btn saved':'save-btn';
   const visitedClass=isVisited(s.name)?'visited-btn been':'visited-btn';
   const tripClass=inTrip(s.name)?'trip-btn added':'trip-btn';
+  const isRoutePinMode = !!window._pendingRouteSelId;
+  const isPinned = isRoutePinMode && (window._routePinState[window._pendingRouteSelId + '-' + s.name] !== true);
+  const pinBtn = isRoutePinMode
+    ? `<div class="fb route-pin-btn${isPinned ? '' : ' pinned'}" onclick="toggleCardPin(${JSON.stringify(s).replace(/"/g,'&quot;')},this)" title="Pin to route" style="font-size:16px;">${isPinned ? '📌' : '📍'}</div>`
+    : '';
   const tripBtn=isSavedView?`<div class="fb ${tripClass}" onclick="addToTrip(${JSON.stringify(s).replace(/"/g,'&quot;')},this)" title="Add to trip">+</div>`:'';
   const actionBtn=isSavedView?`<div class="fb delete-btn" onclick="removeSaved('${s.name.replace(/'/g,"\\'")}')">🗑️</div>`:`<div class="fb ${savedClass}" onclick="toggleSave(${JSON.stringify(s).replace(/"/g,'&quot;')},this)">🔖</div>`;
 
@@ -1511,7 +1516,7 @@ function cardHTML(s,i,isSavedView=false){
       <div class="sc-tags">${(s.city||s.state)?'<span class="tag-loc">📍 '+(s.city?s.city+', ':'')+''+( s.state||'')+'</span>':''  }${tags}</div>
       ${notesSection}
       ${(s.coordinates&&s.coordinates.lat)?'<div onclick="copyCoords('+s.coordinates.lat+','+s.coordinates.lng+',this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:var(--dark);border:1.5px solid var(--slate);border-radius:8px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;margin-top:14px;margin-bottom:10px;user-select:none;">📍 '+s.coordinates.lat.toFixed(4)+', '+s.coordinates.lng.toFixed(4)+'</div>':''}
-      <div class="sc-foot" style="margin-top:${notesSection?'10px':'0'};grid-template-columns:${isSavedView?'1fr 1fr 44px 44px 44px':'1fr 1fr 44px 44px'}">${listingBtn}<a class="fb outline" href="${mapsUrl}" target="_blank">🗺 Directions</a>${visitBtn}${isSavedView?tripBtn:''}${actionBtn}</div>
+      <div class="sc-foot" style="margin-top:${notesSection?'10px':'0'};grid-template-columns:${isRoutePinMode?'1fr 1fr 44px 44px 44px':isSavedView?'1fr 1fr 44px 44px 44px':'1fr 1fr 44px 44px'}">${listingBtn}<a class="fb outline" href="${mapsUrl}" target="_blank">🗺 Directions</a>${visitBtn}${isRoutePinMode?pinBtn:isSavedView?tripBtn:''}${actionBtn}</div>
     </div>
   </div>`;
 }
@@ -2270,20 +2275,14 @@ async function doNLSearch() {
         window._pendingRouteSites = withCoords;
         // Build selection UI in chat
         const selId = 'route-sel-' + Date.now();
-        const checkboxes = withCoords.map((s, i) => `
-          <div id="${selId}-item-${i}" onclick="toggleRoutePin('${selId}',${i})" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--darker);border-radius:10px;cursor:pointer;margin-bottom:6px;user-select:none;">
-            <span id="${selId}-pin-${i}" style="font-size:18px;transition:opacity .15s;">📍</span>
-            <div style="flex:1;">
-              <div style="font-size:13px;font-weight:800;color:var(--sand);">${s.name}</div>
-              <div style="font-size:11px;color:var(--muted);">${[s.city,s.state].filter(Boolean).join(', ')}${s.fee ? ' · ' + s.fee : ''}</div>
-            </div>
-          </div>`).join('');
-        const html = `🧭 <span style="color:var(--sage);font-weight:800;">Found ${withCoords.length} stops along your route.</span><br><br>Tap the 📍 to remove a stop — pinned stops get added to your route. When you're happy with the selection hit <strong>Build my route</strong>.<br><br>
-          <div id="${selId}" style="display:flex;flex-direction:column;gap:2px;margin:8px 0;">${checkboxes}</div>
-          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        // Enter route pin mode
+        window._pendingRouteSelId = selId;
+        window._routePinState = {};
+        window._pendingRouteSites = withCoords;
+        const html = `🧭 <span style="color:var(--sage);font-weight:800;">Found ${withCoords.length} stops along your route.</span><br><br>Tap the <strong>📍 pin</strong> on the cards below to add stops to your route. When you're ready, hit <strong>Build my route</strong>.<br><br>
+          <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
             <div onclick="buildRouteFromSelection('${selId}',${withCoords.length})" style="background:var(--tan);color:#e8d5b7;padding:8px 18px;border-radius:50px;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">🧭 Build my route</div>
-            <div onclick="selectAllRoute('${selId}',${withCoords.length},true)" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">Pin all</div>
-            <div onclick="selectAllRoute('${selId}',${withCoords.length},false)" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">Clear all</div>
+            <div onclick="pinAllCards(${withCoords.length})" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">📍 Pin all</div>
           </div>`;
         appendChatMsg('ai', html);
       }
@@ -3428,8 +3427,32 @@ function checkSearchLimit() {
 }
 
 
-// Track pin state (all pinned by default)
-const _routePinState = {};
+
+function toggleCardPin(site, btn) {
+  if (!window._routePinState) window._routePinState = {};
+  const isPinned = window._routePinState[site.name] === 'pinned';
+  if (isPinned) {
+    window._routePinState[site.name] = 'unpinned';
+    btn.textContent = '📍';
+    btn.classList.remove('pinned');
+  } else {
+    window._routePinState[site.name] = 'pinned';
+    btn.textContent = '📌';
+    btn.classList.add('pinned');
+  }
+}
+
+function pinAllCards(count) {
+  if (!window._pendingRouteSites) return;
+  window._pendingRouteSites.forEach(s => {
+    if (window._routePinState) window._routePinState[s.name] = 'pinned';
+  });
+  // Update all pin buttons on visible cards
+  document.querySelectorAll('.route-pin-btn').forEach(btn => {
+    btn.textContent = '📌';
+    btn.classList.add('pinned');
+  });
+}
 
 function toggleRoutePin(selId, i) {
   const key = selId + '-' + i;
@@ -3454,11 +3477,12 @@ function selectAllRoute(selId, count, checked) {
 
 function buildRouteFromSelection(selId, count) {
   const sites = window._pendingRouteSites || [];
-  const selected = [];
-  for (let i = 0; i < count; i++) {
-    const key = selId + '-' + i;
-    const pinned = _routePinState[key] !== false; // default true
-    if (pinned && sites[i]) selected.push(sites[i]);
+  // Collect pinned sites by name
+  const pinnedNames = new Set(Object.entries(window._routePinState || {}).filter(([k,v]) => v === 'pinned').map(([k]) => k));
+  const selected = sites.filter(s => pinnedNames.has(s.name));
+  if (!selected.length && pinnedNames.size === 0) {
+    appendChatMsg('ai', '📍 Tap the pin button on at least one card below to add it to your route, then hit Build my route.');
+    return;
   }
   if (!selected.length) {
     appendChatMsg('ai', 'No stops selected — check at least one to build your route.');
@@ -3495,6 +3519,8 @@ function buildRouteFromSelection(selId, count) {
   if (typeof renderSaved === 'function') renderSaved();
   syncToSupabase();
   window._pendingRouteSites = null;
+  window._pendingRouteSelId = null;
+  window._routePinState = {};
   appendChatMsg('ai', '✓ <span style="color:var(--sage);font-weight:800;">Route built with ' + optimized.length + ' stop' + (optimized.length !== 1 ? 's' : '') + ', optimized for the most efficient order.</span> Head to Saved → Plan a trip to reorder or adjust, or check the Map → My route tab.');
 }
 
