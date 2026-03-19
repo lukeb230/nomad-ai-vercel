@@ -1358,9 +1358,18 @@ function addSwipe(carousel, id) {
 }
 async function loadPhotosForCard(cardId,site,location){
   const carousel=document.getElementById(`${cardId}-carousel`);if(!carousel)return;
-  const photos=await fetchPlacePhotos(site.name,location,site)||fallbackPhotos(site);
+  const fetched=await fetchPlacePhotos(site.name,location,site);
+  const isFallback = !fetched;
+  const photos=fetched||fallbackPhotos(site);
   const track=carousel.querySelector('.carousel-track');const dots=carousel.querySelector('.carousel-dots');
   track.innerHTML=photos.map((url,pi)=>`<div class="carousel-slide"><span class="ph-loader">🏕️</span><img src="${url}" loading="lazy" style="cursor:zoom-in;" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none';" onclick="openLightbox(${JSON.stringify(photos).replace(/"/g,'&quot;')},${pi});event.stopPropagation();" /></div>`).join('');
+  if (isFallback) {
+    const badge = document.createElement('div');
+    badge.style.cssText = 'position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.7);font-size:9px;font-weight:700;padding:3px 8px;border-radius:50px;pointer-events:none;letter-spacing:.04em;backdrop-filter:blur(4px);';
+    badge.textContent = '📷 Illustrative photo';
+    carousel.style.position = 'relative';
+    carousel.appendChild(badge);
+  }
   dots.innerHTML=photos.map((_,i)=>`<div class="dot${i===0?' active':''}" id="${cardId}-dot-${i}"></div>`).join('');
   if(!carousel.querySelector('.prev')&&photos.length>1){carousel.insertAdjacentHTML('beforeend',`<div class="carousel-btn prev" onclick="slide('${cardId}',-1)">‹</div><div class="carousel-btn next" onclick="slide('${cardId}',1)">›</div>`);}
   addSwipe(carousel, cardId);
