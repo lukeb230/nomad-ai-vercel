@@ -125,7 +125,7 @@
     #back-to-top { position: fixed; bottom: 80px; right: 16px; z-index: 900; width: 40px; height: 40px; border-radius: 50%; background: var(--card); border: 1.5px solid var(--slate); color: var(--sand); font-size: 18px; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.4); transition: opacity .2s; }
     #back-to-top.show { display: flex; }
     @keyframes pulse { 0% { transform: scale(1); opacity: 0.6; } 70% { transform: scale(2); opacity: 0; } 100% { transform: scale(1); opacity: 0; } }
-    #map-search-btn { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; background: var(--tan); color: var(--sand); border: none; border-radius: 50px; padding: 12px 26px; font-size: 14px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5); white-space: nowrap; }
+    #map-search-btn { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; background: var(--tan); color: var(--sand) !important; border: none; border-radius: 50px; padding: 12px 26px; font-size: 14px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5); white-space: nowrap; }
     #map-search-btn.show { display: block; }
     #map-click-hint { position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%); z-index: 9999; background: var(--card); color: var(--muted); border: 1px solid var(--slate); border-radius: 50px; padding: 6px 16px; font-size: 11px; font-weight: 700; font-family: 'Nunito', sans-serif; pointer-events: none; white-space: nowrap; }
     .leaflet-popup-content-wrapper { background: var(--card); border: 1px solid var(--slate); border-radius: 12px; color: var(--sand); font-family: 'Nunito', sans-serif; }
@@ -133,7 +133,7 @@
     .leaflet-popup-content { margin: 12px 14px; }
     .popup-name { font-size: 14px; font-weight: 800; color: var(--sand); margin-bottom: 4px; }
     .popup-meta { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-    .popup-btn { display: inline-block; padding: 6px 14px; background: var(--tan); color: var(--darker); border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; font-family: 'Nunito', sans-serif; }
+    .popup-btn { display: inline-block; padding: 6px 14px; background: var(--tan); color: var(--sand) !important; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none !important; font-family: 'Nunito', sans-serif; }
 
     /* CARDS */
     .sc { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--slate); animation: fu .3s ease both; }
@@ -3683,4 +3683,3 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
 <div id="offline-banner">📵 No internet connection — some features may not work</div>
 </body>
 </html>
-
