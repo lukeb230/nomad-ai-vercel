@@ -1285,18 +1285,17 @@ const _localPhotoCache = {};
 async function getPhotoCache(name) {
   if (_localPhotoCache[name]) return _localPhotoCache[name];
   try {
-    const { data } = await supa.from('photo_cache').select('photos, source, cached_at').eq('campsite_name', name).maybeSingle();
+    const { data, error } = await supa.from('photo_cache').select('photos, source, cached_at').eq('campsite_name', name).maybeSingle();
+    if (error) { console.warn('photo_cache fetch error:', error.message); return null; }
     if (data?.photos) {
-      // Google photos expire after 7 days
-      if (data.source === 'google') {
+      if (data.source === 'google' && data.cached_at) {
         const age = Date.now() - new Date(data.cached_at).getTime();
-        const sevenDays = 7 * 24 * 60 * 60 * 1000;
-        if (age > sevenDays) return null; // treat as expired
+        if (age > 7 * 24 * 60 * 60 * 1000) return null;
       }
       _localPhotoCache[name] = data.photos;
       return data.photos;
     }
-  } catch(e) {}
+  } catch(e) { console.warn('photo_cache exception:', e); }
   return null;
 }
 
@@ -1310,6 +1309,16 @@ async function setPhotoCache(name, photos, source = 'unknown') {
       cached_at: new Date().toISOString()
     }, { onConflict: 'campsite_name' });
   } catch(e) {}
+}
+
+async function fetchWithTimeout(url, ms=5000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    const r = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    return r;
+  } catch(e) { clearTimeout(timer); throw e; }
 }
 
 async function fetchWikimediaPhotos(name, lat, lng) {
@@ -1389,23 +1398,7 @@ async function fetchPlacePhotos(name, location, site) {
     return null;
   }
 
-  // 4. Google Places as last resort
-  try {
-    const r = await fetch(`/api/places?type=search&input=${encodeURIComponent(name+' campground '+location)}`);
-    const d = await r.json();
-    if (d.candidates&&d.candidates[0]&&d.candidates[0].photos&&d.candidates[0].photos.length>0) {
-      const photos = d.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
-      setPhotoCache(name, photos, 'google');
-      return photos;
-    }
-    const r2 = await fetch(`/api/places?type=search&input=${encodeURIComponent(name)}`);
-    const d2 = await r2.json();
-    if (d2.candidates&&d2.candidates[0]&&d2.candidates[0].photos&&d2.candidates[0].photos.length>0) {
-      const photos = d2.candidates[0].photos.slice(0,5).map(p=>`/api/places?type=photo&ref=${encodeURIComponent(p.photo_reference)}`);
-      setPhotoCache(name, photos, 'google');
-      return photos;
-    }
-  } catch(e) {}
+  // Google Places temporarily disabled
   return null;
 }
 function fallbackPhotos(site){const q=encodeURIComponent((site.tags||['camping']).slice(0,2).join(' ')+' campsite');return[0,1,2].map(i=>`https://source.unsplash.com/800x400/?${q}&sig=${i+Math.floor(Math.random()*500)}`);}
