@@ -1107,6 +1107,7 @@ function initMap(){
   }
 
   map.on('click', function(e) {
+    if (mapMode !== 'results') return;
     mapClickLatLng = e.latlng;
     if (mapClickMarker) mapClickMarker.remove();
     mapClickMarker = L.circleMarker([e.latlng.lat, e.latlng.lng], {
@@ -1201,6 +1202,16 @@ function setMapMode(mode){
   document.getElementById('map-btn-results').classList.toggle('on',mode==='results');
   document.getElementById('map-btn-saved').classList.toggle('on',mode==='saved');
   document.getElementById('map-btn-route').classList.toggle('on',mode==='route');
+  // Hide search area UI on saved/route tabs
+  const hint = document.getElementById('map-click-hint');
+  const searchBtn = document.getElementById('map-search-btn');
+  if (mode === 'results') {
+    if (hint) hint.style.display = 'block';
+  } else {
+    if (hint) hint.style.display = 'none';
+    if (searchBtn) searchBtn.classList.remove('show');
+    if (mapClickMarker) { mapClickMarker.remove(); mapClickMarker = null; }
+  }
   clearMapMarkers();
   if(routePolyline&&mode!=='route'){routePolyline.remove();routePolyline=null;}
   if(mode==='results'){if(lastSearchResults.length)plotSites(lastSearchResults,'#e85555');}
