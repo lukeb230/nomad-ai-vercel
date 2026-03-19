@@ -1293,12 +1293,43 @@ function setPhotoCache(name, photos) {
   } catch(e) {}
 }
 
+async function fetchWikimediaPhotos(name, lat, lng) {
+  try {
+    // Try by name first
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages&piprop=original&pithumbsize=800&pilimit=5&format=json&origin=*`;
+    const r = await fetch(searchUrl);
+    const d = await r.json();
+    const pages = d.query?.pages || {};
+    const page = Object.values(pages)[0];
+    if (page && page.original?.source && !page.missing) {
+      return [page.original.source];
+    }
+    // Try by coordinates if available
+    if (lat && lng) {
+      const geoUrl = `https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=5000&gscoord=${lat}|${lng}&gslimit=3&format=json&origin=*`;
+      const gr = await fetch(geoUrl);
+      const gd = await gr.json();
+      const hits = gd.query?.geosearch || [];
+      for (const hit of hits) {
+        const imgUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(hit.title)}&prop=pageimages&piprop=original&pithumbsize=800&pilimit=3&format=json&origin=*`;
+        const ir = await fetch(imgUrl);
+        const id = await ir.json();
+        const pg = Object.values(id.query?.pages || {})[0];
+        if (pg && pg.original?.source && !pg.missing) {
+          return [pg.original.source];
+        }
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
 async function fetchPlacePhotos(name, location, site) {
   // 1. Check cache first
   const cached = getPhotoCache(name);
   if (cached) return cached;
 
-  // 2. Dispersed/BLM → use Mapbox satellite, skip Google entirely
+  // 2. Dispersed/BLM → Mapbox satellite, skip Google entirely
   if (site && isDispersed(site)) {
     const lat = site.coordinates?.lat;
     const lng = site.coordinates?.lng;
@@ -1311,7 +1342,16 @@ async function fetchPlacePhotos(name, location, site) {
     return null;
   }
 
-  // 3. Established campground → Google Places (with cache)
+  // 3. Try Wikimedia Commons (free, no API key)
+  const lat = site?.coordinates?.lat;
+  const lng = site?.coordinates?.lng;
+  const wiki = await fetchWikimediaPhotos(name, lat, lng);
+  if (wiki && wiki.length > 0) {
+    setPhotoCache(name, wiki);
+    return wiki;
+  }
+
+  // 4. Google Places as last resort
   try {
     const r = await fetch(`/api/places?type=search&input=${encodeURIComponent(name+' campground '+location)}`);
     const d = await r.json();
@@ -1360,13 +1400,14 @@ async function loadPhotosForCard(cardId,site,location){
   const carousel=document.getElementById(`${cardId}-carousel`);if(!carousel)return;
   const fetched=await fetchPlacePhotos(site.name,location,site);
   const isFallback = !fetched;
+  const isWikimedia = fetched && fetched[0] && (fetched[0].includes('wikipedia.org') || fetched[0].includes('wikimedia.org'));
   const photos=fetched||fallbackPhotos(site);
   const track=carousel.querySelector('.carousel-track');const dots=carousel.querySelector('.carousel-dots');
   track.innerHTML=photos.map((url,pi)=>`<div class="carousel-slide"><span class="ph-loader">🏕️</span><img src="${url}" loading="lazy" style="cursor:zoom-in;" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none';" onclick="openLightbox(${JSON.stringify(photos).replace(/"/g,'&quot;')},${pi});event.stopPropagation();" /></div>`).join('');
-  if (isFallback) {
+  if (isFallback || isWikimedia) {
     const badge = document.createElement('div');
     badge.style.cssText = 'position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.7);font-size:9px;font-weight:700;padding:3px 8px;border-radius:50px;pointer-events:none;letter-spacing:.04em;backdrop-filter:blur(4px);';
-    badge.textContent = '📷 Illustrative photo';
+    badge.textContent = isFallback ? '📷 Illustrative photo' : '📷 Area photo';
     carousel.style.position = 'relative';
     carousel.appendChild(badge);
   }
