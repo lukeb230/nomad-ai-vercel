@@ -3428,9 +3428,10 @@ function checkSearchLimit() {
 
 
 
-function toggleCardPin(site, btn) {
+function toggleCardPin(siteName, btn) {
   if (!window._routePinState) window._routePinState = {};
-  const key = window._pendingRouteSelId + '-' + site.name;
+  if (!window._pendingRouteSelId) return;
+  const key = window._pendingRouteSelId + '-' + siteName;
   const isPinned = window._routePinState[key] === 'pinned';
   if (isPinned) {
     window._routePinState[key] = 'unpinned';
