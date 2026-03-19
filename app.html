@@ -3431,6 +3431,9 @@ function checkSearchLimit() {
 function toggleCardPin(siteName, btn) {
   if (!window._routePinState) window._routePinState = {};
   if (!window._pendingRouteSelId) return;
+  // Walk up to the actual button div in case click landed on text node
+  while (btn && !btn.classList?.contains('route-pin-btn')) btn = btn.parentElement;
+  if (!btn) return;
   const key = window._pendingRouteSelId + '-' + siteName;
   const isPinned = window._routePinState[key] === 'pinned';
   if (isPinned) {
