@@ -630,11 +630,15 @@
     #app.light .chat-msg.user .chat-bubble { background: #9a7040; }
     #app.light .chat-msg.ai .chat-bubble { background: #f0ebe0; border-color: #c8c0b0; color: #2a3830; }
 
-  </style>
+  
+    #offline-banner { display:none; position:fixed; top:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:#7a3030; color:#f0d0d0; text-align:center; padding:10px 16px; font-size:13px; font-weight:700; z-index:9999; }
+    #offline-banner.show { display:block; }
+</style>
 
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+<div id="offline-banner">📵 No internet connection — some features may not work</div>
 <div id="app" style="position:relative;z-index:1;">
   <!-- HOME TAB -->
   <div id="home-tab">
@@ -2031,7 +2035,12 @@ async function doNLSearch() {
     const d = JSON.parse(rawText);
 
     if (d.error) {
-      appendChatMsg('ai', '⚠️ ' + (d.error.message||'Something went wrong. Try again.'));
+      const errMsg = d.error?.message || '';
+    let friendlyErr = '⚠️ Something went wrong. Try again.';
+    if (errMsg.includes('429') || errMsg.includes('rate')) friendlyErr = '⚠️ NomadAI is getting a lot of requests right now. Try again in a few seconds.';
+    else if (errMsg.includes('credit') || errMsg.includes('balance')) friendlyErr = '⚠️ Service temporarily unavailable. Try again shortly.';
+    else if (!navigator.onLine) friendlyErr = '⚠️ No internet connection. Please check your connection and try again.';
+    appendChatMsg('ai', friendlyErr);
       document.getElementById('res').innerHTML = '';
       goBtn.innerHTML = '✨ Ask AI';
       goBtn.style.display = 'flex';
@@ -2107,7 +2116,9 @@ async function doNLSearch() {
 
   } catch(e) {
     console.error(e);
-    document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">Something went wrong. Try again.</div>';
+    let locErrMsg = 'Something went wrong. Try again.';
+    if (!navigator.onLine) locErrMsg = '📵 No internet connection. Please check your connection.';
+    document.getElementById('res').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);">⚠️ ' + locErrMsg + '</div>';
   }
 
   goBtn.innerHTML = '✨ Ask AI';
@@ -2914,7 +2925,16 @@ async function authSubmit() {
   const fn = authMode === 'signin' ? supa.auth.signInWithPassword({email,password}) : supa.auth.signUp({email,password});
   const { error } = await fn;
   btn.textContent = authMode === 'signin' ? 'Sign in' : 'Create account'; btn.disabled = false;
-  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+  if (error) {
+    let msg = error.message;
+    if (msg.includes('Invalid login')) msg = 'Incorrect email or password. Try again.';
+    else if (msg.includes('Email not confirmed')) msg = 'Please check your email and confirm your account first.';
+    else if (msg.includes('already registered')) msg = 'An account with this email already exists. Try signing in.';
+    else if (msg.includes('Password should')) msg = 'Password must be at least 6 characters.';
+    else if (msg.includes('Unable to validate')) msg = 'Connection error. Check your internet and try again.';
+    else if (msg.includes('rate limit')) msg = 'Too many attempts. Please wait a minute and try again.';
+    errEl.textContent = msg; errEl.style.display = 'block'; return;
+  }
   if (authMode === 'signup') { errEl.style.color = 'var(--sage)'; errEl.textContent = '✓ Check your email to confirm your account!'; errEl.style.display = 'block'; }
 }
 async function signOut() {
@@ -3188,6 +3208,20 @@ async function syncFromSupabase() {
   initPrefs();
 }
 
+
+// ── OFFLINE DETECTION ──
+function updateOnlineStatus() {
+  const banner = document.getElementById('offline-banner');
+  if (!navigator.onLine) {
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
 showMain();
 initAuth();
 setTimeout(initChatScroll, 500);
@@ -3221,7 +3255,7 @@ setTimeout(initChatScroll, 500);
           city: data.city,
           state: data.state
         };
-        setTimeout(() => openCardModal(site), 800);
+        setTimeout(() => openCardModal(site), 1200);
       }
     } catch(e) { console.error('Failed to load shared spot:', e); }
   } else if (encodedSpot) {
