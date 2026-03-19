@@ -3428,36 +3428,33 @@ function checkSearchLimit() {
 
 
 
-function toggleCardPin(siteName, el) {
+function toggleCardPin(idx, el) {
   if (!window._routePinState) window._routePinState = {};
-  if (!window._pendingRouteSelId) return;
   while (el && !el.classList?.contains('route-pin-btn')) el = el.parentElement;
   if (!el) return;
-  // Debounce — ignore if fired within 300ms of last toggle
   const now = Date.now();
   if (el._lastPinToggle && now - el._lastPinToggle < 300) return;
   el._lastPinToggle = now;
-  const key = window._pendingRouteSelId + '-' + siteName;
   if (!el.dataset.pinned) el.dataset.pinned = '0';
   const isPinned = el.dataset.pinned === '1';
   if (isPinned) {
     el.dataset.pinned = '0';
     el.innerHTML = '📌';
     el.classList.remove('pinned');
-    window._routePinState[key] = 'unpinned';
+    window._routePinState[idx] = false;
   } else {
     el.dataset.pinned = '1';
     el.innerHTML = '📍';
     el.classList.add('pinned');
-    window._routePinState[key] = 'pinned';
+    window._routePinState[idx] = true;
   }
 }
 
 function pinAllCards() {
   if (!window._pendingRouteSites || !window._pendingRouteSelId) return;
   const selId = window._pendingRouteSelId;
-  window._pendingRouteSites.forEach(s => {
-    window._routePinState[selId + '-' + s.name] = 'pinned';
+  window._pendingRouteSites.forEach((s, i) => {
+    window._routePinState[i] = true;
   });
   document.querySelectorAll('.route-pin-btn').forEach(btn => {
     btn.dataset.pinned = '1';
@@ -3490,7 +3487,7 @@ function selectAllRoute(selId, count, checked) {
 function buildRouteFromSelection(selId, count) {
   const sites = window._pendingRouteSites || [];
   const pinState = window._routePinState || {};
-  const selected = sites.filter(s => pinState[selId + '-' + s.name] === 'pinned');
+  const selected = sites.filter((s, i) => pinState[i] === true);
   if (!selected.length) {
     appendChatMsg('ai', '📌 Tap the pin button on at least one card below to add it to your route, then hit Build my route.');
     return;
