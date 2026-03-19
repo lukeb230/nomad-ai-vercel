@@ -1491,9 +1491,9 @@ function cardHTML(s,i,isSavedView=false){
   const visitedClass=isVisited(s.name)?'visited-btn been':'visited-btn';
   const tripClass=inTrip(s.name)?'trip-btn added':'trip-btn';
   const isRoutePinMode = !!window._pendingRouteSelId;
-  const isPinned = isRoutePinMode && (window._routePinState[window._pendingRouteSelId + '-' + s.name] !== true);
+  const isPinned = isRoutePinMode && (window._routePinState[i] === true);
   const pinBtn = isRoutePinMode
-    ? `<div class="fb route-pin-btn${isPinned ? '' : ' pinned'}" onclick="toggleCardPin(${JSON.stringify(s).replace(/"/g,'&quot;')},this)" title="Pin to route" style="font-size:16px;">${isPinned ? '📌' : '📍'}</div>`
+    ? `<div class="fb route-pin-btn" data-pinned="0" onclick="event.stopPropagation();toggleCardPin(${i},this)" title="Pin to route" style="font-size:16px;">📌</div>`
     : '';
   const tripBtn=isSavedView?`<div class="fb ${tripClass}" onclick="addToTrip(${JSON.stringify(s).replace(/"/g,'&quot;')},this)" title="Add to trip">+</div>`:'';
   const actionBtn=isSavedView?`<div class="fb delete-btn" onclick="removeSaved('${s.name.replace(/'/g,"\\'")}')">🗑️</div>`:`<div class="fb ${savedClass}" onclick="toggleSave(${JSON.stringify(s).replace(/"/g,'&quot;')},this)">🔖</div>`;
