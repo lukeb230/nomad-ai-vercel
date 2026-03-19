@@ -2274,22 +2274,15 @@ async function doNLSearch() {
       });
     }
 
-    // Auto-populate route planner for route queries
+    // Show route pin UI in chat
     if (isRouteQuery && sites.length) {
       const withCoords = sites.filter(s => s.coordinates?.lat && s.coordinates?.lng);
       if (withCoords.length) {
-        // Store pending route sites for user selection
-        window._pendingRouteSites = withCoords;
-        // Build selection UI in chat
-        const selId = 'route-sel-' + Date.now();
-        // Enter route pin mode
-        window._pendingRouteSelId = selId;
-        window._routePinState = {};
-        window._pendingRouteSites = withCoords;
-        const html = `🧭 <span style="color:var(--sage);font-weight:800;">Found ${withCoords.length} stops along your route.</span><br><br>Tap the <strong>📍 pin</strong> on the cards below to add stops to your route. When you're ready, hit <strong>Build my route</strong>.<br><br>
+        const activeSelId = window._pendingRouteSelId;
+        const html = `🧭 <span style="color:var(--sage);font-weight:800;">Found ${withCoords.length} stops along your route.</span><br><br>Tap 📍 on the cards below to pin the stops you want, then hit <strong>Build my route</strong>.<br><br>
           <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
-            <div onclick="buildRouteFromSelection('${selId}',${withCoords.length})" style="background:var(--tan);color:#e8d5b7;padding:8px 18px;border-radius:50px;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">🧭 Build my route</div>
-            <div onclick="pinAllCards(${withCoords.length})" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">📍 Pin all</div>
+            <div onclick="buildRouteFromSelection('${activeSelId}',${withCoords.length})" style="background:var(--tan);color:#e8d5b7;padding:8px 18px;border-radius:50px;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">🧭 Build my route</div>
+            <div onclick="pinAllCards()" style="background:var(--card);color:var(--muted);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--slate);">📍 Pin all</div>
           </div>`;
         appendChatMsg('ai', html);
       }
@@ -3437,24 +3430,25 @@ function checkSearchLimit() {
 
 function toggleCardPin(site, btn) {
   if (!window._routePinState) window._routePinState = {};
-  const isPinned = window._routePinState[site.name] === 'pinned';
+  const key = window._pendingRouteSelId + '-' + site.name;
+  const isPinned = window._routePinState[key] === 'pinned';
   if (isPinned) {
-    window._routePinState[site.name] = 'unpinned';
+    window._routePinState[key] = 'unpinned';
     btn.textContent = '📍';
     btn.classList.remove('pinned');
   } else {
-    window._routePinState[site.name] = 'pinned';
+    window._routePinState[key] = 'pinned';
     btn.textContent = '📌';
     btn.classList.add('pinned');
   }
 }
 
-function pinAllCards(count) {
-  if (!window._pendingRouteSites) return;
+function pinAllCards() {
+  if (!window._pendingRouteSites || !window._pendingRouteSelId) return;
+  const selId = window._pendingRouteSelId;
   window._pendingRouteSites.forEach(s => {
-    if (window._routePinState) window._routePinState[s.name] = 'pinned';
+    window._routePinState[selId + '-' + s.name] = 'pinned';
   });
-  // Update all pin buttons on visible cards
   document.querySelectorAll('.route-pin-btn').forEach(btn => {
     btn.textContent = '📌';
     btn.classList.add('pinned');
@@ -3484,15 +3478,10 @@ function selectAllRoute(selId, count, checked) {
 
 function buildRouteFromSelection(selId, count) {
   const sites = window._pendingRouteSites || [];
-  // Collect pinned sites by name
-  const pinnedNames = new Set(Object.entries(window._routePinState || {}).filter(([k,v]) => v === 'pinned').map(([k]) => k));
-  const selected = sites.filter(s => pinnedNames.has(s.name));
-  if (!selected.length && pinnedNames.size === 0) {
-    appendChatMsg('ai', '📍 Tap the pin button on at least one card below to add it to your route, then hit Build my route.');
-    return;
-  }
+  const pinState = window._routePinState || {};
+  const selected = sites.filter(s => pinState[selId + '-' + s.name] === 'pinned');
   if (!selected.length) {
-    appendChatMsg('ai', 'No stops selected — check at least one to build your route.');
+    appendChatMsg('ai', '📍 Tap the pin button on at least one card below to add it to your route, then hit Build my route.');
     return;
   }
   // Auto-optimize selected stops
