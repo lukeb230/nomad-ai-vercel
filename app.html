@@ -1278,46 +1278,71 @@ function mapboxPhoto(lat, lng) {
   return `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${lng},${lat},${zoom},0/600x300@2x?access_token=${MAPBOX_TOKEN}`;
 }
 
-// Photo cache in localStorage
-function getPhotoCache(name) {
-  try { const c = JSON.parse(localStorage.getItem('cf_photo_cache')||'{}'); return c[name] || null; } catch(e) { return null; }
-}
-function setPhotoCache(name, photos) {
+// Server-side photo cache via Supabase (shared across all users)
+// Also keep a local session cache to avoid repeat Supabase lookups
+const _localPhotoCache = {};
+
+async function getPhotoCache(name) {
+  if (_localPhotoCache[name]) return _localPhotoCache[name];
   try {
-    const c = JSON.parse(localStorage.getItem('cf_photo_cache')||'{}');
-    c[name] = photos;
-    // Keep cache under 100 entries
-    const keys = Object.keys(c);
-    if (keys.length > 100) delete c[keys[0]];
-    localStorage.setItem('cf_photo_cache', JSON.stringify(c));
+    const { data } = await supa.from('photo_cache').select('photos').eq('campsite_name', name).maybeSingle();
+    if (data?.photos) { _localPhotoCache[name] = data.photos; return data.photos; }
+  } catch(e) {}
+  return null;
+}
+
+async function setPhotoCache(name, photos) {
+  _localPhotoCache[name] = photos;
+  try {
+    await supa.from('photo_cache').upsert({ campsite_name: name, photos }, { onConflict: 'campsite_name' });
   } catch(e) {}
 }
 
 async function fetchWikimediaPhotos(name, lat, lng) {
   try {
-    // Try by name first
+    // Try exact name first
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages&piprop=original&pithumbsize=800&pilimit=5&format=json&origin=*`;
     const r = await fetch(searchUrl);
     const d = await r.json();
     const pages = d.query?.pages || {};
     const page = Object.values(pages)[0];
-    if (page && page.original?.source && !page.missing) {
-      return [page.original.source];
+    if (page && page.original?.source && !page.missing) return [page.original.source];
+
+    // Try shortened name (first 2-3 words) — catches "Palo Duro Canyon" from "Palo Duro Canyon State Park Site 4"
+    const shortName = name.split(' ').slice(0, 3).join(' ');
+    if (shortName !== name) {
+      const r2 = await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(shortName)}&prop=pageimages&piprop=original&pithumbsize=800&pilimit=5&format=json&origin=*`);
+      const d2 = await r2.json();
+      const page2 = Object.values(d2.query?.pages || {})[0];
+      if (page2 && page2.original?.source && !page2.missing) return [page2.original.source];
     }
-    // Try by coordinates if available
+
+    // Try Wikimedia Commons image search by name
+    const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name+' camping')}&srnamespace=6&srlimit=3&format=json&origin=*`;
+    const cr = await fetch(commonsUrl);
+    const cd = await cr.json();
+    const hits = cd.query?.search || [];
+    for (const hit of hits) {
+      const title = hit.title;
+      const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url&iiurlwidth=800&format=json&origin=*`;
+      const ir = await fetch(infoUrl);
+      const id = await ir.json();
+      const pg = Object.values(id.query?.pages || {})[0];
+      if (pg?.imageinfo?.[0]?.thumburl) return [pg.imageinfo[0].thumburl];
+    }
+
+    // Try by coordinates
     if (lat && lng) {
-      const geoUrl = `https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=5000&gscoord=${lat}|${lng}&gslimit=3&format=json&origin=*`;
+      const geoUrl = `https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=8000&gscoord=${lat}|${lng}&gslimit=5&format=json&origin=*`;
       const gr = await fetch(geoUrl);
       const gd = await gr.json();
-      const hits = gd.query?.geosearch || [];
-      for (const hit of hits) {
+      const geoHits = gd.query?.geosearch || [];
+      for (const hit of geoHits) {
         const imgUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(hit.title)}&prop=pageimages&piprop=original&pithumbsize=800&pilimit=3&format=json&origin=*`;
         const ir = await fetch(imgUrl);
         const id = await ir.json();
         const pg = Object.values(id.query?.pages || {})[0];
-        if (pg && pg.original?.source && !pg.missing) {
-          return [pg.original.source];
-        }
+        if (pg && pg.original?.source && !pg.missing) return [pg.original.source];
       }
     }
   } catch(e) {}
@@ -2076,6 +2101,8 @@ function appendChatMsg(role, html) {
 async function doNLSearch() {
   const query = (document.getElementById('nl-input').innerText || document.getElementById('nl-input').textContent || '').trim().replace(/\n/g, ' ');
   if (!query) return;
+  if (!checkSearchLimit()) return;
+  incrementSearchCount();
 
   // Add user message to chat
   appendChatMsg('user', query);
@@ -3317,6 +3344,47 @@ async function syncFromSupabase() {
 }
 
 
+
+// ── SEARCH LIMITS ──
+const SEARCH_LIMIT_GUEST = 5;
+const SEARCH_LIMIT_USER = 20;
+
+function getSearchCount() {
+  const today = new Date().toDateString();
+  try {
+    const data = JSON.parse(localStorage.getItem('cf_search_count') || '{}');
+    if (data.date !== today) return 0;
+    return data.count || 0;
+  } catch(e) { return 0; }
+}
+
+function incrementSearchCount() {
+  const today = new Date().toDateString();
+  try {
+    const data = JSON.parse(localStorage.getItem('cf_search_count') || '{}');
+    const count = (data.date === today ? data.count || 0 : 0) + 1;
+    localStorage.setItem('cf_search_count', JSON.stringify({ date: today, count }));
+    return count;
+  } catch(e) { return 1; }
+}
+
+function checkSearchLimit() {
+  const limit = currentUser ? SEARCH_LIMIT_USER : SEARCH_LIMIT_GUEST;
+  const count = getSearchCount();
+  if (count >= limit) {
+    if (!currentUser) {
+      // Show sign up prompt for guests
+      const msg = `You've used all ${SEARCH_LIMIT_GUEST} free searches for today. Sign in for ${SEARCH_LIMIT_USER} searches per day.`;
+      appendChatMsg('ai', `⚠️ ${msg} <span onclick="openAuth()" style="color:var(--tan);font-weight:800;cursor:pointer;text-decoration:underline;">Sign in free →</span>`);
+      showErr(msg);
+    } else {
+      appendChatMsg('ai', `⚠️ You've used all ${SEARCH_LIMIT_USER} searches for today. Come back tomorrow!`);
+    }
+    return false;
+  }
+  return true;
+}
+
 // ── OFFLINE DETECTION ──
 function updateOnlineStatus() {
   const banner = document.getElementById('offline-banner');
@@ -3464,4 +3532,3 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
 <div id="offline-banner">📵 No internet connection — some features may not work</div>
 </body>
 </html>
-
