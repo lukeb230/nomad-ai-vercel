@@ -733,7 +733,10 @@
     </div>
     <!-- Results appear here for both modes -->
     <div id="res-section" style="display:none;">
-      <div class="slabel" style="padding-top:8px;">Results</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;padding-top:8px;">
+        <div class="slabel" style="padding-top:0;">Results</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;padding:0 16px;">Always verify availability before visiting</div>
+      </div>
       <div class="results" id="res"></div>
     </div>
   </div>
@@ -1941,7 +1944,7 @@ function showWelcomeMessage() {
   const thread = document.getElementById('chat-thread');
   if (!thread) return;
   thread.innerHTML = '';
-  appendChatMsg('ai', "Hey! 🏕️ I'm NomadAI — I find campsites so you don't have to.<br><br>I can search <span style=\"color:var(--tan);font-weight:800;\">free BLM & dispersed spots</span>, paid campgrounds, overlanding sites, and everything in between. Just describe what you want — vibe, location, amenities, distance — and I'll find real options with directions, fees, and weather.<br><br>🛣️ <span style=\"color:var(--tan);font-weight:800;\">Planning a road trip?</span> Ask for camps along a route and I'll pin them all on the map.<br><br>Try: <span style=\"color:var(--tan);font-weight:800;\">\"free site near Zion with shade and a fire ring\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"best BLM spots along Highway 50 in Nevada\"</span>");
+  appendChatMsg('ai', "Stop researching. Start exploring. 🏕️<br><br>Tell me what you're looking for — a vibe, a location, or a drive — and I'll find real <span style=\"color:var(--tan);font-weight:800;\">campsites and overland spots</span> with photos, fees, weather, and directions. Ask for camps along a route and I'll <span style=\"color:var(--tan);font-weight:800;\">auto-build the whole multi-stop trip</span> and pin it on the map.<br><br>Try: <span style=\"color:var(--tan);font-weight:800;\">\"dispersed BLM spot near Moab, no fee\"</span> or <span style=\"color:var(--tan);font-weight:800;\">\"camps along Highway 50 Nevada, 4x4 accessible\"</span><br><br><span style=\"font-size:11px;opacity:0.6;\">Always verify site availability, road conditions, and fire restrictions before heading out.</span>");
   /* ai-response-box always visible */
 }
 
