@@ -3487,7 +3487,10 @@ function selectAllRoute(selId, count, checked) {
 function buildRouteFromSelection(selId, count) {
   const sites = window._pendingRouteSites || [];
   const pinState = window._routePinState || {};
+  console.log('pinState:', JSON.stringify(pinState));
+  console.log('sites count:', sites.length);
   const selected = sites.filter((s, i) => pinState[i] === true);
+  console.log('selected:', selected.length);
   if (!selected.length) {
     appendChatMsg('ai', '📌 Tap the pin button on at least one card below to add it to your route, then hit Build my route.');
     return;
