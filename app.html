@@ -319,6 +319,54 @@
     .stat-fun-fact .fact-icon { font-size: 20px; margin-bottom: 6px; display: block; }
     .stat-section-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--tan); padding: 8px 20px 4px; }
 
+    /* FIRE ALERT */
+    .fire-alert { display:none; align-items:center; gap:6px; background:#3a1a0a; border:1px solid #c0622a; border-radius:10px; padding:7px 12px; font-size:12px; font-weight:700; color:#f4a96a; margin-top:8px; line-height:1.4; }
+
+    /* TRIP NOTES */
+    .notes-section { margin-top:10px; }
+    .notes-toggle { font-size:12px; font-weight:700; color:var(--muted); cursor:pointer; padding:6px 10px; background:var(--dark); border:1.5px solid var(--slate); border-radius:10px; display:flex; align-items:center; gap:6px; }
+    .notes-toggle:hover { border-color:var(--tan); color:var(--sand); }
+    .notes-input { width:100%; margin-top:6px; background:var(--darker); border:1.5px solid var(--slate); border-radius:10px; padding:10px 12px; font-size:13px; color:var(--sand); font-family:'Nunito',sans-serif; font-weight:600; resize:vertical; min-height:72px; outline:none; box-sizing:border-box; }
+    .notes-input:focus { border-color:var(--tan); }
+
+    /* MAP EMPTY STATE */
+    #map-empty-state { position:absolute; top:50%; left:50%; transform:translate(-50%,-60%); text-align:center; pointer-events:none; z-index:400; }
+    #map-empty-state .map-empty-icon { font-size:40px; margin-bottom:10px; }
+    #map-empty-state .map-empty-title { font-size:17px; font-weight:800; color:var(--sage); margin-bottom:6px; text-shadow:0 1px 4px rgba(0,0,0,0.5); }
+    #map-empty-state .map-empty-sub { font-size:13px; color:var(--sage); opacity:0.8; max-width:210px; line-height:1.5; text-shadow:0 1px 3px rgba(0,0,0,0.4); }
+    #app.light #map-empty-state .map-empty-title { color:var(--tan); text-shadow:0 1px 4px rgba(255,255,255,0.7); }
+    #app.light #map-empty-state .map-empty-sub { color:var(--tan); text-shadow:0 1px 3px rgba(255,255,255,0.7); }
+
+    /* SEASONAL / REVIEWS / REPORT */
+    .pill.seasonal { background: rgba(180,120,40,0.15); border: 1px solid rgba(180,120,40,0.4); color: #c4903a; font-size: 10px; }
+    .reviews-strip { display:flex; align-items:center; gap:6px; padding:6px 0 2px; font-size:12px; color:var(--muted); font-weight:700; flex-wrap:wrap; }
+    .reviews-strip .rev-stars { color:#c4a06a; letter-spacing:1px; }
+    .review-form { margin-top:8px; padding:10px 12px; background:var(--darker); border-radius:10px; }
+    .review-stars-input { display:flex; gap:4px; margin-bottom:8px; }
+    .review-star-btn { font-size:20px; cursor:pointer; opacity:0.3; transition:opacity .15s; }
+    .review-star-btn.on { opacity:1; }
+    .review-textarea { width:100%; background:var(--dark); border:1.5px solid var(--slate); border-radius:8px; padding:8px 10px; font-size:13px; color:var(--sand); font-family:'Nunito',sans-serif; font-weight:600; resize:none; min-height:60px; outline:none; box-sizing:border-box; }
+    .review-textarea:focus { border-color:var(--tan); }
+    .review-item { padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px; }
+    .review-item:last-child { border-bottom:none; }
+    .report-link { font-size:10px; color:var(--muted); cursor:pointer; opacity:0.6; margin-top:4px; display:inline-block; }
+    .report-link:hover { opacity:1; color:var(--tan); }
+    .report-form { margin-top:6px; padding:8px 10px; background:var(--darker); border-radius:8px; font-size:12px; }
+    .report-form select { width:100%; background:var(--dark); border:1px solid var(--slate); border-radius:6px; padding:6px 8px; font-size:12px; color:var(--sand); font-family:'Nunito',sans-serif; margin-bottom:6px; outline:none; }
+    .report-form textarea { width:100%; background:var(--dark); border:1px solid var(--slate); border-radius:6px; padding:6px 8px; font-size:12px; color:var(--sand); font-family:'Nunito',sans-serif; resize:none; height:50px; outline:none; box-sizing:border-box; margin-bottom:6px; }
+
+    /* VOICE BUTTON */
+    #voice-btn { height:40px; width:40px; background:var(--dark); border:1.5px solid var(--slate); border-radius:12px; font-size:17px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .2s, border-color .2s; }
+    #voice-btn.listening { background:#5a1010; border-color:#c03030; animation:pulse-mic .8s ease-in-out infinite; }
+    @keyframes pulse-mic { 0%,100%{transform:scale(1);}50%{transform:scale(1.12);} }
+
+    /* ITINERARY */
+    .route-item-date { font-size:11px; color:var(--muted); font-weight:700; margin-top:3px; }
+    .route-item-drive { font-size:11px; color:var(--sage); font-weight:700; padding:2px 8px; background:rgba(138,172,122,.15); border-radius:6px; display:inline-flex; align-items:center; gap:4px; margin-top:3px; }
+    .route-date-input { background:var(--darker); border:1.5px solid var(--slate); border-radius:8px; padding:3px 8px; font-size:11px; color:var(--sand); font-family:'Nunito',sans-serif; font-weight:700; outline:none; cursor:pointer; }
+    .route-date-input:focus { border-color:var(--tan); }
+    .route-total-time { text-align:center; font-size:12px; color:var(--muted); font-weight:700; padding:8px 0 2px; }
+
     /* AUTH MODAL */
     #auth-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1001; background: rgba(0,0,0,0.8); }
     #auth-overlay.show { display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -716,7 +764,6 @@
       <div id="chat-scroll-area" style="flex:1;overflow-y:auto;padding:4px 12px 4px;-webkit-overflow-scrolling:touch;min-height:0;">
         <div class="chat-thread" id="chat-thread"></div>
         <div id="ai-loader" style="display:none;padding:4px 0 8px;text-align:left;padding-left:4px;"><div class="ai-loader-ring"></div></div>
-        <div id="recent-section" style="display:flex;flex-direction:column;gap:10px;padding-bottom:4px;"></div>
       </div>
       <!-- Input bar stuck to bottom of chat box -->
       <div id="nl-input-bar" style="flex-shrink:0;padding:8px 10px 10px;">
@@ -725,6 +772,7 @@
             <div id="nl-input" contenteditable="true" data-placeholder="Ask about campsites..." style="flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--sand);font-family:'Nunito',sans-serif;font-weight:600;caret-color:var(--sand);line-height:1.5;min-height:20px;max-height:80px;overflow-y:auto;word-break:break-word;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doNLSearch();}" oninput="toggleNLClearBtn();"></div>
             <div id="nl-clear-btn" onclick="clearNLSearch()" style="display:none;cursor:pointer;font-size:13px;color:var(--muted);padding:0 4px;line-height:1;user-select:none;flex-shrink:0;">&#x2715;</div>
           </div>
+          <div id="voice-btn" onclick="startVoiceSearch()" title="Voice search" style="display:none;">🎤</div>
           <div onclick="doNLSearch()" style="height:40px;padding:0 14px;background:var(--tan);color:#e8d5b7;border-radius:12px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;font-weight:800;white-space:nowrap;">✨ Ask AI</div>
         </div>
       </div>
@@ -747,7 +795,7 @@
       <div class="map-toggle-btn" id="map-btn-saved" onclick="setMapMode('saved')">🔖 Saved spots</div>
       <div class="map-toggle-btn" id="map-btn-route" onclick="setMapMode('route')">🧭 My route</div>
     </div>
-    <div id="map-container">
+    <div id="map-container" style="position:relative;">
       <div id="leaflet-map"></div>
     </div>
   </div>
@@ -769,8 +817,9 @@
         <div class="route-go-btn" id="route-go-btn" onclick="switchTab('map');setTimeout(()=>setMapMode('route'),150);">🗺️</div>
         <button class="route-add-all-btn" onclick="addAllSavedToRoute()">+ All</button>
         <button class="route-optimize-btn" onclick="optimizeRoute()">✦ Optimize</button>
+        <button class="route-optimize-btn" style="border-color:var(--sky);color:var(--sky);" onclick="shareTrip()">🔗 Share</button>
         <button class="route-optimize-btn" style="border-color:var(--sage);color:var(--sage);" onclick="completeTrip()">✓ Completed</button>
-        <button class="route-clear-btn" onclick="clearRoute()">Clear</button>
+<button class="route-clear-btn" onclick="clearRoute()">Clear</button>
       </div>
     </div>
 
@@ -848,6 +897,16 @@
       </div>
     </div>
 
+    <div class="settings-section">
+      <div class="settings-section-label">Notifications</div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-label">Trip reminders</div>
+          <div class="settings-row-sub">Get notified the day before a dated stop</div>
+        </div>
+        <button class="settings-btn" id="notif-btn" onclick="enableNotifications()">🔔 Enable</button>
+      </div>
+    </div>
     <div class="settings-section">
       <div class="settings-section-label">Data</div>
       <div class="settings-row">
@@ -1054,14 +1113,85 @@ async function fetchSunTimes(lat, lng) {
 
 async function loadWeatherForCard(cardId,lat,lng){
   const el=document.getElementById(`${cardId}-weather`);if(!el||!lat||!lng)return;
-  const w=await fetchWeather(lat,lng);if(!w){el.style.display='none';return;}
-  el.innerHTML=`<span class="w-icon">${w.icon}</span><span class="w-temp">${w.temp}°F</span><span class="w-desc">${w.desc}</span><span class="w-wind">💨 ${w.wind} mph</span>`;
-  // Load sunrise/sunset
+  const w=await fetchWeather(lat,lng);if(!w){el.style.display='none';}
+  else{el.innerHTML=`<span class="w-icon">${w.icon}</span><span class="w-temp">${w.temp}°F</span><span class="w-desc">${w.desc}</span><span class="w-wind">💨 ${w.wind} mph</span>`;}
   fetchSunTimes(lat, lng).then(sun => {
     if (!sun) return;
     const sunEl = document.getElementById(cardId+'-sun');
     if (sunEl) sunEl.innerHTML = '<span><span class="sun-icon">🌅</span> '+sun.rise+'</span><span><span class="sun-icon">🌇</span> '+sun.set+'</span>';
   });
+  fetchFireAlert(lat, lng).then(fire => {
+    if (!fire) return;
+    const fireEl = document.getElementById(cardId+'-fire');
+    if (fireEl) { fireEl.innerHTML = `🔥 Active fire nearby${fire.name?': '+fire.name:''}${fire.acres?' (~'+Math.round(fire.acres).toLocaleString()+' acres)':''}`; fireEl.style.display='flex'; }
+  });
+}
+
+// ── FIRE ALERTS ──
+window._fireCache = {};
+async function fetchFireAlert(lat, lng) {
+  const key = lat.toFixed(2)+','+lng.toFixed(2);
+  if (window._fireCache[key] !== undefined) return window._fireCache[key];
+  try {
+    const r = await fetchWithTimeout(
+      `https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/Active_Fires/FeatureServer/0/query?where=1%3D1&outFields=IncidentName,DailyAcres&geometry=${lng}%2C${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&distance=75&units=esriSRUnit_StatuteMile&outSR=4326&f=json`, 7000
+    );
+    const d = await r.json();
+    const fires = d.features || [];
+    const result = fires.length ? { name: fires[0].attributes?.IncidentName, acres: fires[0].attributes?.DailyAcres } : null;
+    window._fireCache[key] = result;
+    return result;
+  } catch(e) { window._fireCache[key] = null; return null; }
+}
+
+// ── MAP EMPTY STATE ──
+function setMapEmptyState(show) {
+  const container = document.getElementById('map-container');
+  let el = document.getElementById('map-empty-state');
+  if (show && !el) {
+    el = document.createElement('div');
+    el.id = 'map-empty-state';
+    el.innerHTML = '<div class="map-empty-icon">🗺️</div><div class="map-empty-title">No pins yet</div><div class="map-empty-sub">Search for campsites or build a route — pins will appear here</div>';
+    container.appendChild(el);
+  } else if (!show && el) {
+    el.remove();
+  }
+}
+
+// ── VOICE SEARCH ──
+(function(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR) document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('voice-btn');
+    if (btn) btn.style.display = 'flex';
+  });
+})();
+
+let _voiceRec = null;
+function startVoiceSearch() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  const btn = document.getElementById('voice-btn');
+  if (_voiceRec) {
+    _voiceRec.stop();
+    _voiceRec = null;
+    btn.classList.remove('listening'); btn.textContent = '🎤';
+    return;
+  }
+  const r = new SR();
+  _voiceRec = r;
+  r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 1;
+  btn.classList.add('listening'); btn.textContent = '🔴';
+  r.onresult = e => {
+    const t = e.results[0][0].transcript;
+    const inp = document.getElementById('nl-input');
+    inp.innerText = t;
+    toggleNLClearBtn();
+    _voiceRec = null;
+    doNLSearch();
+  };
+  r.onerror = r.onend = () => { _voiceRec = null; btn.classList.remove('listening'); btn.textContent = '🎤'; };
+  r.start();
 }
 
 // ── NOTES / VISITED ──
@@ -1210,6 +1340,7 @@ function setMapMode(mode){
   if(mode==='results'){if(lastSearchResults.length)plotSites(lastSearchResults,'#e85555');}
   else if(mode==='saved'){const saved=getSaved();if(saved.length)plotSites(saved,'#8aac7a');}
   else if(mode==='route'){plotRoute();}
+  setMapEmptyState(mapMarkers.length===0);
 }
 
 function plotRoute(){
@@ -1303,6 +1434,23 @@ async function getPhotoCache(name) {
   return null;
 }
 
+// ── SEARCH CACHE ──
+async function getSearchCache(query) {
+  try {
+    const hash = btoa(encodeURIComponent(query.toLowerCase().trim())).slice(0, 60);
+    const { data } = await supa.from('search_cache').select('results,created_at').eq('query_hash', hash).maybeSingle();
+    if (!data) return null;
+    if (Date.now() - new Date(data.created_at).getTime() > 7*24*60*60*1000) return null;
+    return data.results;
+  } catch(e) { return null; }
+}
+async function setSearchCache(query, results) {
+  try {
+    const hash = btoa(encodeURIComponent(query.toLowerCase().trim())).slice(0, 60);
+    await supa.from('search_cache').upsert({ query_hash: hash, query, results }, { onConflict: 'query_hash' });
+  } catch(e) {}
+}
+
 async function setPhotoCache(name, photos, source = 'unknown') {
   _localPhotoCache[name] = photos;
   try {
@@ -1334,24 +1482,18 @@ async function fetchWikimediaPhotos(name, lat, lng) {
         && !u.includes('pdf') && !u.includes('svg') && !u.includes('document') && !u.includes('archive');
     }
 
-    // Strip common prefixes like "Dispersed Camping - ", "BLM Dispersed - ", "Primitive Camping - "
     const cleanName = name
       .replace(/^(dispersed camping|primitive camping|blm dispersed|blm land|usfs|free camping|campsite|camping)\s*[-–:]\s*/i, '')
       .replace(/\s*(site \d+|campsite \d+|area \d+)$/i, '')
       .trim();
 
-    // Build list of search candidates from most to least specific
     const candidates = [cleanName];
-    // Also try splitting on " - " to get the location part e.g. "Inyo National Forest" from "Dispersed - Inyo National Forest"
     if (name.includes(' - ')) candidates.push(name.split(' - ').slice(1).join(' - ').trim());
-    // Try first 4 words of clean name
     const short = cleanName.split(' ').slice(0, 4).join(' ');
     if (short !== cleanName) candidates.push(short);
-    // Try first 3 words
     const shorter = cleanName.split(' ').slice(0, 3).join(' ');
     if (shorter !== short) candidates.push(shorter);
 
-    // Deduplicate
     const tried = new Set();
     for (const candidate of candidates) {
       if (tried.has(candidate) || candidate.length < 4) continue;
@@ -1362,7 +1504,6 @@ async function fetchWikimediaPhotos(name, lat, lng) {
       if (page && !page.missing && isPhoto(page.original?.source)) return [page.original.source];
     }
 
-    // Try by coordinates — Wikipedia geo articles near the spot
     if (lat && lng) {
       const gr = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gscoord=${lat}|${lng}&gslimit=5&format=json&origin=*`);
       const gd = await gr.json();
@@ -1378,11 +1519,9 @@ async function fetchWikimediaPhotos(name, lat, lng) {
 }
 
 async function fetchPlacePhotos(name, location, site) {
-  // 1. Check cache first
   const cached = await getPhotoCache(name);
   if (cached) return cached;
 
-  // 2. Try Wikimedia Commons for everything (free, no API key)
   const lat = site?.coordinates?.lat;
   const lng = site?.coordinates?.lng;
   const wiki = await fetchWikimediaPhotos(name, lat, lng);
@@ -1391,7 +1530,6 @@ async function fetchPlacePhotos(name, location, site) {
     return wiki;
   }
 
-  // 3. Dispersed/BLM with no Wikimedia → Mapbox satellite
   if (site && isDispersed(site)) {
     const sat = mapboxPhoto(lat, lng);
     if (sat) {
@@ -1402,7 +1540,6 @@ async function fetchPlacePhotos(name, location, site) {
     return null;
   }
 
-  // Google Places temporarily disabled
   return null;
 }
 function fallbackPhotos(site){const q=encodeURIComponent((site.tags||['camping']).slice(0,2).join(' ')+' campsite');return[0,1,2].map(i=>`https://source.unsplash.com/800x400/?${q}&sig=${i+Math.floor(Math.random()*500)}`);}
@@ -1434,7 +1571,6 @@ function addSwipe(carousel, id) {
 async function loadPhotosForCard(cardId,site,location){
   const carousel=document.getElementById(`${cardId}-carousel`);if(!carousel)return;
   const fetched=await fetchPlacePhotos(site.name,location,site);
-  // For dispersed/BLM with no photos found, use Mapbox satellite instead of Unsplash
   let photos, isFallback = false, isWikimedia = false, isMapbox = false;
   if (fetched) {
     photos = fetched;
@@ -1497,8 +1633,8 @@ function cardHTML(s,i,isSavedView=false){
 
   const visitBtn=`<div class="fb ${visitedClass}" onclick="toggleVisited(this.dataset.name,this)" data-name="${s.name}">✓</div>`;
   const note=getNotes(s.name);
-  const notesSection='';
-  const coordsHtml=(s.coordinates&&s.coordinates.lat)?`<div class="weather-strip" id="${cardId}-weather"><span class="w-desc" style="color:var(--muted);font-size:11px;">Loading weather...</span></div><div class="sun-strip" id="${cardId}-sun"><span style="color:var(--muted);font-size:10px;">Loading sunrise/sunset...</span></div>`:'';
+  const notesSection=isSavedView?`<div class="notes-section"><div class="notes-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">📝 ${note?note.substring(0,35)+(note.length>35?'…':''):'Add a note'}</div><textarea class="notes-input" style="display:none;" placeholder="Your notes about this spot..." onblur="saveNote('${s.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this.value);this.previousElementSibling.textContent='📝 '+(this.value?this.value.substring(0,35)+(this.value.length>35?'…':''):'Add a note');">${note}</textarea></div>`:''  ;
+  const coordsHtml=(s.coordinates&&s.coordinates.lat)?`<div class="weather-strip" id="${cardId}-weather"><span class="w-desc" style="color:var(--muted);font-size:11px;">Loading weather...</span></div><div class="sun-strip" id="${cardId}-sun"><span style="color:var(--muted);font-size:10px;">Loading sunrise/sunset...</span></div><div class="fire-alert" id="${cardId}-fire"></div>`:'';
   return `<div class="sc" style="animation-delay:${i*.06}s" data-cardid="${cardId}" data-lat="${s.coordinates?.lat||''}" data-lng="${s.coordinates?.lng||''}">
     <div style="position:relative;">
       <div class="carousel" id="${cardId}-carousel"><div class="carousel-track" id="${cardId}-track"><div class="carousel-slide"><span class="ph-loader">🏕️</span></div></div><div class="carousel-dots"></div></div>
@@ -1507,9 +1643,12 @@ function cardHTML(s,i,isSavedView=false){
     <div class="sc-body">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;"><div class="sc-name" onclick="addRecent(${JSON.stringify(s).replace(/"/g,'&quot;')});renderRecentSection();" style="cursor:pointer;flex:1;margin-bottom:0;">${s.name}${isVisited(s.name)?' <span style="font-size:11px;color:var(--sage);font-weight:700;">✓ Visited</span>':''}</div><div onclick="shareSpot(${JSON.stringify(s).replace(/"/g,'&quot;')})" style="flex-shrink:0;color:var(--muted);font-size:11px;font-weight:800;cursor:pointer;padding:3px 8px;border:1px solid var(--slate);border-radius:6px;font-family:'Nunito',sans-serif;" title="Share">Share</div></div>
       <div class="sc-loc">📍 ${realDist(s)||'Nearby'}</div>
-      <div class="sc-pills"><span class="pill">${s.reservable?'🗓 Reservable':'🟢 Walk-up'}</span>${s.directions?`<span class="pill">🧭 ${s.directions.substring(0,28)}</span>`:''}</div>
+      <div class="sc-pills"><span class="pill">${s.reservable?'🗓 Reservable':'🟢 Walk-up'}</span>${s.directions?'<span class="pill">🧭 '+s.directions.substring(0,28)+'</span>':''}${(s.seasonal&&s.seasonal!=='year-round'&&s.seasonal!=='unknown')?'<span class="pill seasonal" title="AI-estimated — always verify before visiting">🗓 '+({'summer-only':'Summer only','winter-closed':'Winter closed','spring-fall':'Spring/Fall'}[s.seasonal]||s.seasonal)+'</span>':''}</div>
       ${coordsHtml}
       <div class="sc-desc">${s.description}</div>
+      <div class="reviews-strip" id="${cardId}-reviews"><span style="font-size:11px;opacity:0.4;">...</span></div>
+      <span class="report-link" onclick="toggleReportForm('${cardId}',${JSON.stringify(s.name).replace(/"/g,'&quot;')})">⚑ Report an issue</span>
+      <div id="${cardId}-report" style="display:none;"></div>
       <div class="sc-tags">${(s.city||s.state)?'<span class="tag-loc">📍 '+(s.city?s.city+', ':'')+''+( s.state||'')+'</span>':''  }${tags}</div>
       ${notesSection}
       ${(s.coordinates&&s.coordinates.lat)?'<div onclick="copyCoords('+s.coordinates.lat+','+s.coordinates.lng+',this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:var(--dark);border:1.5px solid var(--slate);border-radius:8px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;margin-top:14px;margin-bottom:10px;user-select:none;">📍 '+s.coordinates.lat.toFixed(4)+', '+s.coordinates.lng.toFixed(4)+'</div>':''}
@@ -1521,7 +1660,7 @@ function cardHTML(s,i,isSavedView=false){
 // ── SAVE ──
 function getSaved(){try{return JSON.parse(localStorage.getItem('cf_saved')||'[]');}catch(e){return[];}}
 function isSaved(name){return getSaved().some(s=>s.name===name);}
-function toggleSave(site,btn){let saved=getSaved();if(isSaved(site.name)){saved=saved.filter(s=>s.name!==site.name);btn.classList.remove('saved');}else{saved.push(site);btn.classList.add('saved');}localStorage.setItem('cf_saved',JSON.stringify(saved));syncToSupabase();}
+function toggleSave(site,btn){let saved=getSaved();if(isSaved(site.name)){saved=saved.filter(s=>s.name!==site.name);btn.classList.remove('saved');}else{saved.push(site);btn.classList.add('saved');logEvent('save',{name:site.name,state:site.state});}localStorage.setItem('cf_saved',JSON.stringify(saved));syncToSupabase();}
 // ── TRIP LIST ──
 function getTrip(){try{return JSON.parse(localStorage.getItem('cf_trip')||'[]');}catch(e){return[];}}
 function inTrip(name){return getTrip().some(s=>s.name===name);}
@@ -1572,7 +1711,7 @@ function renderSaved(){
   else sites=[...sites].reverse();
   if(!sites.length){el.innerHTML='<div class="saved-empty">No spots in '+currentState+'.</div>';return;}
   el.innerHTML=sites.map((s,i)=>cardHTML(s,i,true)).join('');
-  sites.forEach((s,i)=>{const card=el.children[i];if(!card)return;const cid=card.getAttribute('data-cardid');const lat=parseFloat(card.getAttribute('data-lat'));const lng=parseFloat(card.getAttribute('data-lng'));setTimeout(()=>loadPhotosForCard(cid,s,''),i*200);if(lat&&lng)setTimeout(()=>loadWeatherForCard(cid,lat,lng),i*300+100);});
+  sites.forEach((s,i)=>{const card=el.children[i];if(!card)return;const cid=card.getAttribute('data-cardid');const lat=parseFloat(card.getAttribute('data-lat'));const lng=parseFloat(card.getAttribute('data-lng'));setTimeout(()=>loadPhotosForCard(cid,s,''),i*200);if(lat&&lng)setTimeout(()=>loadWeatherForCard(cid,lat,lng),i*300+100);setTimeout(()=>loadReviewsForCard(cid,s.name),i*150+50);});
 }
 
 // ── HOME ──
@@ -2135,11 +2274,25 @@ function appendChatMsg(role, html) {
   if (cch) cch.style.display = 'block';
 }
 
+function extractRouteLocations(query) {
+  const q = query.replace(/\b(through|via)\b/gi,'to').replace(/\band\b/gi,'to');
+  const fromTo = q.match(/from\s+([^,]+?)\s+to\s+(.+)/i);
+  if (fromTo) {
+    return [fromTo[1].trim(), ...fromTo[2].split(/\s+to\s+/i).map(s=>s.trim())]
+      .filter(l=>l.length>2).slice(0,6);
+  }
+  const parts = q.split(/\s+to\s+/i);
+  if (parts.length>=2) return parts
+    .map(s=>s.replace(/^(plan|drive|camp|route|road.?trip)\s+/i,'').trim())
+    .filter(l=>l.length>2).slice(0,6);
+  return [];
+}
+
 function estimateTripStops(query) {
   if (/month|30.?day|four.?week|4.?week/i.test(query)) return 12;
   if (/two.?week|2.?week|14.?day/i.test(query)) return 10;
-  if (/\b(a |one )?week\b|7.?day|seven.?day/i.test(query)) return 6;
-  if (/weekend|[2-5].?day|two.?day|three.?day|four.?day|five.?day/i.test(query)) return 3;
+  if (/\b(a |one )?week\b|7.?day|seven.?day/i.test(query)) return 8;
+  if (/weekend|[2-5].?day|two.?day|three.?day|four.?day|five.?day/i.test(query)) return 8;
   return 8;
 }
 
@@ -2213,10 +2366,34 @@ async function doNLSearch() {
   document.getElementById('res').innerHTML = '';
   skeletonCards(6, 'res');
 
-  const fields = '{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"2 sentences","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"..."}';
+  const fields = '{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"2 sentences","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"...","seasonal":"year-round|summer-only|winter-closed|spring-fall|unknown"}';
 
   const isAppQuestion = /what can|how do|how does|how to|what is|what are|what do|who are|tell me|explain|help me|features|capabilities|can you|do you|are you|how work|nomadai|about you|about this|where is|what.s in|what.*like|good time|best time|weather in|things to do|near.*what|recommend|suggest|tips for|far from|drive.*from|distance/i.test(query);
   const isRouteQuery = /along|on the way|on my way|en route|between .* and|from .* to|drive.*through|road trip|highway|interstate|\bI-\d|\bUS-\d|\bhwy\b|\broute\b.*\d/i.test(query);
+
+  // Check search cache for non-route, non-question queries
+  if (!isAppQuestion && !isRouteQuery) {
+    const cached = await getSearchCache(query);
+    if (cached && cached.length) {
+      document.getElementById('res').innerHTML = '';
+      setResSection(true);
+      recalcDistances(cached);
+      document.getElementById('res').innerHTML = cached.map((s,i) => cardHTML(s,i,false)).join('');
+      cached.forEach((s,i) => {
+        const card = document.getElementById('res').children[i];
+        if (!card) return;
+        const cid = card.getAttribute('data-cardid');
+        const loc = [s.city,s.state].filter(Boolean).join(', ');
+        setTimeout(() => loadPhotosForCard(cid,s,loc), i*200);
+        if (s.coordinates?.lat && s.coordinates?.lng) setTimeout(() => loadWeatherForCard(cid,s.coordinates.lat,s.coordinates.lng), i*300+100);
+      });
+      appendChatMsg('ai', '⚡ Showing cached results for this search.');
+      goBtn.innerHTML = '✨ Ask AI'; goBtn.style.display = 'flex'; goBtn.style.pointerEvents = '';
+      const aiLoader = document.getElementById('ai-loader'); if(aiLoader) aiLoader.style.display='none';
+      logEvent('search', { query, cached: true });
+      return;
+    }
+  }
 
   // System prompt — tells the AI its role and to maintain conversation context
   const systemPrompt = 'You are NomadAI, an expert camping guide and campsite finder. You help users find campsites, plan trips, and answer outdoor/camping questions. You remember the conversation history — if the user says things like "tell me more about the first one", "what about that spot", or "something closer", you understand they are referring to previous results. If the user is clearly asking about a new location or topic, treat it as a fresh search. Keep responses friendly and concise.' + locationContext;
@@ -2234,7 +2411,11 @@ async function doNLSearch() {
       const tripStops = estimateTripStops(query);
       window._lastRouteQuery = query;
       window._routeCoveredStates = '';
-      userContent = 'Plan a road trip with campsites matching: "' + query + '". ' + locationContext + ' CRITICAL ROUTE INSTRUCTIONS: Identify every major state and region along the FULL route from start to finish. You MUST spread results EVENLY — include 1-2 stops per state/region so the entire route is covered end to end. Do NOT cluster results in just the first few states. List stops in geographic order from start to finish. ' + routeMix + ' Return ONLY a JSON array of exactly ' + tripStops + ' campsites covering the full route. Each: ' + fields + ' No fake results. Start with MSG: followed by one friendly sentence (max 15 words), then newline, then JSON array only.';
+      const locs = extractRouteLocations(query);
+      const locGuarantee = locs.length >= 2
+        ? ` MANDATORY WAYPOINT STOPS: You MUST include at least 1-2 campsites within 150 miles of EACH of these locations — non-negotiable: ${locs.join(' → ')}. That accounts for ${locs.length} guaranteed stops. Distribute the remaining ${Math.max(0, tripStops - locs.length)} stops evenly along the route between them. The LAST location (${locs[locs.length-1]}) MUST have at least 1 stop.`
+        : ' CRITICAL: Cover the ENTIRE route end to end — at least 1-2 stops per state from start to finish. Do NOT cluster in early states.';
+      userContent = 'Plan a road trip with campsites matching: "' + query + '". ' + locationContext + locGuarantee + ' List stops in strict geographic order from start to finish. ' + routeMix + ' Return ONLY a JSON array of exactly ' + tripStops + ' campsites. Each: ' + fields + ' No fake results. Start with MSG: followed by one friendly sentence (max 15 words), then newline, then JSON array only.';
     } else {
       const mixInstruction = wantsEstablished
         ? 'Focus on established campgrounds with amenities as requested.'
@@ -2339,6 +2520,7 @@ async function doNLSearch() {
         const loc = [s.city,s.state].filter(Boolean).join(', ');
         setTimeout(() => loadPhotosForCard(cid,s,loc), i*200);
         if (lat && lng) setTimeout(() => loadWeatherForCard(cid,lat,lng), i*300+100);
+        setTimeout(() => loadReviewsForCard(cid, s.name), i*150+50);
       });
     }
 
@@ -2358,7 +2540,12 @@ async function doNLSearch() {
       }
     }
 
-    // Add to search history
+    // Cache results and log analytics
+    if (!isAppQuestion && !isRouteQuery && sites.length) {
+      setSearchCache(query, sites);
+      logEvent('search', { query, results: sites.length });
+    }
+    if (isRouteQuery) logEvent('route_search', { query });
 
   } catch(e) {
     console.error(e);
@@ -2739,7 +2926,11 @@ function toggleRouteFromLocation() {
   renderRoutePlanner();
 }
 
-function renderRoutePlanner() {
+function getTripDates(){try{return JSON.parse(localStorage.getItem('cf_trip_dates')||'{}');}catch(e){return{};}}
+function saveTripDate(name,val){try{const d=getTripDates();d[name]=val;localStorage.setItem('cf_trip_dates',JSON.stringify(d));}catch(e){}}
+function fmtDuration(secs){const h=Math.floor(secs/3600),m=Math.round((secs%3600)/60);return h>0?`${h}h ${m}m`:`${m}m`;}
+
+async function renderRoutePlanner() {
   const sites = getTrip();
   const list = document.getElementById('route-list');
   if (!sites.length) {
@@ -2747,18 +2938,51 @@ function renderRoutePlanner() {
     document.getElementById('route-go-btn').href = '#';
     return;
   }
-  list.innerHTML = sites.map((s, i) => `
-    <div class="route-item" data-index="${i}">
-      <div class="route-num">${i+1}</div>
-      <div class="route-name">${s.name}</div>
-      <div class="route-dist">${s.distance||''}</div>
-      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
-        ${i > 0 ? `<div onclick="moveStop(${i},-1)" style="width:26px;height:26px;background:var(--dark);border:1.5px solid var(--slate);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--muted);">↑</div>` : '<div style="width:26px;height:26px;"></div>'}
-        ${i < sites.length-1 ? `<div onclick="moveStop(${i},1)" style="width:26px;height:26px;background:var(--dark);border:1.5px solid var(--slate);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--muted);">↓</div>` : '<div style="width:26px;height:26px;"></div>'}
-      </div>
-      <div onclick="removeFromTrip('${s.name.replace(/'/g,"\\'")}');renderRoutePlanner();renderSaved();" style="width:26px;height:26px;background:var(--dark);border:1.5px solid #7a3030;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#f0a0a0;margin-left:2px;">✕</div>
-    </div>`).join('');
+  const dates = getTripDates();
+  // Render stops immediately, then fetch drive times
+  const renderItems = (legTimes) => {
+    let totalSecs = 0;
+    list.innerHTML = sites.map((s, i) => {
+      const leg = legTimes && i > 0 ? legTimes[i-1] : null;
+      if (leg) totalSecs += leg;
+      const driveHtml = leg ? `<div class="route-item-drive">🚗 ${fmtDuration(leg)}</div>` : '';
+      const dateVal = dates[s.name] || '';
+      return `
+      <div class="route-item" data-index="${i}">
+        <div class="route-num">${i+1}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="route-name">${s.name}</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px;">
+            ${driveHtml}
+            <input type="date" class="route-date-input" value="${dateVal}" onchange="saveTripDate('${s.name.replace(/'/g,"\\'")}',this.value)" title="Arrival date"/>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
+          ${i > 0 ? `<div onclick="moveStop(${i},-1)" style="width:26px;height:26px;background:var(--dark);border:1.5px solid var(--slate);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--muted);">↑</div>` : '<div style="width:26px;height:26px;"></div>'}
+          ${i < sites.length-1 ? `<div onclick="moveStop(${i},1)" style="width:26px;height:26px;background:var(--dark);border:1.5px solid var(--slate);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--muted);">↓</div>` : '<div style="width:26px;height:26px;"></div>'}
+        </div>
+        <div onclick="removeFromTrip('${s.name.replace(/'/g,"\\'")}');renderRoutePlanner();renderSaved();" style="width:26px;height:26px;background:var(--dark);border:1.5px solid #7a3030;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#f0a0a0;margin-left:2px;">✕</div>
+      </div>`;
+    }).join('');
+    if (legTimes && totalSecs > 0) {
+      list.insertAdjacentHTML('beforeend', `<div class="route-total-time">Total drive time: ~${fmtDuration(totalSecs)}</div>`);
+    }
+  };
+  renderItems(null); // immediate render without drive times
   updateRouteLink(sites);
+  // Async: fetch OSRM leg durations
+  const withCoords = sites.filter(s => s.coordinates?.lat && s.coordinates?.lng);
+  if (withCoords.length >= 2) {
+    try {
+      const coords = withCoords.map(s => `${s.coordinates.lng},${s.coordinates.lat}`).join(';');
+      const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=false&steps=false`);
+      const d = await r.json();
+      if (d.routes?.[0]?.legs) {
+        const legTimes = d.routes[0].legs.map(l => l.duration);
+        renderItems(legTimes);
+      }
+    } catch(e) {}
+  }
 }
 
 function updateRouteLink(sites) {
@@ -3018,36 +3242,7 @@ function addRecent(site){
 }
 function clearRecent(){localStorage.removeItem('cf_recent');renderRecentSection();}
 
-function renderRecentSection(){
-  const el=document.getElementById('recent-section');
-  if(!el)return;
-  const recent=getRecent();
-  if(!recent.length){el.innerHTML='';return;}
-  el.innerHTML=`<div class="divider" style="display:flex;align-items:center;justify-content:space-between;padding-right:0"><span>Recently viewed</span><span onclick="clearRecent()" style="font-size:10px;color:var(--muted);cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Clear</span></div>`+
-  recent.map((s,i)=>{
-    const src=(s.source||'other').toLowerCase().replace('recreation.gov','rec').replace('ioverlander','iover').replace('campendium','camp');
-    const savedClass=isSaved(s.name)?'save-btn saved':'save-btn';
-    const mapsUrl=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name+' campsite')}`;
-    return `<div class="sc recent-card" style="animation-delay:${i*.04}s;cursor:pointer;" onclick="openCardModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">
-      <div class="sc-body" style="padding:12px 14px;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-          <div>
-            <div class="sc-name" style="font-size:14px;">${s.name}${isVisited(s.name)?' <span style="font-size:10px;color:var(--sage);font-weight:700;">✓</span>':''}</div>
-            <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
-              <span class="sc-badge ${src}" style="position:static;font-size:9px;padding:2px 8px;">${s.sourceLabel||s.source}</span>
-              <span style="font-size:11px;color:var(--muted);font-weight:600;">📍 ${s.distance||'Nearby'}</span>
-              <span style="font-size:11px;color:var(--tan);font-weight:700;">${s.fee||'Free'}</span>
-            </div>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0;">
-            <a class="fb outline" href="${mapsUrl}" target="_blank" style="height:34px;padding:0 10px;font-size:12px;">🗺</a>
-            <div class="fb ${savedClass}" onclick="toggleSave(${JSON.stringify(s).replace(/"/g,'&quot;')},this)" style="height:34px;width:34px;">🔖</div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
+function renderRecentSection(){}
 
 // ── PHOTO LIGHTBOX ──
 let lightboxPhotos = [];
@@ -3451,9 +3646,130 @@ async function syncFromSupabase() {
 
 
 
+// ── REVIEWS ──
+const _reviewCache = {};
+async function loadReviewsForCard(cardId, name) {
+  const el = document.getElementById(cardId + '-reviews');
+  if (!el) return;
+  try {
+    if (!_reviewCache[name]) {
+      const { data } = await supa.from('campsite_reviews').select('rating,review_text,created_at,user_id').eq('campsite_name', name).order('created_at', { ascending: false }).limit(20);
+      _reviewCache[name] = data || [];
+    }
+    const reviews = _reviewCache[name];
+    if (!reviews.length) { el.innerHTML = '<span style="font-size:11px;opacity:0.35;">No reviews yet</span>'; return; }
+    const avg = (reviews.reduce((s,r) => s + r.rating, 0) / reviews.length).toFixed(1);
+    const stars = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+    el.innerHTML = `<span class="rev-stars">${stars}</span><span style="font-weight:800;color:var(--sand);">${avg}</span><span style="opacity:0.6;">(${reviews.length})</span><span onclick="toggleReviewList('${cardId}','${name.replace(/'/g,"\\'")}',this)" style="cursor:pointer;color:var(--tan);font-size:11px;margin-left:4px;">See reviews ▾</span>`;
+    el.insertAdjacentHTML('afterend', `<div id="${cardId}-review-list" style="display:none;"></div>`);
+  } catch(e) { el.innerHTML = ''; }
+}
+function toggleReviewList(cardId, name, btn) {
+  const el = document.getElementById(cardId + '-review-list');
+  if (!el) return;
+  if (el.style.display !== 'none') { el.style.display = 'none'; btn.textContent = 'See reviews ▾'; return; }
+  const reviews = _reviewCache[name] || [];
+  const myReview = reviews.find(r => r.user_id === currentUser?.id);
+  el.innerHTML = reviews.map(r => `<div class="review-item"><span style="color:#c4a06a;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span> <span style="opacity:0.6;font-size:10px;">${new Date(r.created_at).toLocaleDateString()}</span>${r.review_text ? '<br><span style="color:var(--sand);">'+r.review_text+'</span>' : ''}</div>`).join('');
+  if (currentUser) {
+    el.insertAdjacentHTML('beforeend', `<div class="review-form" id="${cardId}-rev-form">
+      <div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:6px;">${myReview ? 'Update your review' : 'Write a review'}</div>
+      <div class="review-stars-input" id="${cardId}-rev-stars">${[1,2,3,4,5].map(n=>`<span class="review-star-btn${myReview&&n<=myReview.rating?' on':''}" onclick="setRevStar('${cardId}',${n})" data-val="${n}">★</span>`).join('')}</div>
+      <textarea class="review-textarea" id="${cardId}-rev-text" placeholder="Optional notes about this spot...">${myReview?.review_text||''}</textarea>
+      <div onclick="submitReview('${cardId}','${name.replace(/'/g,"\\'")}',this)" style="margin-top:6px;display:inline-flex;padding:6px 16px;background:var(--tan);color:#e8d5b7;border-radius:50px;font-size:12px;font-weight:800;cursor:pointer;">Submit</div>
+    </div>`);
+  } else {
+    el.insertAdjacentHTML('beforeend', `<div style="font-size:11px;color:var(--muted);padding:6px 0;"><span onclick="openAuth()" style="color:var(--tan);cursor:pointer;font-weight:800;">Sign in</span> to leave a review</div>`);
+  }
+  el.style.display = 'block';
+  btn.textContent = 'Hide reviews ▴';
+}
+function setRevStar(cardId, val) {
+  document.querySelectorAll(`#${cardId}-rev-stars .review-star-btn`).forEach(s => s.classList.toggle('on', parseInt(s.dataset.val) <= val));
+}
+async function submitReview(cardId, name, btn) {
+  const rating = [...document.querySelectorAll(`#${cardId}-rev-stars .review-star-btn.on`)].length;
+  const text = document.getElementById(cardId + '-rev-text')?.value.trim() || '';
+  if (!rating) { alert('Pick a star rating first.'); return; }
+  btn.textContent = 'Saving...';
+  const { error } = await supa.from('campsite_reviews').upsert({ user_id: currentUser.id, campsite_name: name, rating, review_text: text }, { onConflict: 'user_id,campsite_name' });
+  if (error) { btn.textContent = 'Error — try again'; return; }
+  delete _reviewCache[name];
+  btn.textContent = '✓ Saved!';
+  setTimeout(() => loadReviewsForCard(cardId, name), 500);
+}
+
+// ── REPORT ──
+function toggleReportForm(cardId, name) {
+  const el = document.getElementById(cardId + '-report');
+  if (!el) return;
+  if (el.style.display !== 'none') { el.style.display = 'none'; return; }
+  el.innerHTML = `<div class="report-form">
+    <select id="${cardId}-issue"><option value="">Select issue...</option><option>Permanently closed</option><option>Wrong location</option><option>Bad directions</option><option>Fake / doesn't exist</option></select>
+    <textarea id="${cardId}-note" placeholder="Optional details..."></textarea>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div onclick="submitReport('${cardId}','${name.replace(/'/g,"\\'")}',this)" style="display:inline-flex;padding:5px 14px;background:var(--dark);border:1px solid var(--tan);color:var(--tan);border-radius:50px;font-size:11px;font-weight:800;cursor:pointer;">Submit</div>
+      <span onclick="document.getElementById('${cardId}-report').style.display='none'" style="font-size:11px;color:var(--muted);cursor:pointer;">Cancel</span>
+    </div>
+  </div>`;
+  el.style.display = 'block';
+}
+async function submitReport(cardId, name, btn) {
+  const issueType = document.getElementById(cardId + '-issue')?.value;
+  if (!issueType) { alert('Select an issue type.'); return; }
+  const note = document.getElementById(cardId + '-note')?.value.trim() || '';
+  btn.textContent = 'Sending...';
+  await supa.from('campsite_reports').insert({ user_id: currentUser?.id || null, campsite_name: name, issue_type: issueType, note });
+  const el = document.getElementById(cardId + '-report');
+  if (el) el.innerHTML = '<div style="font-size:11px;color:var(--sage);padding:6px 0;">✓ Thanks for the report!</div>';
+}
+
+// ── TRIP SHARING ──
+async function shareTrip() {
+  const stops = getTrip();
+  if (!stops.length) { alert('Add stops to your trip first.'); return; }
+  const name = prompt('Name this trip:', 'My NomadAI Trip') || 'My NomadAI Trip';
+  const { data, error } = await supa.from('shared_trips').insert({ user_id: currentUser?.id || null, trip_name: name, stops }).select('id').single();
+  if (error || !data) { alert('Could not share trip. Try again.'); return; }
+  const url = 'https://nomadai.us/app?trip=' + data.id;
+  logEvent('share_trip', { stops: stops.length });
+  if (navigator.share) { navigator.share({ title: name, url }); }
+  else { await navigator.clipboard.writeText(url).catch(()=>{}); alert('Trip link copied to clipboard!'); }
+}
+
+// ── PUSH NOTIFICATIONS ──
+async function checkTripReminders() {
+  if (!('Notification' in window)) return;
+  const dates = getTripDates();
+  const trip = getTrip();
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  const tStr = tomorrow.toISOString().slice(0, 10);
+  const upcoming = trip.filter(s => dates[s.name] === tStr);
+  if (!upcoming.length) return;
+  if (Notification.permission === 'default') await Notification.requestPermission();
+  if (Notification.permission === 'granted') {
+    upcoming.forEach(s => new Notification('NomadAI Trip Reminder 🏕️', {
+      body: `Tomorrow: ${s.name}${s.city ? ' in ' + s.city : ''}`,
+      icon: '/icons/icon-192.png'
+    }));
+  }
+}
+async function enableNotifications() {
+  if (!('Notification' in window)) { alert('Notifications not supported on this device.'); return; }
+  const perm = await Notification.requestPermission();
+  const btn = document.getElementById('notif-btn');
+  if (btn) btn.textContent = perm === 'granted' ? '🔔 Reminders on' : '🔕 Blocked by browser';
+}
+
+// ── ANALYTICS ──
+function logEvent(type, data = {}) {
+  supa.from('analytics_events').insert({ user_id: currentUser?.id || null, event_type: type, data }).catch(()=>{});
+}
+
 // ── SEARCH LIMITS ──
 const SEARCH_LIMIT_GUEST = 5;
 const SEARCH_LIMIT_USER = 20;
+const ADMIN_EMAILS = ['lukebrowneo20@gmail.com'];
 
 function getSearchCount() {
   const today = new Date().toDateString();
@@ -3475,6 +3791,7 @@ function incrementSearchCount() {
 }
 
 function checkSearchLimit() {
+  if (currentUser && ADMIN_EMAILS.includes(currentUser.email)) return true;
   const limit = currentUser ? SEARCH_LIMIT_USER : SEARCH_LIMIT_GUEST;
   const count = getSearchCount();
   if (count >= limit) {
@@ -3593,7 +3910,15 @@ function buildRouteFromSelection(selId, count) {
   window._pendingRouteSites = null;
   window._pendingRouteSelId = null;
   window._routePinState = {};
+  logEvent('route_build', { stops: optimized.length });
   appendChatMsg('ai', '✓ <span style="color:var(--sage);font-weight:800;">Route built with ' + optimized.length + ' stop' + (optimized.length !== 1 ? 's' : '') + ', optimized for the most efficient order.</span> Head to Saved → Plan a trip to reorder or adjust, or check the Map → My route tab.');
+  // Auto-switch to map tab and fit bounds
+  setTimeout(() => {
+    showTab('map');
+    setTimeout(() => {
+      if (typeof plotRoute === 'function') plotRoute();
+    }, 300);
+  }, 800);
 }
 
 // ── OFFLINE DETECTION ──
@@ -3606,8 +3931,9 @@ window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 showMain();
-initAuth();
+initAuth().then(() => checkTripReminders());
 setTimeout(initChatScroll, 500);
 
 // ── SHARED SPOT URL HANDLER ──
@@ -3642,6 +3968,30 @@ setTimeout(initChatScroll, 500);
         setTimeout(() => openCardModal(site), 1200);
       }
     } catch(e) { console.error('Failed to load shared spot:', e); }
+  }
+  // Handle ?trip= shared trip
+  const tripId = params.get('trip');
+  if (tripId) {
+    try {
+      const { data, error } = await supa.from('shared_trips').select('*').eq('id', tripId).single();
+      if (!error && data?.stops?.length) {
+        setTimeout(() => {
+          switchTab('search');
+          setResSection(true);
+          recalcDistances(data.stops);
+          document.getElementById('res').innerHTML = data.stops.map((s,i) => cardHTML(s,i,false)).join('');
+          appendChatMsg('ai', `🗺️ <span style="color:var(--sage);font-weight:800;">Shared trip: ${data.trip_name||'Route'}</span> — ${data.stops.length} stops`);
+          data.stops.forEach((s,i) => {
+            const card = document.getElementById('res').children[i];
+            if (!card) return;
+            const cid = card.getAttribute('data-cardid');
+            setTimeout(() => loadPhotosForCard(cid,s,''), i*200);
+            if (s.coordinates?.lat && s.coordinates?.lng) setTimeout(() => loadWeatherForCard(cid,s.coordinates.lat,s.coordinates.lng), i*300+100);
+            setTimeout(() => loadReviewsForCard(cid, s.name), i*150+50);
+          });
+        }, 1000);
+      }
+    } catch(e) { console.error('Failed to load shared trip:', e); }
   } else if (encodedSpot) {
     // Decode fallback URL
     try {
