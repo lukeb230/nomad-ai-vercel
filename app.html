@@ -138,10 +138,11 @@
     /* CARDS */
     .sc { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--slate); animation: fu .3s ease both; }
     @keyframes fu { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .carousel { position: relative; height: 160px; background: var(--dark); overflow: hidden; }
-    .carousel-track { display: flex; height: 100%; transition: transform 0.35s ease; }
-    .carousel-slide { min-width: 100%; height: 100%; background: var(--dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; }
-    .carousel-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .carousel { position: relative; width: 100%; padding-top: 56.25%; height: 0; background: var(--dark); overflow: hidden; }
+    .carousel-track { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; transition: transform 0.35s ease; }
+    .carousel-slide { min-width: 100%; height: 100%; background: var(--dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden; }
+    .carousel-slide-bg { position: absolute; inset: -15%; width: 130%; height: 130%; background-size: cover; background-position: center; filter: blur(18px); opacity: 0.55; z-index: 0; }
+    .carousel-slide img { position: relative; z-index: 1; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
     .ph-loader { position: absolute; font-size: 2rem; opacity: .3; pointer-events: none; }
     .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; background: rgba(28,40,32,0.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; font-size: 14px; color: var(--sand); user-select: none; }
     .carousel-btn.prev { left: 8px; }
@@ -166,7 +167,9 @@
     .sc-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
     .tag { font-size: 11px; padding: 3px 9px; background: var(--dark); border-radius: 6px; color: var(--muted); font-weight: 600; }
     .tag-loc { font-size: 11px; padding: 3px 9px; background: rgba(168,196,204,0.15); border-radius: 6px; color: var(--sky); font-weight: 700; border: 1px solid rgba(168,196,204,0.3); }
-    .sc-foot { display: grid; grid-template-columns: 1fr 1fr 44px 44px; gap: 6px; }
+    .sc-foot { display: grid; grid-template-columns: 1fr 1fr 44px; gap: 6px; }
+    .sc-foot--pin  { grid-template-columns: 1fr 1fr 44px 44px; }
+    .sc-foot--saved { grid-template-columns: 1fr 1fr 44px 44px 44px; }
     .fb { height: 42px; border-radius: 12px; font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; }
     .fb.solid   { background: var(--tan);  color: var(--sand); }
     .fb.search-site-btn { background: var(--tan); color: #f5e6cf; border: none; flex-direction: column; gap: 1px; line-height: 1.2; font-size: 11px; font-weight: 800; }
@@ -330,15 +333,15 @@
     .notes-input:focus { border-color:var(--tan); }
 
     /* MAP EMPTY STATE */
-    #map-empty-state { position:absolute; top:50%; left:50%; transform:translate(-50%,-60%); text-align:center; pointer-events:none; z-index:400; }
-    #map-empty-state .map-empty-icon { font-size:40px; margin-bottom:10px; }
-    #map-empty-state .map-empty-title { font-size:17px; font-weight:800; color:var(--sage); margin-bottom:6px; text-shadow:0 1px 4px rgba(0,0,0,0.5); }
-    #map-empty-state .map-empty-sub { font-size:13px; color:var(--sage); opacity:0.8; max-width:210px; line-height:1.5; text-shadow:0 1px 3px rgba(0,0,0,0.4); }
-    #app.light #map-empty-state .map-empty-title { color:var(--tan); text-shadow:0 1px 4px rgba(255,255,255,0.7); }
-    #app.light #map-empty-state .map-empty-sub { color:var(--tan); text-shadow:0 1px 3px rgba(255,255,255,0.7); }
+    #map-empty-state { position:absolute; top:50%; left:50%; transform:translate(-50%,-60%); text-align:center; pointer-events:none; z-index:400; background:var(--card); border:1.5px solid var(--slate); border-radius:18px; padding:24px 28px; box-shadow:0 4px 24px rgba(0,0,0,0.18); max-width:260px; }
+    #map-empty-state .map-empty-icon { font-size:36px; margin-bottom:10px; }
+    #map-empty-state .map-empty-title { font-size:16px; font-weight:800; color:var(--sand); margin-bottom:6px; }
+    #map-empty-state .map-empty-sub { font-size:13px; color:var(--muted); line-height:1.55; }
+    #app.light #map-empty-state { box-shadow:0 4px 24px rgba(0,0,0,0.10); }
 
     /* SEASONAL / REVIEWS / REPORT */
     .pill.seasonal { background: rgba(180,120,40,0.15); border: 1px solid rgba(180,120,40,0.4); color: #c4903a; font-size: 10px; }
+    .pill.pill-view { background: rgba(60,120,180,0.13); border: 1px solid rgba(60,120,180,0.35); color: #5b9bd5; font-size: 10px; }
     .reviews-strip { display:flex; align-items:center; gap:6px; padding:6px 0 2px; font-size:12px; color:var(--muted); font-weight:700; flex-wrap:wrap; }
     .reviews-strip .rev-stars { color:#c4a06a; letter-spacing:1px; }
     .review-form { margin-top:8px; padding:10px 12px; background:var(--darker); border-radius:10px; }
@@ -363,6 +366,9 @@
     /* ITINERARY */
     .route-item-date { font-size:11px; color:var(--muted); font-weight:700; margin-top:3px; }
     .route-item-drive { font-size:11px; color:var(--sage); font-weight:700; padding:2px 8px; background:rgba(138,172,122,.15); border-radius:6px; display:inline-flex; align-items:center; gap:4px; margin-top:3px; }
+    .route-date-btn { position:relative; display:inline-flex; align-items:center; gap:4px; background:var(--darker); border:1.5px solid var(--slate); border-radius:8px; padding:3px 8px; font-size:11px; color:var(--sand); font-family:'Nunito',sans-serif; font-weight:700; cursor:pointer; white-space:nowrap; overflow:hidden; }
+    .route-date-btn input[type="date"] { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; border:none; padding:0; margin:0; }
+    .route-date-btn:focus-within { border-color:var(--tan); }
     .route-date-input { background:var(--darker); border:1.5px solid var(--slate); border-radius:8px; padding:3px 8px; font-size:11px; color:var(--sand); font-family:'Nunito',sans-serif; font-weight:700; outline:none; cursor:pointer; }
     .route-date-input:focus { border-color:var(--tan); }
     .route-total-time { text-align:center; font-size:12px; color:var(--muted); font-weight:700; padding:8px 0 2px; }
@@ -588,6 +594,41 @@
       }
     }
   
+    /* ── MOBILE OVERRIDES (≤ 600px) ── */
+    @media (max-width: 600px) {
+      /* Bottom nav — safe area for iPhone notch */
+      .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+      .nav-btn { padding: 10px 0 12px; font-size: 10px; }
+
+      /* Card footer saved view — 2-row layout on mobile */
+      .sc-foot--saved { display: flex; flex-wrap: wrap; gap: 5px; }
+      .sc-foot--saved .search-site-btn,
+      .sc-foot--saved .outline { flex: 1 1 calc(50% - 3px); min-width: 0; }
+      .sc-foot--saved .visited-btn,
+      .sc-foot--saved .trip-btn,
+      .sc-foot--saved .delete-btn { flex: 1 1 calc(33% - 4px); min-width: 44px; }
+      .fb { height: 44px; font-size: 12px; border-radius: 10px; }
+      .fb.search-site-btn { font-size: 10px; }
+
+      /* Route planner action buttons — 2-column grid instead of flex row */
+      .route-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 10px 12px; }
+      .route-go-btn { grid-column: 1 / -1; height: 44px; }
+      .route-clear-btn, .route-optimize-btn, .route-add-all-btn { height: 40px; padding: 0 10px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      /* Route header toggles — wrap on narrow screens */
+      .route-header { flex-wrap: wrap; gap: 6px; }
+
+      /* NL chat box — shorter on small screens */
+      #nl-mode-wrap { height: clamp(320px, 55vh, 480px) !important; }
+
+      /* Topbar */
+      .topbar { padding: 14px 16px 10px; }
+      .topbar-title { font-size: 18px; }
+
+      /* Route date input in planner */
+      .route-date-input { font-size: 11px; padding: 3px 6px; }
+    }
+
     /* HOME DASHBOARD */
     .home-section { padding: 0 16px 6px; }
     .home-section-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .14em; color: var(--tan); margin-bottom: 10px; }
@@ -1090,25 +1131,44 @@ function realDist(site){
 // ── WEATHER ──
 const WMO={0:'Clear',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',80:'Showers',81:'Heavy showers',95:'Thunderstorm'};
 const WMO_ICON={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',95:'⛈️'};
+// Proximity cache — keyed to 0.1° grid (~11km). Sites within same cell share one fetch.
+const _wxCache = {}, _sunCache = {}, _wxPending = {}, _sunPending = {};
+const _wxKey = (lat, lng) => (Math.round(lat*10)/10) + ',' + (Math.round(lng*10)/10);
 async function fetchWeather(lat,lng){
-  try{const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,windspeed_10m&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=auto`);const d=await r.json();if(!d.current)return null;const c=d.current;return{temp:Math.round(c.temperature_2m),wind:Math.round(c.windspeed_10m),desc:WMO[c.weathercode]||'Unknown',icon:WMO_ICON[c.weathercode]||'🌡️'};}catch(e){return null;}
+  const key = _wxKey(lat, lng);
+  if (_wxCache[key]) return _wxCache[key];
+  if (_wxPending[key]) return _wxPending[key];
+  _wxPending[key] = (async () => {
+    try{const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,windspeed_10m&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=auto`);const d=await r.json();if(!d.current)return null;const c=d.current;const result={temp:Math.round(c.temperature_2m),wind:Math.round(c.windspeed_10m),desc:WMO[c.weathercode]||'Unknown',icon:WMO_ICON[c.weathercode]||'🌡️'};_wxCache[key]=result;return result;}catch(e){return null;}
+    finally{delete _wxPending[key];}
+  })();
+  return _wxPending[key];
 }
 async function fetchSunTimes(lat, lng) {
-  try {
-    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lng+'&daily=sunrise,sunset&timezone=auto&forecast_days=1');
-    const d = await r.json();
-    if (!d.daily) return null;
-    const rise = d.daily.sunrise[0];
-    const set = d.daily.sunset[0];
-    const fmt = t => {
-      const dt = new Date(t);
-      let h = dt.getHours(), m = dt.getMinutes();
-      const ap = h >= 12 ? 'pm' : 'am';
-      h = h % 12 || 12;
-      return h + ':' + (m < 10 ? '0'+m : m) + ' ' + ap;
-    };
-    return { rise: fmt(rise), set: fmt(set) };
-  } catch(e) { return null; }
+  const key = _wxKey(lat, lng);
+  if (_sunCache[key]) return _sunCache[key];
+  if (_sunPending[key]) return _sunPending[key];
+  _sunPending[key] = (async () => {
+    try {
+      const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lng+'&daily=sunrise,sunset&timezone=auto&forecast_days=1');
+      const d = await r.json();
+      if (!d.daily) return null;
+      const rise = d.daily.sunrise[0];
+      const set = d.daily.sunset[0];
+      const fmt = t => {
+        const dt = new Date(t);
+        let h = dt.getHours(), m = dt.getMinutes();
+        const ap = h >= 12 ? 'pm' : 'am';
+        h = h % 12 || 12;
+        return h + ':' + (m < 10 ? '0'+m : m) + ' ' + ap;
+      };
+      const result = { rise: fmt(rise), set: fmt(set) };
+      _sunCache[key] = result;
+      return result;
+    } catch(e) { return null; }
+    finally { delete _sunPending[key]; }
+  })();
+  return _sunPending[key];
 }
 
 async function loadWeatherForCard(cardId,lat,lng){
@@ -1586,10 +1646,10 @@ async function loadPhotosForCard(cardId,site,location){
     isFallback = true;
   }
   const track=carousel.querySelector('.carousel-track');const dots=carousel.querySelector('.carousel-dots');
-  track.innerHTML=photos.map((url,pi)=>`<div class="carousel-slide"><span class="ph-loader">🏕️</span><img src="${url}" loading="lazy" style="cursor:zoom-in;" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none';" onclick="openLightbox(${JSON.stringify(photos).replace(/"/g,'&quot;')},${pi});event.stopPropagation();" /></div>`).join('');
+  track.innerHTML=photos.map((url,pi)=>`<div class="carousel-slide"><div class="carousel-slide-bg" style="background-image:url('${url.replace(/'/g,"%27")}')"></div><span class="ph-loader">🏕️</span><img src="${url}" loading="lazy" style="cursor:zoom-in;" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none';" onclick="openLightbox(${JSON.stringify(photos).replace(/"/g,'&quot;')},${pi});event.stopPropagation();" /></div>`).join('');
   if (isFallback || isWikimedia || isMapbox) {
     const badge = document.createElement('div');
-    badge.style.cssText = 'position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.7);font-size:9px;font-weight:700;padding:3px 8px;border-radius:50px;pointer-events:none;letter-spacing:.04em;backdrop-filter:blur(4px);';
+    badge.style.cssText = 'position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.7);font-size:9px;font-weight:700;padding:3px 8px;border-radius:50px;pointer-events:none;letter-spacing:.04em;backdrop-filter:blur(4px);z-index:10;';
     badge.textContent = isMapbox ? '🛰️ Satellite view' : isWikimedia ? '📷 Area photo' : '📷 Illustrative photo';
     carousel.style.position = 'relative';
     carousel.appendChild(badge);
@@ -1643,16 +1703,16 @@ function cardHTML(s,i,isSavedView=false){
     <div class="sc-body">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;"><div class="sc-name" onclick="addRecent(${JSON.stringify(s).replace(/"/g,'&quot;')});renderRecentSection();" style="cursor:pointer;flex:1;margin-bottom:0;">${s.name}${isVisited(s.name)?' <span style="font-size:11px;color:var(--sage);font-weight:700;">✓ Visited</span>':''}</div><div onclick="shareSpot(${JSON.stringify(s).replace(/"/g,'&quot;')})" style="flex-shrink:0;color:var(--muted);font-size:11px;font-weight:800;cursor:pointer;padding:3px 8px;border:1px solid var(--slate);border-radius:6px;font-family:'Nunito',sans-serif;" title="Share">Share</div></div>
       <div class="sc-loc">📍 ${realDist(s)||'Nearby'}</div>
-      <div class="sc-pills"><span class="pill">${s.reservable?'🗓 Reservable':'🟢 Walk-up'}</span>${s.directions?'<span class="pill">🧭 '+s.directions.substring(0,28)+'</span>':''}${(s.seasonal&&s.seasonal!=='year-round'&&s.seasonal!=='unknown')?'<span class="pill seasonal" title="AI-estimated — always verify before visiting">🗓 '+({'summer-only':'Summer only','winter-closed':'Winter closed','spring-fall':'Spring/Fall'}[s.seasonal]||s.seasonal)+'</span>':''}</div>
+      <div class="sc-pills"><span class="pill">${s.reservable?'🗓 Reservable':'🟢 Walk-up'}</span>${s.directions?'<span class="pill">🧭 '+s.directions.substring(0,28)+'</span>':''}${(s.seasonal&&s.seasonal!=='year-round'&&s.seasonal!=='unknown')?'<span class="pill seasonal" title="AI-estimated — always verify before visiting">🗓 '+({'summer-only':'Summer only','winter-closed':'Winter closed','spring-fall':'Spring/Fall'}[s.seasonal]||s.seasonal)+'</span>':''}${(()=>{const viewEmoji={'mountain':'⛰️','ocean':'🌊','lake':'🏞️','river':'🌊','desert':'🏜️','forest':'🌲','valley':'🏔️','canyon':'🪨','meadow':'🌿','waterfall':'💧','beach':'🏖️','glacier':'🧊','dunes':'🏜️','cliff':'🪨','plains':'🌾'};const vs=Array.isArray(s.views)?s.views.filter(v=>v&&v!=='none'):[];return vs.length?vs.map(v=>'<span class="pill pill-view" title="AI-estimated scenery — verify before visiting">'+(viewEmoji[v]||'🏕️')+' '+v.charAt(0).toUpperCase()+v.slice(1)+' view</span>').join(''):'';})()}</div>
       ${coordsHtml}
-      <div class="sc-desc">${s.description}</div>
+      <div class="sc-desc">${s.description}${(()=>{const vs=Array.isArray(s.views)?s.views.filter(v=>v&&v!=='none'):[];return vs.length?' <span style="font-size:10px;color:var(--muted);font-style:italic;">View info is AI-estimated — verify on the source site.</span>':'';})()} </div>
       <div class="reviews-strip" id="${cardId}-reviews"><span style="font-size:11px;opacity:0.4;">...</span></div>
       <span class="report-link" onclick="toggleReportForm('${cardId}',${JSON.stringify(s.name).replace(/"/g,'&quot;')})">⚑ Report an issue</span>
       <div id="${cardId}-report" style="display:none;"></div>
       <div class="sc-tags">${(s.city||s.state)?'<span class="tag-loc">📍 '+(s.city?s.city+', ':'')+''+( s.state||'')+'</span>':''  }${tags}</div>
       ${notesSection}
       ${(s.coordinates&&s.coordinates.lat)?'<div onclick="copyCoords('+s.coordinates.lat+','+s.coordinates.lng+',this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:var(--dark);border:1.5px solid var(--slate);border-radius:8px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;margin-top:14px;margin-bottom:10px;user-select:none;">📍 '+s.coordinates.lat.toFixed(4)+', '+s.coordinates.lng.toFixed(4)+'</div>':''}
-      <div class="sc-foot" style="margin-top:${notesSection?'10px':'0'};grid-template-columns:${isSavedView?'1fr 1fr 44px 44px 44px':isRoutePinMode?'1fr 1fr 44px 44px':'1fr 1fr 44px 44px'}">${listingBtn}<a class="fb outline" href="${mapsUrl}" target="_blank">🗺 Directions</a>${isRoutePinMode?pinBtn:isSavedView?visitBtn:''}${isSavedView?tripBtn:''}${actionBtn}</div>
+      <div class="sc-foot ${isRoutePinMode?'sc-foot--pin':isSavedView?'sc-foot--saved':''}" style="margin-top:${notesSection?'10px':'0'}">${listingBtn}<a class="fb outline" href="${mapsUrl}" target="_blank">🗺 Directions</a>${isRoutePinMode?pinBtn:isSavedView?visitBtn:''}${isSavedView?tripBtn:''}${actionBtn}</div>
     </div>
   </div>`;
 }
@@ -2040,10 +2100,18 @@ async function acSearch(val) {
   clearTimeout(acTimeout);
   acTimeout = setTimeout(async () => {
     try {
-      const r = await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(val)+'&format=json&limit=3&addressdetails=1', {
-        headers: { 'Accept-Language': 'en', 'User-Agent': 'NomadAI/1.0' }
-      });
-      const data = await r.json();
+      const cacheKey = 'nomad_ac_' + val.toLowerCase().trim();
+      let data;
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        data = JSON.parse(cached);
+      } else {
+        const r = await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(val)+'&format=json&limit=3&addressdetails=1', {
+          headers: { 'Accept-Language': 'en', 'User-Agent': 'NomadAI/1.0' }
+        });
+        data = await r.json();
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e) {}
+      }
       acResults = data;
       acIndex = -1;
       if (!data.length) { list.style.display='none'; return; }
@@ -2288,12 +2356,15 @@ function extractRouteLocations(query) {
   return [];
 }
 
-function estimateTripStops(query) {
-  if (/month|30.?day|four.?week|4.?week/i.test(query)) return 12;
-  if (/two.?week|2.?week|14.?day/i.test(query)) return 10;
-  if (/\b(a |one )?week\b|7.?day|seven.?day/i.test(query)) return 8;
-  if (/weekend|[2-5].?day|two.?day|three.?day|four.?day|five.?day/i.test(query)) return 8;
-  return 8;
+function estimateTripStops(query, numLocs) {
+  const locs = numLocs || 2;
+  // Base stops scale with number of waypoints — more hops = more stops needed
+  const base = Math.max(12, locs * 4);
+  if (/month|30.?day|four.?week|4.?week/i.test(query)) return Math.max(base, 16);
+  if (/two.?week|2.?week|14.?day/i.test(query)) return Math.max(base, 14);
+  if (/\b(a |one )?week\b|7.?day|seven.?day/i.test(query)) return Math.max(base, 12);
+  if (/weekend|[2-5].?day|two.?day|three.?day|four.?day|five.?day/i.test(query)) return Math.max(10, locs * 3);
+  return base;
 }
 
 async function doMoreRouteStops() {
@@ -2366,7 +2437,8 @@ async function doNLSearch() {
   document.getElementById('res').innerHTML = '';
   skeletonCards(6, 'res');
 
-  const fields = '{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"2 sentences","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"...","seasonal":"year-round|summer-only|winter-closed|spring-fall|unknown"}';
+  const fields = '{"name":"...","source":"dyrt|recreation.gov|ioverlander|blm|campendium|other","sourceLabel":"...","url":"real URL or empty","distance":"~XX miles","fee":"Free or $XX/night","reservable":false,"description":"2 sentences","tags":["tag1","tag2"],"directions":"10 words max","coordinates":{"lat":0.0,"lng":0.0},"city":"...","state":"...","seasonal":"year-round|summer-only|winter-closed|spring-fall|unknown","views":["mountain"|"ocean"|"lake"|"river"|"desert"|"forest"|"valley"|"canyon"|"meadow"|"waterfall"|"beach"|"glacier"|"dunes"|"cliff"|"plains"|"none"]}';
+  // views is an array — include only views the site is genuinely known for. Use [] if unknown or none.
 
   const isAppQuestion = /what can|how do|how does|how to|what is|what are|what do|who are|tell me|explain|help me|features|capabilities|can you|do you|are you|how work|nomadai|about you|about this|where is|what.s in|what.*like|good time|best time|weather in|things to do|near.*what|recommend|suggest|tips for|far from|drive.*from|distance/i.test(query);
   const isRouteQuery = /along|on the way|on my way|en route|between .* and|from .* to|drive.*through|road trip|highway|interstate|\bI-\d|\bUS-\d|\bhwy\b|\broute\b.*\d/i.test(query);
@@ -2408,14 +2480,30 @@ async function doNLSearch() {
       const routeMix = wantsEstablished
         ? 'Focus on established campgrounds with amenities as requested.'
         : 'Mix of free dispersed/BLM sites and established campgrounds throughout.';
-      const tripStops = estimateTripStops(query);
+      const locs = extractRouteLocations(query);
+      const tripStops = estimateTripStops(query, locs.length);
       window._lastRouteQuery = query;
       window._routeCoveredStates = '';
-      const locs = extractRouteLocations(query);
-      const locGuarantee = locs.length >= 2
-        ? ` MANDATORY WAYPOINT STOPS: You MUST include at least 1-2 campsites within 150 miles of EACH of these locations — non-negotiable: ${locs.join(' → ')}. That accounts for ${locs.length} guaranteed stops. Distribute the remaining ${Math.max(0, tripStops - locs.length)} stops evenly along the route between them. The LAST location (${locs[locs.length-1]}) MUST have at least 1 stop.`
-        : ' CRITICAL: Cover the ENTIRE route end to end — at least 1-2 stops per state from start to finish. Do NOT cluster in early states.';
-      userContent = 'Plan a road trip with campsites matching: "' + query + '". ' + locationContext + locGuarantee + ' List stops in strict geographic order from start to finish. ' + routeMix + ' Return ONLY a JSON array of exactly ' + tripStops + ' campsites. Each: ' + fields + ' No fake results. Start with MSG: followed by one friendly sentence (max 15 words), then newline, then JSON array only.';
+      let locGuarantee;
+      if (locs.length >= 2) {
+        // Build per-segment instructions: between each consecutive pair, demand stops in the MIDDLE
+        const segments = [];
+        for (let i = 0; i < locs.length - 1; i++) {
+          segments.push(`${locs[i]} → ${locs[i+1]}`);
+        }
+        const stopsPerSegment = Math.max(2, Math.floor((tripStops - locs.length) / segments.length));
+        const segInstructions = segments.map(seg =>
+          `At least ${stopsPerSegment} stops geographically BETWEEN ${seg} (not near the endpoints themselves)`
+        ).join('; ');
+        locGuarantee = ` ROUTE DISTRIBUTION RULES — follow exactly:
+1. SEGMENTS: ${segInstructions}.
+2. ENDPOINT CAP: No more than 2 stops within 80 miles of ${locs[0]} (start) and no more than 2 stops within 80 miles of ${locs[locs.length-1]} (end).
+3. MIDDLE BIAS: The majority of stops must be in the middle portion of the route, NOT near the endpoints.
+4. ORDER: List all ${tripStops} stops in strict geographic order from ${locs[0]} to ${locs[locs.length-1]}.`;
+      } else {
+        locGuarantee = ' CRITICAL: Cover the ENTIRE route end to end. Divide the route into thirds — put at least 3 stops in the first third, 4+ stops in the middle third, and 3 stops in the final third. Do NOT cluster near start or end.';
+      }
+      userContent = 'Plan a road trip with campsites matching: "' + query + '". ' + locationContext + locGuarantee + ' ' + routeMix + ' Return ONLY a JSON array of exactly ' + tripStops + ' campsites. Each: ' + fields + ' No fake results. Start with MSG: followed by one friendly sentence (max 15 words), then newline, then JSON array only.';
     } else {
       const mixInstruction = wantsEstablished
         ? 'Focus on established campgrounds with amenities as requested.'
@@ -2954,7 +3042,7 @@ async function renderRoutePlanner() {
           <div class="route-name">${s.name}</div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px;">
             ${driveHtml}
-            <input type="date" class="route-date-input" value="${dateVal}" onchange="saveTripDate('${s.name.replace(/'/g,"\\'")}',this.value)" title="Arrival date"/>
+            <label class="route-date-btn" title="Set arrival date">📅 ${dateVal ? dateVal.slice(5).replace('-','/') : 'Set date'}<input type="date" value="${dateVal}" onchange="saveTripDate('${s.name.replace(/'/g,"\\'")}',this.value);renderRoutePlanner();" /></label>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
@@ -3763,7 +3851,7 @@ async function enableNotifications() {
 
 // ── ANALYTICS ──
 function logEvent(type, data = {}) {
-  supa.from('analytics_events').insert({ user_id: currentUser?.id || null, event_type: type, data }).catch(()=>{});
+  try { supa.from('analytics_events').insert({ user_id: currentUser?.id || null, event_type: type, data }); } catch(e) {}
 }
 
 // ── SEARCH LIMITS ──
