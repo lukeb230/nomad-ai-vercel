@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    { "source": "/app", "destination": "/app.html" },
+    { "source": "/spot/:id", "destination": "/app.html" },
+    { "source": "/spot", "destination": "/app.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" }
+  ],
+  "routes": [
+    { "handle": "error" },
+    { "src": "/(.*)", "status": 404, "dest": "/404.html" }
+  ]
+}
