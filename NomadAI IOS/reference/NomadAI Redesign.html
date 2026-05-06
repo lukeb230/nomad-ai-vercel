@@ -1,0 +1,2313 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>NomadAI — Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..800,0..100;1,9..144,300..800,0..100&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/* ================================================================
+   TOKENS
+================================================================ */
+:root[data-theme="dark"]{
+  --ink:       #13191558;   /* layered fills use alpha */
+  --bg:        #141c17;     /* page */
+  --bark:      #1c2720;     /* card base */
+  --surface:   #243028;     /* raised */
+  --surface-2: #2b382f;     /* raised 2 */
+  --line:      #34433a;     /* hairline */
+  --line-soft: #2a362e;
+
+  --fg:        #ecdfc2;     /* primary (parchment) */
+  --fg-dim:    #c8b994;
+  --muted:     #8fa38e;     /* secondary */
+  --faint:     #667066;
+
+  --clay:      #c4825e;     /* primary accent - canyon clay */
+  --clay-ink:  #1b120b;
+  --moss:      #88a578;     /* secondary accent */
+  --sage:      #b8c9a8;
+  --rust:      #b05a3c;
+  --sand:      #d9bf91;
+  --slate:     #7e968f;
+  --sky:       #9fb8b8;
+  --berry:     #b77878;
+
+  --dyrt:      #c08b5c;
+  --rec:       #8aac7a;
+  --iov:       #688c9a;
+  --blm:       #7e968f;
+  --camp:      #8a7355;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.28), 0 0 0 1px rgba(0,0,0,.18);
+  --shadow-md: 0 10px 30px -12px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.25);
+  --shadow-lg: 0 30px 60px -20px rgba(0,0,0,.7), 0 8px 24px rgba(0,0,0,.35);
+
+  --paper-tex: radial-gradient(1200px 600px at 20% -10%, #1e2a22 0%, transparent 60%),
+               radial-gradient(900px 500px at 120% 20%, #1b2620 0%, transparent 55%);
+  --topo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280' viewBox='0 0 280 280'><g fill='none' stroke='%23ecdfc2' stroke-opacity='.035' stroke-width='.8'><circle cx='140' cy='140' r='20'/><circle cx='140' cy='140' r='44'/><circle cx='140' cy='140' r='72'/><circle cx='140' cy='140' r='104'/><circle cx='140' cy='140' r='138'/></g></svg>");
+}
+:root[data-theme="light"]{
+  --bg:        #f1e9d3;       /* parchment */
+  --bark:      #f7efd9;
+  --surface:   #fbf5e3;
+  --surface-2: #f3eacf;
+  --line:      #d9caa1;
+  --line-soft: #e2d5af;
+
+  --fg:        #22312a;
+  --fg-dim:    #3c4b41;
+  --muted:     #62715f;
+  --faint:     #8a9182;
+
+  --clay:      #9c5b3a;
+  --clay-ink:  #fff5e6;
+  --moss:      #4a7246;
+  --sage:      #6a8855;
+  --rust:      #8a3e24;
+  --sand:      #a48452;
+  --slate:     #54706a;
+  --sky:       #5a8080;
+  --berry:     #8a4b4b;
+
+  --dyrt:      #9c7143;
+  --rec:       #4a7246;
+  --iov:       #3f6576;
+  --blm:       #54706a;
+  --camp:      #6a553a;
+
+  --shadow-sm: 0 1px 2px rgba(70,50,20,.1), 0 0 0 1px rgba(70,50,20,.05);
+  --shadow-md: 0 10px 24px -12px rgba(70,50,20,.25), 0 2px 6px rgba(70,50,20,.08);
+  --shadow-lg: 0 24px 50px -20px rgba(70,50,20,.3), 0 8px 22px rgba(70,50,20,.12);
+
+  --paper-tex: radial-gradient(1200px 600px at 20% -10%, #f7efd9 0%, transparent 60%),
+               radial-gradient(900px 500px at 120% 20%, #f2e8cd 0%, transparent 55%);
+  --topo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280' viewBox='0 0 280 280'><g fill='none' stroke='%2322312a' stroke-opacity='.06' stroke-width='.8'><circle cx='140' cy='140' r='20'/><circle cx='140' cy='140' r='44'/><circle cx='140' cy='140' r='72'/><circle cx='140' cy='140' r='104'/><circle cx='140' cy='140' r='138'/></g></svg>");
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{background:#0c110e}
+body{
+  font-family:'Inter Tight', system-ui, -apple-system, sans-serif;
+  color:var(--fg);
+  background:var(--bg);
+  background-image:var(--paper-tex);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  letter-spacing:-0.005em;
+}
+
+/* Display type */
+.display{font-family:'Fraunces', Georgia, serif; font-variation-settings:"opsz" 96, "SOFT" 60, "wght" 500; letter-spacing:-0.02em;}
+.display-it{font-family:'Fraunces', Georgia, serif; font-style:italic; font-variation-settings:"opsz" 96, "SOFT" 80, "wght" 400; letter-spacing:-0.02em;}
+.mono{font-family:'JetBrains Mono', ui-monospace, monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase;}
+
+/* ================================================================
+   APP SHELL (480px max, centered, phone-feel on desktop)
+================================================================ */
+.desktop-backdrop{
+  min-height:100vh;
+  display:flex; justify-content:center; align-items:stretch;
+  background:
+    var(--topo),
+    radial-gradient(600px 400px at 50% 10%, rgba(196,130,94,.05), transparent 60%),
+    var(--bg);
+  padding:0;
+}
+@media (min-width: 720px){
+  .desktop-backdrop{ padding:24px 0; align-items:flex-start; }
+  .desktop-backdrop::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      var(--topo),
+      linear-gradient(180deg, rgba(0,0,0,.2), transparent 30%, rgba(0,0,0,.3)),
+      var(--bg);
+    z-index:-1;
+  }
+}
+
+.app-shell{
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  background:var(--bg);
+  position:relative;
+  overflow:hidden;
+  border-left:1px solid var(--line-soft);
+  border-right:1px solid var(--line-soft);
+}
+@media (min-width: 720px){
+  .app-shell{
+    min-height:860px;
+    max-height:calc(100vh - 48px);
+    border-radius:28px;
+    box-shadow: var(--shadow-lg);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+}
+
+/* ================================================================
+   TAB PAGES
+================================================================ */
+.page{
+  display:none;
+  flex-direction:column;
+  min-height:100vh;
+  padding-bottom:96px; /* space for bottom nav */
+}
+@media (min-width:720px){
+  .page{ min-height:812px; max-height:calc(100vh - 48px); overflow:auto; }
+}
+.page.active{ display:flex; }
+.page::-webkit-scrollbar{ width:0; }
+
+/* Topbar */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:calc(env(safe-area-inset-top) + 18px) 20px 10px;
+  background:linear-gradient(180deg, var(--bg) 70%, transparent);
+  position:sticky; top:0; z-index:5;
+}
+.topbar .brand{
+  display:flex; align-items:center; gap:10px;
+}
+.brand-mark{
+  width:36px; height:36px; border-radius:10px;
+  display:grid; place-items:center;
+  background:linear-gradient(145deg, var(--clay), var(--rust));
+  color:var(--clay-ink);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), var(--shadow-sm);
+}
+.brand-name{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 48, "SOFT" 60, "wght" 600;
+  font-size:20px; letter-spacing:-.01em;
+  line-height:1;
+}
+.brand-sub{
+  font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--muted); margin-top:2px;
+  font-family:'JetBrains Mono', monospace;
+}
+.topbar-actions{
+  display:flex; gap:8px; align-items:center;
+}
+.icon-btn{
+  width:38px; height:38px; border-radius:50%;
+  border:1px solid var(--line);
+  background:var(--bark);
+  display:grid; place-items:center;
+  color:var(--fg-dim);
+  cursor:pointer;
+  transition:all .15s;
+}
+.icon-btn:hover{ border-color:var(--clay); color:var(--fg); transform:translateY(-1px);}
+.icon-btn:active{ transform:scale(.96);}
+
+/* ================================================================
+   BOTTOM NAV
+================================================================ */
+.bottom-nav{
+  position:fixed;
+  bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px;
+  padding:10px 12px calc(env(safe-area-inset-bottom) + 12px);
+  background:linear-gradient(180deg, transparent, rgba(0,0,0,.15) 30%, var(--bg));
+  z-index:50;
+  display:flex; justify-content:center;
+}
+[data-theme="light"] .bottom-nav{
+  background:linear-gradient(180deg, transparent, rgba(230,210,160,.3) 30%, var(--bg));
+}
+.nav-pill{
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:4px;
+  padding:6px;
+  background:var(--bark);
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow: var(--shadow-md);
+  width:min(100%, 420px);
+}
+.nav-btn{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px;
+  padding:9px 4px 7px;
+  border-radius:18px;
+  border:none; background:transparent;
+  color:var(--muted);
+  font:600 10.5px 'Inter Tight';
+  cursor:pointer;
+  transition:all .18s cubic-bezier(.2,.7,.2,1);
+  position:relative;
+  letter-spacing:.02em;
+}
+.nav-btn svg{ width:22px; height:22px; stroke-width:1.6; }
+.nav-btn.active{
+  color:var(--clay-ink);
+  background:var(--clay);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
+}
+[data-theme="light"] .nav-btn.active{ color:#fff3e0; }
+.nav-btn:hover:not(.active){ color:var(--fg); }
+
+/* ================================================================
+   HOME TAB — editorial dashboard
+================================================================ */
+.home-hero{
+  padding:6px 20px 14px;
+}
+.home-hero .eyebrow{
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:8px;
+}
+.home-hero .eyebrow .dot{ width:6px; height:6px; background:var(--clay); border-radius:50%; box-shadow:0 0 0 3px rgba(196,130,94,.2); animation:pulse 2s infinite;}
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.55}}
+.home-hero h1{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 144, "SOFT" 80, "wght" 400;
+  font-size:40px; line-height:1.02; letter-spacing:-.03em;
+  margin:0 0 4px;
+  color:var(--fg);
+}
+.home-hero h1 em{
+  font-style:italic;
+  font-variation-settings:"opsz" 144, "SOFT" 100, "wght" 400;
+  color:var(--clay);
+}
+.home-hero .sub{
+  color:var(--muted); font-size:14px; line-height:1.4;
+  max-width:340px;
+}
+
+/* Current trip hero card */
+.trip-hero{
+  margin:20px 16px 0;
+  padding:0;
+  border-radius:20px;
+  overflow:hidden;
+  background:var(--bark);
+  border:1px solid var(--line);
+  position:relative;
+  box-shadow: var(--shadow-md);
+}
+.trip-hero .map-preview{
+  height:180px;
+  background:
+    radial-gradient(400px 200px at 30% 60%, rgba(136,165,120,.25), transparent 60%),
+    linear-gradient(140deg, #2a3a30, #1a241d);
+  position:relative;
+  overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+[data-theme="light"] .trip-hero .map-preview{
+  background:
+    radial-gradient(400px 200px at 30% 60%, rgba(106,136,85,.3), transparent 60%),
+    linear-gradient(140deg, #e8dcb4, #d9c892);
+}
+.trip-hero .map-topo{
+  position:absolute; inset:0;
+  background-image:var(--topo);
+  opacity:.7;
+}
+.trip-hero .map-route{
+  position:absolute; inset:0;
+}
+.trip-hero .meta{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:12px; }
+.trip-hero .meta .head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px;}
+.trip-hero .meta .title{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 72, "wght" 500, "SOFT" 60;
+  font-size:22px; line-height:1.15; letter-spacing:-.015em;
+  margin:0;
+}
+.trip-hero .meta .title-sub{
+  font-size:12px; color:var(--muted); margin-top:2px;
+  display:flex; gap:8px; align-items:center;
+}
+.trip-hero .active-pill{
+  background:rgba(196,130,94,.15);
+  color:var(--clay);
+  border:1px solid rgba(196,130,94,.35);
+  padding:4px 10px; border-radius:999px;
+  font:600 10px 'JetBrains Mono'; letter-spacing:.12em; text-transform:uppercase;
+}
+.trip-hero .progress-row{
+  display:flex; align-items:center; gap:12px;
+  padding-top:10px; border-top:1px dashed var(--line);
+}
+.progress-track{
+  flex:1; height:4px; background:var(--surface-2); border-radius:999px; overflow:hidden;
+}
+.progress-fill{
+  height:100%; background:linear-gradient(90deg, var(--moss), var(--clay));
+  border-radius:999px; transition:width .4s;
+}
+.progress-label{ font:600 11px/1 'JetBrains Mono'; color:var(--muted); letter-spacing:.08em;}
+
+.stops-preview{
+  display:flex; gap:8px; margin-top:4px;
+  overflow-x:auto; scrollbar-width:none;
+  padding-bottom:2px;
+}
+.stops-preview::-webkit-scrollbar{display:none;}
+.stop-chip{
+  display:flex; align-items:center; gap:8px;
+  padding:7px 12px 7px 9px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-size:12px; color:var(--fg-dim);
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+.stop-chip .num{
+  width:18px; height:18px; border-radius:50%;
+  background:var(--clay); color:var(--clay-ink);
+  display:grid; place-items:center;
+  font:700 10px 'JetBrains Mono';
+}
+.stop-chip.done .num{ background:var(--moss); }
+.stop-chip.done{ color:var(--muted); }
+.stop-chip.next{ border-color:var(--clay); background:rgba(196,130,94,.1);}
+
+/* Stat strip */
+.stat-strip{
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:10px; padding:20px 16px 4px;
+}
+.stat{
+  background:var(--bark);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px 12px;
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+}
+.stat:hover{ border-color:var(--clay); transform:translateY(-2px);}
+.stat .n{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 72, "wght" 500, "SOFT" 60;
+  font-size:28px; line-height:1; letter-spacing:-.02em;
+  color:var(--fg);
+}
+.stat .lbl{
+  font:500 11px 'JetBrains Mono'; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); margin-top:8px;
+}
+.stat .ico{ position:absolute; top:10px; right:10px; color:var(--faint); width:16px; height:16px;}
+
+/* Section title */
+.section-hd{
+  display:flex; justify-content:space-between; align-items:flex-end;
+  padding:28px 20px 12px;
+}
+.section-hd .lbl{
+  font:600 10px 'JetBrains Mono'; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--muted);
+}
+.section-hd h2{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 72, "wght" 400, "SOFT" 70;
+  font-size:24px; line-height:1.1; letter-spacing:-.02em;
+  margin:4px 0 0;
+}
+.section-hd .more{
+  font:600 12px 'Inter Tight'; color:var(--clay);
+  background:none; border:none; cursor:pointer;
+  display:flex; align-items:center; gap:4px;
+}
+
+/* Journal preview — editorial */
+.journal-list{
+  display:flex; flex-direction:column; gap:2px;
+  padding:0 16px;
+}
+.journal-entry{
+  display:grid; grid-template-columns:68px 1fr auto;
+  gap:14px; align-items:center;
+  padding:14px 6px;
+  border-bottom:1px dashed var(--line);
+  cursor:pointer;
+  transition:background .15s;
+}
+.journal-entry:hover{ background:rgba(196,130,94,.04);}
+.journal-entry:last-child{ border-bottom:none;}
+.journal-thumb{
+  width:68px; height:68px; border-radius:12px;
+  background:var(--surface-2);
+  position:relative; overflow:hidden;
+  border:1px solid var(--line);
+  display:grid; place-items:center;
+  color:var(--muted);
+}
+.journal-thumb svg{ width:28px; height:28px; opacity:.5;}
+.journal-thumb.img{ background-size:cover; background-position:center; }
+.journal-info .name{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 48, "wght" 500, "SOFT" 50;
+  font-size:16px; line-height:1.2; margin:0 0 3px;
+}
+.journal-info .meta{ font-size:11px; color:var(--muted); display:flex; gap:8px; align-items:center;}
+.journal-info .meta .sep{ color:var(--faint);}
+.journal-stars{
+  display:flex; gap:1px; color:var(--clay);
+}
+.journal-stars svg{ width:11px; height:11px; fill:currentColor;}
+.journal-aside{
+  display:flex; flex-direction:column; align-items:flex-end; gap:6px;
+  font:500 10px 'JetBrains Mono'; color:var(--muted);
+}
+
+/* Quick actions — magazine grid */
+.quick-grid{
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:10px; padding:0 16px;
+}
+.quick-card{
+  position:relative;
+  padding:16px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:var(--bark);
+  cursor:pointer;
+  transition:all .18s;
+  aspect-ratio: 1.15;
+  display:flex; flex-direction:column; justify-content:space-between;
+  overflow:hidden;
+}
+.quick-card:hover{ border-color:var(--clay); transform:translateY(-2px); }
+.quick-card.feature{
+  grid-column: span 2;
+  aspect-ratio: 2.6;
+  background:
+    radial-gradient(500px 300px at 100% 100%, rgba(196,130,94,.2), transparent 60%),
+    linear-gradient(135deg, var(--surface), var(--bark));
+}
+.quick-card .ico-lg{
+  width:36px; height:36px; border-radius:10px;
+  background:var(--surface-2); border:1px solid var(--line);
+  display:grid; place-items:center; color:var(--clay);
+}
+.quick-card .qtitle{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 48, "wght" 500, "SOFT" 60;
+  font-size:17px; line-height:1.15; margin:0;
+}
+.quick-card .qsub{ font-size:12px; color:var(--muted); margin-top:2px;}
+
+/* ================================================================
+   SEARCH TAB — AI chat as hero
+================================================================ */
+.search-hero{
+  padding:12px 20px 8px;
+}
+.search-hero h1{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 144, "wght" 400, "SOFT" 80;
+  font-size:36px; line-height:1.02; letter-spacing:-.025em;
+  margin:8px 0 4px;
+}
+.search-hero h1 em{ font-style:italic; color:var(--clay); font-variation-settings:"opsz" 144, "wght" 400, "SOFT" 100;}
+.search-hero .sub{ color:var(--muted); font-size:14px; }
+
+.mode-toggle{
+  display:inline-flex;
+  margin:16px 20px 0;
+  padding:4px;
+  background:var(--bark); border:1px solid var(--line);
+  border-radius:999px;
+  gap:2px;
+}
+.mode-toggle button{
+  background:none; border:none;
+  padding:8px 14px;
+  color:var(--muted);
+  font:600 12px 'Inter Tight';
+  border-radius:999px; cursor:pointer;
+  display:flex; align-items:center; gap:6px;
+  transition:all .15s;
+}
+.mode-toggle button.on{
+  background:var(--clay); color:var(--clay-ink);
+}
+
+/* Chat canvas */
+.chat-canvas{
+  margin:14px 16px 0;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:
+    var(--topo),
+    var(--bark);
+  min-height:360px;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.chat-scroll{
+  flex:1; overflow-y:auto;
+  padding:18px 16px;
+  display:flex; flex-direction:column; gap:12px;
+  max-height:380px;
+}
+.msg{ max-width:84%; padding:10px 14px; border-radius:16px; font-size:14px; line-height:1.45;}
+.msg.user{
+  align-self:flex-end;
+  background:var(--clay); color:var(--clay-ink);
+  border-bottom-right-radius:4px;
+}
+.msg.ai{
+  align-self:flex-start;
+  background:var(--surface); color:var(--fg);
+  border:1px solid var(--line);
+  border-bottom-left-radius:4px;
+}
+.msg.ai .msg-head{
+  font:600 10px 'JetBrains Mono'; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--moss); margin-bottom:4px;
+  display:flex; align-items:center; gap:6px;
+}
+.thinking{
+  display:inline-flex; gap:4px; align-items:center;
+}
+.thinking span{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--moss); opacity:.4;
+  animation:dot 1.1s infinite;
+}
+.thinking span:nth-child(2){ animation-delay:.15s;}
+.thinking span:nth-child(3){ animation-delay:.3s;}
+@keyframes dot{
+  0%,60%,100%{ opacity:.3; transform:translateY(0);}
+  30%{ opacity:1; transform:translateY(-3px);}
+}
+
+.suggestion-rail{
+  display:flex; gap:8px; overflow-x:auto; padding:0 16px 12px;
+  scrollbar-width:none;
+}
+.suggestion-rail::-webkit-scrollbar{ display:none;}
+.sug{
+  flex:0 0 auto;
+  padding:7px 12px;
+  border:1px solid var(--line);
+  background:var(--bark);
+  border-radius:999px;
+  font-size:12px; color:var(--fg-dim);
+  white-space:nowrap; cursor:pointer;
+  transition:all .15s;
+  display:flex; align-items:center; gap:6px;
+}
+.sug:hover{ border-color:var(--clay); color:var(--fg);}
+.sug svg{ width:12px; height:12px; color:var(--clay);}
+
+.chat-input-row{
+  display:flex; align-items:flex-end; gap:8px;
+  padding:12px;
+  border-top:1px solid var(--line);
+  background:var(--bark);
+}
+.chat-input{
+  flex:1;
+  min-height:40px; max-height:110px;
+  padding:10px 14px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  color:var(--fg);
+  font:400 14px 'Inter Tight';
+  resize:none;
+  line-height:1.4;
+  outline:none;
+}
+.chat-input:focus{ border-color:var(--clay);}
+.send-btn{
+  width:44px; height:44px;
+  border-radius:14px;
+  border:none;
+  background:var(--clay); color:var(--clay-ink);
+  display:grid; place-items:center;
+  cursor:pointer;
+  transition:transform .15s;
+  box-shadow: 0 4px 12px rgba(196,130,94,.25);
+}
+.send-btn:hover{ transform:translateY(-1px);}
+.send-btn:active{ transform:scale(.94);}
+.send-btn.mic{ background:var(--surface); color:var(--fg-dim); border:1px solid var(--line); box-shadow:none;}
+
+/* AI badge on results */
+.ai-note{
+  display:flex; align-items:center; gap:8px;
+  padding:10px 16px;
+  margin:16px 16px 8px;
+  background:rgba(136,165,120,.08);
+  border:1px solid rgba(136,165,120,.25);
+  border-radius:12px;
+  font-size:12px; color:var(--sage);
+}
+.ai-note .dot{ width:6px; height:6px; background:var(--moss); border-radius:50%;}
+
+/* Location mode */
+.loc-search{
+  margin:14px 16px 0;
+  padding:8px;
+  background:var(--bark); border:1px solid var(--line);
+  border-radius:14px;
+  display:flex; align-items:center; gap:8px;
+}
+.loc-search input{
+  flex:1; background:transparent; border:none; outline:none;
+  color:var(--fg); font:500 14px 'Inter Tight';
+  padding:6px 4px;
+}
+.loc-search input::placeholder{ color:var(--faint);}
+.loc-search .loc-ico{ color:var(--muted); width:18px; height:18px; margin-left:6px;}
+
+.filter-section{ margin:14px 16px 0;}
+.filter-label{
+  font:600 10px 'JetBrains Mono'; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:8px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.chip-row{
+  display:flex; gap:6px; flex-wrap:wrap;
+}
+.chip-row.scroll{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:4px;}
+.chip-row.scroll::-webkit-scrollbar{ display:none;}
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 12px;
+  background:var(--bark); border:1px solid var(--line);
+  border-radius:999px;
+  font:500 12px 'Inter Tight'; color:var(--fg-dim);
+  cursor:pointer;
+  transition:all .15s;
+  white-space:nowrap;
+}
+.chip:hover{ border-color:var(--fg-dim); color:var(--fg);}
+.chip.on{ background:var(--clay); color:var(--clay-ink); border-color:var(--clay);}
+.chip svg{ width:13px; height:13px;}
+.chip.src{ padding-left:7px;}
+.chip.src .src-dot{ width:8px; height:8px; border-radius:2px;}
+.chip.src.on{ filter:none;}
+.chip-row.radius .chip{ flex:1; justify-content:center;}
+
+.search-cta{
+  margin:18px 16px 0;
+  padding:14px;
+  background:var(--clay); color:var(--clay-ink);
+  border-radius:14px;
+  border:none;
+  font:700 14px 'Inter Tight'; letter-spacing:-.005em;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .15s;
+  box-shadow: 0 6px 16px rgba(196,130,94,.3);
+  width:calc(100% - 32px);
+}
+.search-cta:hover{ transform:translateY(-1px);}
+
+/* ================================================================
+   CAMPSITE CARD — the Atom, progressive disclosure
+================================================================ */
+.card-stack{
+  padding:14px 16px 8px;
+  display:flex; flex-direction:column; gap:14px;
+}
+.site-card{
+  background:var(--bark);
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  position:relative;
+  transition:border-color .2s, transform .2s;
+  box-shadow: var(--shadow-sm);
+}
+.site-card:hover{ border-color:var(--sand); }
+.card-photo{
+  aspect-ratio: 16/9;
+  background:var(--surface-2);
+  position:relative;
+  overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.card-photo .img-ph{
+  position:absolute; inset:0;
+  background-size:cover; background-position:center;
+}
+.card-photo .img-ph.ph-trees{ background:
+  radial-gradient(600px 200px at 50% 120%, #2d3e32, transparent 60%),
+  linear-gradient(170deg, #3a4a3a 0%, #2a3828 60%, #1f2a20 100%);
+}
+.card-photo .img-ph.ph-desert{ background:
+  radial-gradient(600px 200px at 50% 120%, #a06040, transparent 60%),
+  linear-gradient(170deg, #c88a5e 0%, #a66240 60%, #6a3e28 100%);
+}
+.card-photo .img-ph.ph-lake{ background:
+  linear-gradient(180deg, #3a5a68 0%, #6a8890 55%, #2a3a48 55.01%, #1a2430 100%);
+}
+.card-photo .img-ph.ph-canyon{ background:
+  linear-gradient(170deg, #884a30 0%, #a86040 40%, #d89068 80%, #f2b890 100%);
+}
+.card-photo .img-overlay{
+  position:absolute; inset:0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.12) 0%, transparent 30%, rgba(0,0,0,.45));
+}
+.source-badge{
+  position:absolute; top:12px; left:12px;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 10px 5px 8px;
+  background:rgba(0,0,0,.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius:999px;
+  font:600 10px 'JetBrains Mono'; letter-spacing:.12em; text-transform:uppercase;
+  color:#fff;
+}
+.source-badge .sd{ width:7px; height:7px; border-radius:2px;}
+.fee-badge{
+  position:absolute; top:12px; right:12px;
+  padding:5px 10px;
+  background:rgba(20,28,23,.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius:999px;
+  color:var(--sage);
+  font:700 11px 'JetBrains Mono'; letter-spacing:.05em;
+}
+.fee-badge.paid{ color:var(--sand); }
+.photo-dots{
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  display:flex; gap:4px;
+}
+.photo-dots .d{ width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.4);}
+.photo-dots .d.on{ background:#fff; width:16px; border-radius:3px;}
+.photo-arrow{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:32px; height:32px;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(6px);
+  border-radius:50%;
+  display:grid; place-items:center;
+  border:none; cursor:pointer; color:#fff;
+  opacity:0; transition:opacity .2s;
+}
+.site-card:hover .photo-arrow{ opacity:1;}
+.photo-arrow.prev{ left:10px;}
+.photo-arrow.next{ right:10px;}
+
+.card-body{ padding:14px 16px 14px;}
+.card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+.card-name{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 72, "wght" 500, "SOFT" 60;
+  font-size:19px; line-height:1.15; letter-spacing:-.01em;
+  margin:0 0 3px;
+  color:var(--fg);
+}
+.card-loc{
+  font-size:12px; color:var(--sky);
+  display:flex; align-items:center; gap:5px;
+}
+.card-loc svg{ width:11px; height:11px;}
+.card-dist{
+  font:600 11px 'JetBrains Mono'; color:var(--muted);
+  letter-spacing:.05em;
+  flex-shrink:0;
+  text-align:right;
+}
+
+/* Field-entry pill strip */
+.field-pills{
+  display:flex; gap:6px; flex-wrap:wrap;
+  margin-top:10px;
+}
+.fp{
+  font:500 11px 'Inter Tight';
+  padding:3px 9px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--fg-dim);
+  background:var(--surface);
+  display:inline-flex; align-items:center; gap:4px;
+}
+.fp svg{ width:11px; height:11px; opacity:.7;}
+
+.card-desc{
+  font-size:13px; line-height:1.5;
+  color:var(--fg-dim);
+  margin-top:10px;
+}
+
+/* Expand/collapse */
+.card-expand{
+  display:none;
+  border-top:1px dashed var(--line);
+  margin-top:12px;
+  padding-top:12px;
+}
+.site-card.open .card-expand{ display:block; animation:fadeIn .3s;}
+@keyframes fadeIn{ from{opacity:0; transform:translateY(-4px);} to{opacity:1; transform:none;}}
+
+.data-row{
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:1px; background:var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:8px;
+  border:1px solid var(--line);
+}
+.data-cell{
+  background:var(--surface);
+  padding:10px 12px;
+  display:flex; align-items:center; gap:10px;
+}
+.data-cell .cell-ico{
+  width:28px; height:28px; border-radius:8px;
+  background:var(--bark); border:1px solid var(--line);
+  display:grid; place-items:center;
+  color:var(--clay); flex-shrink:0;
+}
+.data-cell .cell-body .cell-lbl{
+  font:600 9px 'JetBrains Mono'; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--muted);
+}
+.data-cell .cell-body .cell-val{
+  font-size:12px; color:var(--fg); font-weight:600; line-height:1.15; margin-top:1px;
+}
+
+.tag-chips{
+  display:flex; flex-wrap:wrap; gap:5px;
+  margin-top:12px;
+}
+.tc{
+  font:500 10px 'JetBrains Mono'; letter-spacing:.06em;
+  padding:3px 8px;
+  border-radius:6px;
+  background:var(--surface);
+  color:var(--muted);
+  border:1px solid var(--line-soft);
+}
+
+.card-footer{
+  display:flex; gap:6px;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px dashed var(--line);
+  flex-wrap:wrap;
+}
+.action-btn{
+  flex:1;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+  padding:9px 6px;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:10px;
+  color:var(--fg-dim);
+  font:600 11px 'Inter Tight';
+  cursor:pointer;
+  transition:all .15s;
+  min-width:70px;
+}
+.action-btn:hover{ border-color:var(--clay); color:var(--fg);}
+.action-btn svg{ width:13px; height:13px;}
+.action-btn.primary{ background:var(--clay); color:var(--clay-ink); border-color:var(--clay);}
+.action-btn.saved{ color:var(--clay); border-color:var(--clay);}
+
+.card-toggle{
+  width:100%;
+  padding:8px;
+  margin-top:10px;
+  background:transparent; border:none;
+  color:var(--muted);
+  font:600 10px 'JetBrains Mono'; letter-spacing:.14em; text-transform:uppercase;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  border-top:1px dashed var(--line);
+  transition:color .15s;
+}
+.card-toggle:hover{ color:var(--fg);}
+.card-toggle svg{ transition:transform .2s; width:12px; height:12px;}
+.site-card.open .card-toggle svg{ transform:rotate(180deg);}
+
+/* ================================================================
+   SAVED TAB — Route planner (timeline)
+================================================================ */
+.saved-head{
+  padding:6px 20px 6px;
+}
+.saved-head h1{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 144, "wght" 400, "SOFT" 80;
+  font-size:34px; line-height:1; letter-spacing:-.025em;
+  margin:8px 0 4px;
+}
+.saved-head h1 em{font-style:italic; color:var(--clay);}
+.saved-head .sub{ color:var(--muted); font-size:13px;}
+
+.mode-tabs{
+  display:flex; gap:4px; padding:10px 20px 0;
+}
+.mode-tabs button{
+  padding:8px 14px;
+  background:transparent; border:none;
+  color:var(--muted);
+  font:600 12px 'Inter Tight';
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:all .15s;
+  display:flex; align-items:center; gap:6px;
+}
+.mode-tabs button.on{
+  color:var(--fg);
+  border-bottom-color:var(--clay);
+}
+
+/* Timeline */
+.timeline{
+  padding:20px 20px 0;
+}
+.tl-head{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:16px; gap:8px; flex-wrap:wrap;
+}
+.tl-toggle-row{
+  display:flex; gap:6px;
+}
+.tl-toggle{
+  padding:6px 12px;
+  border:1px solid var(--line);
+  background:var(--bark);
+  border-radius:999px;
+  font:500 11px 'Inter Tight';
+  color:var(--fg-dim);
+  cursor:pointer;
+  display:flex; align-items:center; gap:5px;
+  transition:all .15s;
+}
+.tl-toggle.on{ background:var(--moss); color:var(--bg); border-color:var(--moss);}
+.tl-toggle svg{ width:11px; height:11px;}
+
+.tl-meta{
+  display:flex; gap:12px; margin-bottom:16px;
+  padding:12px 14px;
+  background:var(--bark); border:1px solid var(--line);
+  border-radius:14px;
+  flex-wrap:wrap;
+}
+.tl-meta .m{ display:flex; flex-direction:column; gap:2px;}
+.tl-meta .m .v{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 48, "wght" 500, "SOFT" 60;
+  font-size:18px; line-height:1;
+}
+.tl-meta .m .l{
+  font:500 10px 'JetBrains Mono'; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--muted);
+}
+.tl-meta .sep{ width:1px; background:var(--line); margin:0 4px;}
+
+.timeline-list{
+  position:relative;
+  padding-left:28px;
+}
+.timeline-list::before{
+  content:""; position:absolute;
+  left:11px; top:8px; bottom:30px;
+  width:2px;
+  background:
+    repeating-linear-gradient(to bottom, var(--line) 0, var(--line) 3px, transparent 3px, transparent 7px);
+}
+.tl-stop{
+  position:relative;
+  padding:10px 0 10px 16px;
+}
+.tl-stop .dot{
+  position:absolute;
+  left:-23px; top:16px;
+  width:18px; height:18px;
+  border-radius:50%;
+  background:var(--bg);
+  border:2px solid var(--clay);
+  display:grid; place-items:center;
+  font:700 9px 'JetBrains Mono';
+  color:var(--clay);
+}
+.tl-stop.start .dot{
+  background:var(--clay); color:var(--clay-ink);
+  box-shadow:0 0 0 4px rgba(196,130,94,.15);
+}
+.tl-stop.end .dot{
+  background:var(--moss); border-color:var(--moss); color:var(--clay-ink);
+}
+.tl-card{
+  background:var(--bark); border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px 14px;
+  display:flex; gap:12px; align-items:center;
+  cursor:grab;
+  transition:all .15s;
+}
+.tl-card:hover{ border-color:var(--clay);}
+.tl-card:active{ cursor:grabbing;}
+.tl-thumb{
+  width:42px; height:42px; border-radius:10px;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  flex-shrink:0;
+  background-size:cover; background-position:center;
+}
+.tl-body{ flex:1; min-width:0;}
+.tl-body .nm{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 48, "wght" 500, "SOFT" 50;
+  font-size:14px; line-height:1.15; margin:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.tl-body .mt{ font-size:11px; color:var(--muted); margin-top:2px;}
+.tl-handle{
+  width:28px; height:28px; border-radius:50%;
+  display:grid; place-items:center;
+  color:var(--muted);
+  background:transparent; border:none; cursor:grab;
+}
+
+.tl-leg{
+  position:relative;
+  padding:6px 0 6px 16px;
+  font:500 10px 'JetBrains Mono'; color:var(--muted);
+  letter-spacing:.1em;
+  display:flex; align-items:center; gap:8px;
+  min-height:24px;
+}
+.tl-leg::before{
+  content:""; display:block;
+  width:14px; height:1px; background:var(--line);
+}
+.tl-leg svg{ width:12px; height:12px; color:var(--faint);}
+
+.tl-actions{
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:8px; margin-top:20px;
+}
+.tl-action{
+  padding:11px 10px;
+  background:var(--bark); border:1px solid var(--line);
+  border-radius:12px;
+  color:var(--fg-dim);
+  font:600 12px 'Inter Tight';
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  cursor:pointer;
+  transition:all .15s;
+}
+.tl-action.primary{
+  background:var(--clay); color:var(--clay-ink); border-color:var(--clay);
+  grid-column:span 2;
+}
+.tl-action:hover{ border-color:var(--clay); color:var(--fg);}
+.tl-action.primary:hover{ color:var(--clay-ink); transform:translateY(-1px);}
+
+/* ================================================================
+   MAP TAB
+================================================================ */
+.map-wrap{
+  margin:6px 16px 0;
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  aspect-ratio: 0.82;
+  position:relative;
+  background:
+    radial-gradient(500px 300px at 30% 40%, #2a3e32 0%, transparent 60%),
+    radial-gradient(400px 200px at 80% 80%, #3a4a3e 0%, transparent 50%),
+    linear-gradient(160deg, #1c2620 0%, #18211c 100%);
+}
+[data-theme="light"] .map-wrap{
+  background:
+    radial-gradient(500px 300px at 30% 40%, #e8dbaf 0%, transparent 60%),
+    radial-gradient(400px 200px at 80% 80%, #d9c78d 0%, transparent 50%),
+    linear-gradient(160deg, #e9dcb4 0%, #dccc9c 100%);
+}
+.map-wrap::before{
+  content:""; position:absolute; inset:0;
+  background-image:var(--topo);
+  opacity:.7;
+}
+.map-mode-bar{
+  position:absolute; top:12px; left:12px; right:12px;
+  display:flex; gap:4px;
+  padding:4px;
+  background:rgba(20,28,23,.7);
+  backdrop-filter:blur(14px);
+  border:1px solid var(--line);
+  border-radius:14px;
+  z-index:3;
+}
+.map-mode-bar button{
+  flex:1; padding:8px;
+  background:transparent; border:none;
+  color:var(--fg-dim); font:600 11px 'Inter Tight';
+  border-radius:10px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+}
+.map-mode-bar button.on{ background:var(--clay); color:var(--clay-ink);}
+.map-mode-bar svg{ width:12px; height:12px;}
+
+.map-pin{
+  position:absolute;
+  width:24px; height:24px;
+  transform:translate(-50%, -100%);
+  z-index:2;
+  cursor:pointer;
+  transition:transform .15s;
+}
+.map-pin:hover{ transform:translate(-50%, -100%) scale(1.15);}
+.map-pin svg{ width:100%; height:100%; filter: drop-shadow(0 3px 4px rgba(0,0,0,.4));}
+
+.map-route-line{
+  position:absolute; inset:0; z-index:1;
+  pointer-events:none;
+}
+
+.map-popup{
+  position:absolute;
+  bottom:16px; left:16px; right:16px;
+  background:var(--bark);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  display:flex; align-items:center; gap:12px;
+  z-index:3;
+  box-shadow:var(--shadow-md);
+}
+.map-popup .popup-thumb{
+  width:52px; height:52px; border-radius:10px;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  flex-shrink:0;
+}
+.map-popup .popup-body{ flex:1;min-width:0;}
+.map-popup .popup-body .nm{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 48, "wght" 500, "SOFT" 50;
+  font-size:15px; margin:0; line-height:1.2;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.map-popup .popup-body .mt{ font-size:11px; color:var(--muted); margin-top:2px;}
+.map-popup .popup-cta{
+  padding:8px 12px;
+  background:var(--clay); color:var(--clay-ink); border:none;
+  border-radius:10px; font:600 11px 'Inter Tight';
+  cursor:pointer;
+}
+
+/* ================================================================
+   PASSPORT — modal or on-screen page
+================================================================ */
+.passport-wrap{
+  padding:0 16px 20px;
+}
+.passport-cover{
+  margin:10px 0 20px;
+  padding:24px 22px;
+  border-radius:18px;
+  background:
+    var(--topo),
+    linear-gradient(145deg, #5a3e28 0%, #6d4a2f 55%, #4a3220 100%);
+  color:#e9dcc0;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), var(--shadow-md);
+  position:relative;
+  overflow:hidden;
+}
+[data-theme="light"] .passport-cover{
+  background:
+    var(--topo),
+    linear-gradient(145deg, #7a4a2a 0%, #8a5632 55%, #5a3a20 100%);
+  color:#f3ead6;
+}
+.passport-cover::before{
+  content:""; position:absolute; inset:6px;
+  border:1px dashed rgba(233,220,192,.25);
+  border-radius:14px;
+  pointer-events:none;
+}
+.passport-cover .pc-label{
+  font:600 10px 'JetBrains Mono'; letter-spacing:.22em; text-transform:uppercase;
+  opacity:.6;
+}
+.passport-cover h2{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 144, "wght" 500, "SOFT" 80;
+  font-size:34px; line-height:1; margin:10px 0 4px;
+  letter-spacing:-.02em;
+}
+.passport-cover .count{ font-size:13px; opacity:.8; margin-top:6px;}
+
+.stamp-grid{
+  display:grid; grid-template-columns:repeat(2, 1fr);
+  gap:12px;
+}
+.stamp{
+  aspect-ratio: 1;
+  border-radius:18px;
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform .2s;
+  padding:14px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  border:1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  background:var(--bark);
+}
+.stamp:hover{ transform:translateY(-3px) rotate(-.5deg); }
+.stamp::before{
+  content:""; position:absolute; inset:8px;
+  border:1.5px dashed currentColor;
+  border-radius:12px;
+  opacity:.2;
+  pointer-events:none;
+}
+
+/* Stamp variants — like patches */
+.stamp.v-circle{
+  background:
+    radial-gradient(circle at 50% 50%, var(--surface) 0, var(--surface) 70%, var(--bark) 70.5%);
+}
+.stamp.v-circle::before{ border-radius:50%; inset:10%;}
+
+.stamp .st-top{ display:flex; justify-content:space-between; align-items:flex-start; z-index:2;}
+.stamp .st-ico{
+  width:42px; height:42px; border-radius:50%;
+  display:grid; place-items:center;
+  color:var(--clay);
+  background:var(--surface-2);
+  border:1.5px solid currentColor;
+}
+.stamp .st-ico svg{ width:22px; height:22px;}
+.stamp .st-num{
+  font:700 10px 'JetBrains Mono';
+  color:var(--muted);
+  padding:3px 7px;
+  border:1px solid var(--line); border-radius:4px;
+  letter-spacing:.08em;
+}
+.stamp .st-name{
+  font-family:'Fraunces', serif;
+  font-variation-settings:"opsz" 48, "wght" 500, "SOFT" 50;
+  font-size:14px; line-height:1.1; letter-spacing:-.01em;
+  margin:0;
+}
+.stamp .st-loc{
+  font:500 10px 'JetBrains Mono'; letter-spacing:.1em;
+  color:var(--muted); margin-top:4px;
+}
+.stamp .st-date{
+  position:absolute; bottom:14px; right:14px;
+  font:600 9px 'JetBrains Mono'; letter-spacing:.12em;
+  color:var(--muted);
+  transform:rotate(-6deg);
+  padding:3px 6px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:var(--bark);
+}
+
+/* Color-varied stamps */
+.stamp.c-moss{ color:var(--moss);}
+.stamp.c-clay{ color:var(--clay);}
+.stamp.c-rust{ color:var(--rust);}
+.stamp.c-slate{ color:var(--slate);}
+.stamp.c-sand{ color:var(--sand);}
+.stamp.c-berry{ color:var(--berry);}
+
+.stamp.locked{
+  opacity:.4;
+  background:
+    repeating-linear-gradient(45deg, var(--bark) 0, var(--bark) 8px, var(--surface) 8px, var(--surface) 9px);
+}
+.stamp.locked .st-ico, .stamp.locked .st-name, .stamp.locked .st-loc, .stamp.locked .st-date{ color:var(--faint);}
+.stamp.locked::before{ border-color:var(--faint);}
+
+/* ================================================================
+   Design system showcase (top-level strip)
+================================================================ */
+.tokens-bar{
+  position:fixed; top:16px; right:16px;
+  z-index:100;
+  display:flex; gap:6px; align-items:center;
+  background:var(--bark); border:1px solid var(--line);
+  padding:6px; border-radius:999px;
+  box-shadow:var(--shadow-md);
+}
+.tokens-bar button{
+  padding:7px 12px;
+  background:transparent; border:none;
+  color:var(--muted);
+  font:600 11px 'Inter Tight';
+  border-radius:999px;
+  cursor:pointer;
+  display:flex; align-items:center; gap:5px;
+}
+.tokens-bar button.on{ background:var(--clay); color:var(--clay-ink);}
+.tokens-bar svg{ width:13px; height:13px;}
+
+/* ================================================================
+   Utility
+================================================================ */
+.hidden{ display:none !important;}
+.spacer-sm{ height:8px;} .spacer-md{ height:20px;} .spacer-lg{ height:40px;}
+
+/* Scrollbar styling inside app */
+.chat-scroll::-webkit-scrollbar{ width:4px;}
+.chat-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:99px;}
+
+</style>
+</head>
+<body>
+
+<div class="desktop-backdrop">
+
+  <!-- Theme toggle (outside shell) -->
+  <div class="tokens-bar">
+    <button data-theme-btn="dark" class="on">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.8a9 9 0 1 1-9.8-9.8 7 7 0 0 0 9.8 9.8z"/></svg>
+      Dark
+    </button>
+    <button data-theme-btn="light">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.4-6.4l-.7.7M6.3 17.7l-.7.7m0-12.8l.7.7m11.4 11.4l.7.7"/></svg>
+      Light
+    </button>
+  </div>
+
+  <main class="app-shell" data-screen-label="App Shell">
+
+    <!-- ==================== HOME TAB ==================== -->
+    <section class="page active" data-page="home" data-screen-label="01 Home">
+
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 20l7-13 7 13"/><path d="M9 14l3-5.5 3 5.5"/></svg>
+          </div>
+          <div>
+            <div class="brand-name">Nomad<em style="font-style:italic;font-variation-settings:'opsz' 48,'SOFT' 100,'wght' 400;color:var(--clay)">AI</em></div>
+            <div class="brand-sub">Field journal</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+          </button>
+          <button class="icon-btn" title="Profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="home-hero">
+        <div class="eyebrow">
+          <span class="dot"></span>
+          <span class="mono" style="color:var(--muted)">Day 3 · Rolling</span>
+        </div>
+        <h1>Still chasing <em>the long&nbsp;way</em> west.</h1>
+        <p class="sub">Three stops checked. Eight to go. The wind out of Moab is calmer tonight.</p>
+      </div>
+
+      <!-- Hero trip card -->
+      <article class="trip-hero">
+        <div class="map-preview">
+          <div class="map-topo"></div>
+          <svg class="map-route" viewBox="0 0 400 180" preserveAspectRatio="none">
+            <path d="M40,140 C100,110 120,90 160,80 S220,60 250,50 S320,40 360,30" fill="none" stroke="#c4825e" stroke-width="2" stroke-dasharray="3 3"/>
+            <circle cx="40" cy="140" r="6" fill="#88a578"/>
+            <circle cx="160" cy="80" r="6" fill="#88a578"/>
+            <circle cx="220" cy="60" r="6" fill="#88a578"/>
+            <circle cx="250" cy="50" r="7" fill="#c4825e" stroke="#ecdfc2" stroke-width="2"/>
+            <circle cx="320" cy="40" r="4" fill="none" stroke="#c4825e" stroke-width="1.5"/>
+            <circle cx="360" cy="30" r="4" fill="none" stroke="#c4825e" stroke-width="1.5"/>
+          </svg>
+          <div style="position:absolute;top:12px;left:12px;display:flex;gap:8px;align-items:center;">
+            <span class="active-pill">En Route</span>
+          </div>
+          <div style="position:absolute;bottom:12px;right:14px;" class="mono" ><span style="color:#b8c9a8">Day 3 of 8</span></div>
+        </div>
+
+        <div class="meta">
+          <div class="head">
+            <div>
+              <h3 class="title">Carson City → Moab</h3>
+              <div class="title-sub">
+                <span>1,247 mi</span><span style="color:var(--faint)">·</span><span>8 stops</span><span style="color:var(--faint)">·</span><span>US‑50 · BLM corridor</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stops-preview">
+            <div class="stop-chip done"><span class="num">1</span>Fallon</div>
+            <div class="stop-chip done"><span class="num">2</span>Austin Pass</div>
+            <div class="stop-chip done"><span class="num">3</span>Hickison Pet.</div>
+            <div class="stop-chip next"><span class="num">4</span>Ward Mtn (tonight)</div>
+            <div class="stop-chip"><span class="num">5</span>Cathedral Gorge</div>
+            <div class="stop-chip"><span class="num">6</span>Valley of Fire</div>
+            <div class="stop-chip"><span class="num">7</span>Valley of the Gods</div>
+            <div class="stop-chip"><span class="num">8</span>Moab</div>
+          </div>
+
+          <div class="progress-row">
+            <div class="progress-track"><div class="progress-fill" style="width:42%"></div></div>
+            <div class="progress-label">42%</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Stats strip -->
+      <div class="stat-strip">
+        <div class="stat" data-stat="visited">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2l2.5 5 5.5.8-4 3.9 1 5.5L12 14.5 7 17.2l1-5.5-4-3.9 5.5-.8z"/></svg>
+          <div class="n">24</div>
+          <div class="lbl">Visited</div>
+        </div>
+        <div class="stat">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>
+          <div class="n">7</div>
+          <div class="lbl">Trips</div>
+        </div>
+        <div class="stat">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
+          <div class="n">11</div>
+          <div class="lbl">States</div>
+        </div>
+      </div>
+
+      <!-- Section: Camp Journal -->
+      <div class="section-hd">
+        <div>
+          <div class="lbl">Field notes</div>
+          <h2>Camp journal</h2>
+        </div>
+        <button class="more">All entries
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="journal-list">
+        <div class="journal-entry">
+          <div class="journal-thumb">
+            <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1"><path d="M0 28l10-8 8 6 6-4 16 8v10H0z" fill="#88a578" stroke="none" opacity=".35"/><path d="M0 32l10-6 8 4 8-5 14 7" stroke="#ecdfc2" stroke-opacity=".5"/></svg>
+          </div>
+          <div class="journal-info">
+            <h4 class="name">Hickison Petroglyphs</h4>
+            <div class="meta">
+              <span>Nevada</span>
+              <span class="sep">·</span>
+              <span class="journal-stars">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7L12 17l-6.5 4 2-7L2 9.5 9 9z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7L12 17l-6.5 4 2-7L2 9.5 9 9z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7L12 17l-6.5 4 2-7L2 9.5 9 9z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7L12 17l-6.5 4 2-7L2 9.5 9 9z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7L12 17l-6.5 4 2-7L2 9.5 9 9z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              </span>
+            </div>
+          </div>
+          <div class="journal-aside">
+            <span>2d ago</span>
+          </div>
+        </div>
+
+        <div class="journal-entry">
+          <div class="journal-thumb" style="background:linear-gradient(135deg,#6a8890,#2a3a48);">
+            <svg viewBox="0 0 40 40" fill="none" stroke="#ecdfc2" stroke-width="1" opacity=".6"><path d="M4 22c4-2 7-1 10 1s7 2 10 1 8-2 12 1v15H0V22z" fill="currentColor" opacity=".3"/><path d="M26 6l3 8h-6z" fill="currentColor" opacity=".6"/></svg>
+          </div>
+          <div class="journal-info">
+            <h4 class="name">Austin Summit Pass</h4>
+            <div class="meta">
+              <span>Nevada</span>
+              <span class="sep">·</span>
+              <span>No fee · Pit toilet</span>
+            </div>
+          </div>
+          <div class="journal-aside"><span>3d ago</span></div>
+        </div>
+
+        <div class="journal-entry">
+          <div class="journal-thumb" style="background:linear-gradient(135deg,#c88a5e,#6a3e28);">
+            <svg viewBox="0 0 40 40" fill="none" stroke="#ecdfc2" stroke-width="1" opacity=".7"><path d="M0 28c5-6 10-10 15-4s12 0 15-6l10 6v16H0z" fill="currentColor" opacity=".3"/><circle cx="30" cy="10" r="3" fill="#ecdfc2" opacity=".8"/></svg>
+          </div>
+          <div class="journal-info">
+            <h4 class="name">Fallon BLM Dispersed</h4>
+            <div class="meta">
+              <span>Nevada</span>
+              <span class="sep">·</span>
+              <span>Windy — air down at turn-in</span>
+            </div>
+          </div>
+          <div class="journal-aside"><span>4d ago</span></div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="section-hd">
+        <div>
+          <div class="lbl">Shortcuts</div>
+          <h2>Before you air down</h2>
+        </div>
+      </div>
+
+      <div class="quick-grid">
+        <div class="quick-card feature" data-go="search">
+          <div class="ico-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
+          </div>
+          <div>
+            <h3 class="qtitle">Ask NomadAI where to go tonight</h3>
+            <p class="qsub">"Quiet dispersed near me, no fee, flat pad"</p>
+          </div>
+        </div>
+        <div class="quick-card" data-go="map">
+          <div class="ico-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>
+          </div>
+          <h3 class="qtitle">What's near me</h3>
+          <p class="qsub">Map mode</p>
+        </div>
+        <div class="quick-card" data-go="saved">
+          <div class="ico-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M8 7l8 4M8 17l8-4"/></svg>
+          </div>
+          <h3 class="qtitle">Plan a route</h3>
+          <p class="qsub">8 saved ready</p>
+        </div>
+      </div>
+
+      <div class="spacer-md"></div>
+    </section>
+
+
+    <!-- ==================== SEARCH TAB ==================== -->
+    <section class="page" data-page="search" data-screen-label="02 Search">
+      <header class="topbar">
+        <div class="brand">
+          <div>
+            <div class="brand-sub">Search</div>
+            <div style="font-family:'Fraunces',serif; font-variation-settings:'opsz' 72,'wght' 500,'SOFT' 60; font-size:22px; letter-spacing:-.015em; margin-top:2px;">Find your spot</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="History">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="search-hero">
+        <div class="mono" style="color:var(--muted)">★ Ask freely</div>
+        <h1>Tell it where to, and <em>it'll read the land</em>.</h1>
+        <p class="sub">Plain English. Route queries, vibe queries, beginner questions — all ok.</p>
+      </div>
+
+      <div class="mode-toggle">
+        <button class="on" data-mode="ai">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z"/></svg>
+          Ask AI
+        </button>
+        <button data-mode="loc">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" width="14" height="14"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          Location
+        </button>
+      </div>
+
+      <!-- AI mode -->
+      <div data-mode-panel="ai">
+        <div class="chat-canvas">
+          <div class="chat-scroll" id="chatScroll">
+            <div class="msg ai">
+              <div class="msg-head"><span style="width:6px;height:6px;background:var(--moss);border-radius:50%"></span>NomadAI</div>
+              Tell me what you're looking for. I'll search every source and build a list.
+            </div>
+            <div class="msg user">Dispersed BLM sites along US‑50 Nevada, 4x4 accessible, no fee.</div>
+            <div class="msg ai">
+              <div class="msg-head"><span style="width:6px;height:6px;background:var(--moss);border-radius:50%"></span>NomadAI · 7 found</div>
+              Here's an ordered string of BLM + dispersed sites from Fallon to the Utah line. I biased for higher elevation (cooler nights) and flat pads that'll hold a rooftop.
+            </div>
+          </div>
+
+          <div class="suggestion-rail">
+            <div class="sug">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z"/></svg>
+              Free spots near me tonight
+            </div>
+            <div class="sug">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 12h16M4 6h16M4 18h16"/></svg>
+              Overland corridor — Moab to Durango
+            </div>
+            <div class="sug">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/></svg>
+              Shade within 2 hrs drive
+            </div>
+            <div class="sug">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 18h18M5 18V6M19 18V6M9 12h6"/></svg>
+              RV hookups under $30
+            </div>
+          </div>
+
+          <div class="chat-input-row">
+            <textarea class="chat-input" id="chatInput" placeholder="Ask about campsites…" rows="1"></textarea>
+            <button class="send-btn mic" title="Voice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" width="18" height="18"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+            </button>
+            <button class="send-btn" id="sendBtn" title="Send">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M4 12l16-8-6 16-3-7z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="ai-note">
+          <span class="dot"></span>
+          <span>Route query · 7 stops · cached 18 min ago</span>
+        </div>
+
+        <!-- Results -->
+        <div class="card-stack" id="results">
+          <!-- cards injected by JS -->
+        </div>
+      </div>
+
+      <!-- Location mode -->
+      <div data-mode-panel="loc" class="hidden">
+        <div class="loc-search">
+          <svg class="loc-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" placeholder="City, park, or highway…" value="US‑50 Nevada" />
+          <button class="icon-btn" style="width:30px;height:30px;" title="Near me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" width="14" height="14"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          </button>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-label">Type <span style="opacity:.6">multi</span></div>
+          <div class="chip-row">
+            <div class="chip on">Dispersed / BLM</div>
+            <div class="chip">Paid w/ facilities</div>
+            <div class="chip on">Overlanding</div>
+            <div class="chip">Car camping</div>
+            <div class="chip">RV friendly</div>
+            <div class="chip">Walk‑in only</div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-label">Sources</div>
+          <div class="chip-row">
+            <div class="chip src on" style="border-color:var(--dyrt)"><span class="src-dot" style="background:var(--dyrt)"></span>The Dyrt</div>
+            <div class="chip src on" style="border-color:var(--iov)"><span class="src-dot" style="background:var(--iov)"></span>iOverlander</div>
+            <div class="chip src" style="border-color:var(--rec)"><span class="src-dot" style="background:var(--rec)"></span>Recreation.gov</div>
+            <div class="chip src on" style="border-color:var(--blm)"><span class="src-dot" style="background:var(--blm)"></span>BLM / Dispersed</div>
+            <div class="chip src" style="border-color:var(--camp)"><span class="src-dot" style="background:var(--camp)"></span>Campendium</div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-label">Search radius</div>
+          <div class="chip-row radius">
+            <div class="chip">25 mi</div>
+            <div class="chip on">50 mi</div>
+            <div class="chip">100 mi</div>
+            <div class="chip">200 mi</div>
+          </div>
+        </div>
+
+        <button class="search-cta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="16" height="16"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          Search the field
+        </button>
+
+        <div class="spacer-md"></div>
+      </div>
+
+      <div class="spacer-md"></div>
+    </section>
+
+
+    <!-- ==================== MAP TAB ==================== -->
+    <section class="page" data-page="map" data-screen-label="03 Map">
+      <header class="topbar">
+        <div class="brand">
+          <div>
+            <div class="brand-sub">Map</div>
+            <div style="font-family:'Fraunces',serif; font-variation-settings:'opsz' 72,'wght' 500,'SOFT' 60; font-size:22px; letter-spacing:-.015em;">The field</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+        </div>
+      </header>
+
+      <div class="map-wrap">
+        <div class="map-mode-bar">
+          <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Results</button>
+          <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved</button>
+          <button class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>Route</button>
+        </div>
+
+        <!-- Fake route with pins -->
+        <svg class="map-route-line" viewBox="0 0 100 120" preserveAspectRatio="none">
+          <path d="M15,90 C30,85 40,70 45,55 S55,40 70,30 S85,20 92,15" fill="none" stroke="#c4825e" stroke-width=".8" stroke-dasharray="1.5 1.5"/>
+        </svg>
+
+        <div class="map-pin" style="left:15%;top:75%">
+          <svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 1 8 8c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 8-8z" fill="#88a578" stroke="#14201a" stroke-width="1.2"/><circle cx="12" cy="10" r="2.8" fill="#14201a"/></svg>
+        </div>
+        <div class="map-pin" style="left:45%;top:48%">
+          <svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 1 8 8c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 8-8z" fill="#88a578" stroke="#14201a" stroke-width="1.2"/><circle cx="12" cy="10" r="2.8" fill="#14201a"/></svg>
+        </div>
+        <div class="map-pin" style="left:70%;top:28%;z-index:4">
+          <svg viewBox="0 0 28 28"><path d="M14 2a9 9 0 0 1 9 9c0 7-9 14-9 14S5 18 5 11a9 9 0 0 1 9-9z" fill="#c4825e" stroke="#ecdfc2" stroke-width="1.2"/><circle cx="14" cy="11" r="3.2" fill="#14201a"/></svg>
+        </div>
+        <div class="map-pin" style="left:92%;top:14%">
+          <svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 1 8 8c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 8-8z" fill="#7e968f" stroke="#14201a" stroke-width="1.2"/><circle cx="12" cy="10" r="2.8" fill="#14201a"/></svg>
+        </div>
+
+        <div class="map-popup">
+          <div class="popup-thumb" style="background:linear-gradient(135deg,#a86040,#6a3e28);"></div>
+          <div class="popup-body">
+            <h4 class="nm">Ward Mountain BLM</h4>
+            <div class="mt">Ely, NV · Free · 4x4 recommended</div>
+          </div>
+          <button class="popup-cta">Open</button>
+        </div>
+      </div>
+
+      <div class="section-hd">
+        <div>
+          <div class="lbl">Route · active</div>
+          <h2>Carson City → Moab</h2>
+        </div>
+        <button class="more">Edit route</button>
+      </div>
+
+      <div class="card-stack">
+        <div style="padding:12px 14px; background:var(--bark); border:1px solid var(--line); border-radius:14px; display:flex; gap:12px; align-items:center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--clay)" stroke-width="1.5" stroke-linecap="round" width="22" height="22"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          <div style="flex:1">
+            <div style="font:600 14px 'Inter Tight'">Tap any pin to open</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Pan the map to search a new area</div>
+          </div>
+          <button class="action-btn primary" style="flex:none">Search area</button>
+        </div>
+      </div>
+
+      <div class="spacer-md"></div>
+    </section>
+
+
+    <!-- ==================== SAVED TAB — timeline route planner ==================== -->
+    <section class="page" data-page="saved" data-screen-label="04 Saved">
+      <header class="topbar">
+        <div class="brand">
+          <div>
+            <div class="brand-sub">Saved</div>
+            <div style="font-family:'Fraunces',serif; font-variation-settings:'opsz' 72,'wght' 500,'SOFT' 60; font-size:22px; letter-spacing:-.015em;">Your pins</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Share">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="saved-head">
+        <h1>The <em>long way</em> — your draft</h1>
+        <p class="sub">Eight stops, reorder by dragging. Distances re-compute.</p>
+      </div>
+
+      <div class="mode-tabs">
+        <button class="on">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13" stroke-linecap="round"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M6 8.5v7"/></svg>
+          Route
+        </button>
+        <button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13" stroke-linecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          All saved · 14
+        </button>
+        <button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13" stroke-linecap="round"><path d="M3 6h18M3 12h12M3 18h8"/></svg>
+          Passport
+        </button>
+      </div>
+
+      <div class="timeline">
+        <div class="tl-head">
+          <div class="tl-toggle-row">
+            <button class="tl-toggle on">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M17 3l4 4-4 4"/><path d="M3 7h18"/><path d="M7 21l-4-4 4-4"/><path d="M21 17H3"/></svg>
+              Round trip
+            </button>
+            <button class="tl-toggle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+              Start from me
+            </button>
+          </div>
+          <button class="tl-toggle" style="background:var(--clay); color:var(--clay-ink); border-color:var(--clay)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z"/></svg>
+            Optimize
+          </button>
+        </div>
+
+        <div class="tl-meta">
+          <div class="m">
+            <div class="v">1,247 <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono'">mi</span></div>
+            <div class="l">Total</div>
+          </div>
+          <div class="sep"></div>
+          <div class="m">
+            <div class="v">8</div>
+            <div class="l">Stops</div>
+          </div>
+          <div class="sep"></div>
+          <div class="m">
+            <div class="v">~23 <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono'">hrs</span></div>
+            <div class="l">Driving</div>
+          </div>
+          <div class="sep"></div>
+          <div class="m">
+            <div class="v">$0</div>
+            <div class="l">Fees</div>
+          </div>
+        </div>
+
+        <div class="timeline-list" id="timelineList">
+          <!-- stops injected -->
+        </div>
+
+        <div class="tl-actions">
+          <button class="tl-action">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" width="14" height="14"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/></svg>
+            Map view
+          </button>
+          <button class="tl-action">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" width="14" height="14"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+            Share route
+          </button>
+          <button class="tl-action primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M4 12l5 5L20 6"/></svg>
+            Start trip
+          </button>
+        </div>
+      </div>
+
+      <!-- Passport preview at bottom -->
+      <div class="section-hd">
+        <div>
+          <div class="lbl">Collected</div>
+          <h2>Passport</h2>
+        </div>
+        <button class="more" id="openPassport">Open book
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="passport-wrap">
+        <div class="passport-cover">
+          <div class="pc-label">NomadAI · Field Passport</div>
+          <h2>Book No. 01</h2>
+          <div class="count">24 stamps · 11 states · 7 trips</div>
+        </div>
+
+        <div class="stamp-grid" id="stampGrid">
+          <!-- stamps injected -->
+        </div>
+      </div>
+
+      <div class="spacer-md"></div>
+    </section>
+
+
+    <!-- ==================== BOTTOM NAV ==================== -->
+    <nav class="bottom-nav">
+      <div class="nav-pill">
+        <button class="nav-btn active" data-tab="home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
+          Home
+        </button>
+        <button class="nav-btn" data-tab="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          Search
+        </button>
+        <button class="nav-btn" data-tab="map">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>
+          Map
+        </button>
+        <button class="nav-btn" data-tab="saved">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          Saved
+        </button>
+      </div>
+    </nav>
+
+  </main>
+</div>
+
+<script>
+/* =====================================================================
+   DATA
+===================================================================== */
+const SITES = [
+  {
+    id:'ward', name:'Ward Mountain BLM', city:'Ely, NV', dist:'142 mi away',
+    source:'BLM', fee:'Free', src_color:'var(--blm)',
+    photo:'ph-trees',
+    pills:[{i:'tree',t:'Dispersed'},{i:'shield',t:'BLM'},{i:'no',t:'No fee'},{i:'truck',t:'4x4 ok'}],
+    desc:'High-elevation pinyon-juniper at 7,200 ft. Night breeze comes down the ridge; bring wind stakes. Pull-offs are flat and hold a rooftop tent.',
+    weather:'58° · Clear', wind:'NW 8 mph', sunrise:'6:12', sunset:'7:38',
+    tags:['pit-toilet','no-water','pack-out','dogs-ok','cell:2bars'],
+    openByDefault:true
+  },
+  {
+    id:'cathedral', name:'Cathedral Gorge State Park', city:'Panaca, NV', dist:'204 mi away',
+    source:'REC', fee:'$22/night', src_color:'var(--rec)',
+    photo:'ph-canyon',
+    pills:[{i:'water',t:'Water'},{i:'toilet',t:'Vault toilet'},{i:'reserve',t:'Reservable'},{i:'rv',t:'RV ok'}],
+    desc:'Slot-canyon views at sunset, bentonite spires in the wash. Loop B has better shade. Reservable in Rec.gov.',
+    weather:'72° · Clear', wind:'W 4 mph', sunrise:'6:08', sunset:'7:41',
+    tags:['showers','reservable','rv-30a','dogs-ok','cell:3bars']
+  },
+  {
+    id:'valleyfire', name:'Valley of Fire Overflow', city:'Overton, NV', dist:'348 mi away',
+    source:'IOV', fee:'Free', src_color:'var(--iov)',
+    photo:'ph-desert',
+    pills:[{i:'tree',t:'Dispersed'},{i:'truck',t:'High clearance'},{i:'no',t:'No services'}],
+    desc:'Crowd-sourced turn-off a half-mile past the park boundary. Red sand, juniper scrub, zero light pollution. Verify before visiting — road condition varies with rain.',
+    weather:'81° · Haze', wind:'S 12 mph', sunrise:'6:01', sunset:'7:45',
+    tags:['self-contained','pack-out','no-fires','cell:none']
+  }
+];
+
+const STOPS = [
+  {n:1, name:'Carson City', sub:'Departure', thumb:'#3a4a3a', type:'start'},
+  {leg:'42 mi · 50 min'},
+  {n:2, name:'Fallon BLM Dispersed', sub:'Nevada · Free', thumb:'#c88a5e', done:true},
+  {leg:'128 mi · 2 hr 10'},
+  {n:3, name:'Austin Summit Pass', sub:'Nevada · Free', thumb:'#6a8890', done:true},
+  {leg:'96 mi · 1 hr 40'},
+  {n:4, name:'Hickison Petroglyphs', sub:'Nevada · Free · BLM', thumb:'#88a578', done:true},
+  {leg:'158 mi · 2 hr 40'},
+  {n:5, name:'Ward Mountain BLM', sub:'Ely, NV · Free', thumb:'#3a5a68', active:true},
+  {leg:'186 mi · 3 hr 05'},
+  {n:6, name:'Cathedral Gorge SP', sub:'Panaca, NV · $22', thumb:'#a86040'},
+  {leg:'212 mi · 3 hr 30'},
+  {n:7, name:'Valley of Fire Overflow', sub:'Overton, NV · Free', thumb:'#c08060'},
+  {leg:'245 mi · 4 hr 00'},
+  {n:8, name:'Moab', sub:'Arrival · Utah', thumb:'#884a30', type:'end'}
+];
+
+const STAMPS = [
+  {name:'Hickison Petroglyphs', loc:'Nevada · BLM', num:'#023', color:'c-moss', date:"Apr '26", icon:'tree'},
+  {name:'Austin Summit Pass', loc:'Nevada · USFS', num:'#022', color:'c-clay', date:"Apr '26", icon:'mountain'},
+  {name:'Fallon Dispersed', loc:'Nevada · BLM', num:'#021', color:'c-sand', date:"Apr '26", icon:'tent'},
+  {name:'Alvord Desert', loc:'Oregon · BLM', num:'#020', color:'c-rust', date:"Mar '26", icon:'sun'},
+  {name:'Ruby Beach', loc:'Washington · NPS', num:'#019', color:'c-slate', date:"Feb '26", icon:'wave'},
+  {name:'Death Valley Wash', loc:'California · NPS', num:'#018', color:'c-berry', date:"Jan '26", icon:'sun'},
+  {name:'???', loc:'Next stamp', num:'—', color:'c-moss', date:'', icon:'lock', locked:true},
+  {name:'???', loc:'Keep rolling', num:'—', color:'c-slate', date:'', icon:'lock', locked:true}
+];
+
+/* ICON LIBRARY — thin line, 1.5 stroke, organic */
+const ICONS = {
+  tree:  '<path d="M12 2l6 9h-4l5 8H5l5-8H6z" fill="none"/>',
+  shield:'<path d="M12 2l8 3v7c0 5-4 8-8 10-4-2-8-5-8-10V5z"/>',
+  no:    '<circle cx="12" cy="12" r="8"/><path d="M6 6l12 12"/>',
+  truck: '<path d="M2 16V7h10v9M12 10h5l3 3v3M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>',
+  water: '<path d="M12 3c4 5 7 8 7 12a7 7 0 0 1-14 0c0-4 3-7 7-12z"/>',
+  toilet:'<rect x="5" y="3" width="14" height="14" rx="1"/><path d="M8 21l4-4 4 4"/>',
+  reserve:'<rect x="4" y="5" width="16" height="15" rx="1"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  rv:    '<path d="M3 16V8h13l3 4v4M3 16h18M7 16a2 2 0 1 0 0 0zM15 16a2 2 0 1 0 0 0z"/>',
+  mountain:'<path d="M3 20l7-12 5 7 3-4 3 9z"/>',
+  tent:  '<path d="M3 20l9-16 9 16zM12 4l-3 16M12 4l3 16"/>',
+  sun:   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.5 4.5l1.4 1.4M18.1 18.1l1.4 1.4M4.5 19.5l1.4-1.4M18.1 5.9l1.4-1.4"/>',
+  wave:  '<path d="M3 12c3-4 6-4 9 0s6 4 9 0M3 17c3-4 6-4 9 0s6 4 9 0"/>',
+  lock:  '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  thermo:'<path d="M10 4a2 2 0 1 1 4 0v10a4 4 0 1 1-4 0z"/>',
+  sunrise:'<path d="M3 18h18M5 15a7 7 0 0 1 14 0M12 3v5M7 8l1.5 1.5M17 8l-1.5 1.5"/>',
+  moon:   '<path d="M21 12.8a9 9 0 1 1-9.8-9.8 7 7 0 0 0 9.8 9.8z"/>',
+  dollar: '<path d="M12 3v18M16 7a4 4 0 0 0-4-2c-2 0-4 1-4 3 0 4 8 3 8 7 0 2-2 3-4 3a4 4 0 0 1-4-2"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><path d="M15 9l-2 5-5 2 2-5z"/>'
+};
+const svg = (name, size=14) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="${size}" height="${size}">${ICONS[name]||''}</svg>`;
+
+/* =====================================================================
+   STATE
+===================================================================== */
+const state = {
+  tab:'home',
+  mode:'ai',
+  theme:'dark'
+};
+
+/* =====================================================================
+   TABS
+===================================================================== */
+function go(tab){
+  state.tab = tab;
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.dataset.page===tab));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  // scroll top of page
+  const p = document.querySelector(`.page[data-page="${tab}"]`);
+  if(p) p.scrollTop = 0;
+  try{ localStorage.setItem('nomad_tab', tab); }catch(e){}
+}
+document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => go(b.dataset.tab)));
+document.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', () => go(el.dataset.go)));
+document.getElementById('openPassport')?.addEventListener('click', () => {
+  document.querySelector('.passport-wrap').scrollIntoView({behavior:'smooth', block:'start'});
+});
+// Stat click -> passport
+document.querySelectorAll('[data-stat]').forEach(el => el.addEventListener('click', () => go('saved')));
+
+/* =====================================================================
+   THEME
+===================================================================== */
+function setTheme(t){
+  state.theme = t;
+  document.documentElement.dataset.theme = t;
+  document.querySelectorAll('[data-theme-btn]').forEach(b => b.classList.toggle('on', b.dataset.themeBtn===t));
+  try{ localStorage.setItem('nomad_theme', t); }catch(e){}
+}
+document.querySelectorAll('[data-theme-btn]').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.themeBtn)));
+
+/* =====================================================================
+   SEARCH MODE TOGGLE
+===================================================================== */
+document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
+  const m = b.dataset.mode;
+  state.mode = m;
+  document.querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x.dataset.mode===m));
+  document.querySelectorAll('[data-mode-panel]').forEach(x => x.classList.toggle('hidden', x.dataset.modePanel!==m));
+}));
+
+/* =====================================================================
+   CHAT
+===================================================================== */
+const chatInput = document.getElementById('chatInput');
+const chatScroll = document.getElementById('chatScroll');
+const sendBtn = document.getElementById('sendBtn');
+
+chatInput?.addEventListener('input', () => {
+  chatInput.style.height = 'auto';
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 110) + 'px';
+});
+chatInput?.addEventListener('keydown', e => {
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+});
+sendBtn?.addEventListener('click', sendChat);
+document.querySelectorAll('.sug').forEach(s => s.addEventListener('click', () => {
+  chatInput.value = s.textContent.trim();
+  sendChat();
+}));
+
+function addMsg(role, html){
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.innerHTML = (role==='ai' ? `<div class="msg-head"><span style="width:6px;height:6px;background:var(--moss);border-radius:50%"></span>NomadAI</div>` : '') + html;
+  chatScroll.appendChild(el);
+  chatScroll.scrollTop = chatScroll.scrollHeight;
+  return el;
+}
+function sendChat(){
+  const v = chatInput.value.trim();
+  if(!v) return;
+  addMsg('user', v);
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
+  const thinking = addMsg('ai', `<div class="thinking"><span></span><span></span><span></span></div>`);
+  setTimeout(() => {
+    thinking.innerHTML = `<div class="msg-head"><span style="width:6px;height:6px;background:var(--moss);border-radius:50%"></span>NomadAI · 3 found</div>Here are three spots that match. I kept it tight — quieter nights, shorter drives, and at least one you haven't passed before.`;
+    chatScroll.scrollTop = chatScroll.scrollHeight;
+  }, 900);
+}
+
+/* =====================================================================
+   CARDS (Atom)
+===================================================================== */
+function renderCard(site){
+  return `
+  <article class="site-card${site.openByDefault?' open':''}" data-id="${site.id}">
+    <div class="card-photo">
+      <div class="img-ph ${site.photo}"></div>
+      <div class="img-overlay"></div>
+      <div class="source-badge"><span class="sd" style="background:${site.src_color}"></span>${site.source}</div>
+      <div class="fee-badge ${site.fee.includes('$')?'paid':''}">${site.fee}</div>
+      <button class="photo-arrow prev">‹</button>
+      <button class="photo-arrow next">›</button>
+      <div class="photo-dots"><span class="d on"></span><span class="d"></span><span class="d"></span><span class="d"></span></div>
+    </div>
+    <div class="card-body">
+      <div class="card-head">
+        <div style="min-width:0;flex:1">
+          <h3 class="card-name">${site.name}</h3>
+          <div class="card-loc">${svg('compass',11)} ${site.city}</div>
+        </div>
+        <div class="card-dist">${site.dist.replace(' away','')}</div>
+      </div>
+
+      <div class="field-pills">
+        ${site.pills.map(p => `<span class="fp">${svg(p.i,11)} ${p.t}</span>`).join('')}
+      </div>
+
+      <p class="card-desc">${site.desc}</p>
+
+      <div class="card-expand">
+        <div class="data-row">
+          <div class="data-cell">
+            <div class="cell-ico">${svg('thermo',14)}</div>
+            <div class="cell-body">
+              <div class="cell-lbl">Weather</div>
+              <div class="cell-val">${site.weather}</div>
+            </div>
+          </div>
+          <div class="data-cell">
+            <div class="cell-ico">${svg('compass',14)}</div>
+            <div class="cell-body">
+              <div class="cell-lbl">Wind</div>
+              <div class="cell-val">${site.wind}</div>
+            </div>
+          </div>
+          <div class="data-cell">
+            <div class="cell-ico">${svg('sunrise',14)}</div>
+            <div class="cell-body">
+              <div class="cell-lbl">Sunrise</div>
+              <div class="cell-val">${site.sunrise} AM</div>
+            </div>
+          </div>
+          <div class="data-cell">
+            <div class="cell-ico">${svg('moon',14)}</div>
+            <div class="cell-body">
+              <div class="cell-lbl">Sunset</div>
+              <div class="cell-val">${site.sunset} PM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tag-chips">
+          ${site.tags.map(t => `<span class="tc">${t}</span>`).join('')}
+        </div>
+
+        <div class="card-footer">
+          <button class="action-btn primary">${svg('compass',13)} Directions</button>
+          <button class="action-btn">${svg('shield',13)} Source</button>
+          <button class="action-btn saved">${svg('shield',13)} Saved</button>
+          <button class="action-btn">+ Trip</button>
+        </div>
+      </div>
+
+      <button class="card-toggle">
+        <span class="toggle-lbl">${site.openByDefault?'Hide field data':'Show field data'}</span>
+        ${svg('compass',12).replace('compass','')/* placeholder */}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="12" height="12"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+  </article>`;
+}
+const resultsEl = document.getElementById('results');
+if(resultsEl){
+  resultsEl.innerHTML = SITES.map(renderCard).join('');
+  resultsEl.addEventListener('click', e => {
+    const tgl = e.target.closest('.card-toggle');
+    if(tgl){
+      const c = tgl.closest('.site-card');
+      c.classList.toggle('open');
+      c.querySelector('.toggle-lbl').textContent = c.classList.contains('open') ? 'Hide field data' : 'Show field data';
+    }
+    const sb = e.target.closest('.action-btn.saved');
+    if(sb){ sb.classList.toggle('saved'); }
+  });
+}
+
+/* =====================================================================
+   TIMELINE
+===================================================================== */
+function renderTimeline(){
+  const el = document.getElementById('timelineList');
+  if(!el) return;
+  let html = '';
+  STOPS.forEach((s, i) => {
+    if(s.leg){
+      html += `<div class="tl-leg">${svg('compass',11)} ${s.leg}</div>`;
+    } else {
+      const cls = s.type==='start'?'start':s.type==='end'?'end':s.done?'done':s.active?'active':'';
+      html += `
+        <div class="tl-stop ${cls}">
+          <div class="dot">${s.n}</div>
+          <div class="tl-card">
+            <div class="tl-thumb" style="background:${s.thumb}"></div>
+            <div class="tl-body">
+              <h4 class="nm">${s.name}</h4>
+              <div class="mt">${s.sub}</div>
+            </div>
+            <button class="tl-handle">
+              ${svg('compass',14).replace('compass','')/*drag*/}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" width="14" height="14"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg>
+            </button>
+          </div>
+        </div>`;
+    }
+  });
+  el.innerHTML = html;
+}
+renderTimeline();
+
+/* =====================================================================
+   STAMPS
+===================================================================== */
+function renderStamps(){
+  const el = document.getElementById('stampGrid');
+  if(!el) return;
+  el.innerHTML = STAMPS.map((s,i) => {
+    const shape = i%3===1 ? 'v-circle' : '';
+    return `
+    <div class="stamp ${s.color} ${shape} ${s.locked?'locked':''}">
+      <div class="st-top">
+        <div class="st-ico">${svg(s.icon,20)}</div>
+        <div class="st-num">${s.num}</div>
+      </div>
+      <div>
+        <h4 class="st-name">${s.name}</h4>
+        <div class="st-loc">${s.loc}</div>
+      </div>
+      ${s.date?`<div class="st-date">${s.date}</div>`:''}
+    </div>`;
+  }).join('');
+}
+renderStamps();
+
+/* =====================================================================
+   PERSIST
+===================================================================== */
+try{
+  const savedTab = localStorage.getItem('nomad_tab');
+  if(savedTab && ['home','search','map','saved'].includes(savedTab)) go(savedTab);
+  const savedTheme = localStorage.getItem('nomad_theme');
+  if(savedTheme==='light' || savedTheme==='dark') setTheme(savedTheme);
+}catch(e){}
+
+/* =====================================================================
+   MODE tabs in Saved
+===================================================================== */
+document.querySelectorAll('.mode-tabs').forEach(group => {
+  group.addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    group.querySelectorAll('button').forEach(x => x.classList.toggle('on', x===b));
+  });
+});
+
+</script>
+</body>
+</html>
