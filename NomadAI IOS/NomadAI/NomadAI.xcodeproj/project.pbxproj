@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2F09CC762F9E9D32009A0EA2 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2F09CC752F9E9D32009A0EA2 /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		2F09CBD12F9DCCFB009A0EA2 /* NomadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NomadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F09CC762F9E9D32009A0EA2 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +38,7 @@
 			isa = PBXGroup;
 			children = (
 				2F09CBD32F9DCCFB009A0EA2 /* NomadAI */,
+				2F09CC702F9E9CB1009A0EA2 /* Frameworks */,
 				2F09CBD22F9DCCFB009A0EA2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +49,13 @@
 				2F09CBD12F9DCCFB009A0EA2 /* NomadAI.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		2F09CC702F9E9CB1009A0EA2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +78,7 @@
 			);
 			name = NomadAI;
 			packageProductDependencies = (
+				2F09CC752F9E9D32009A0EA2 /* Supabase */,
 			);
 			productName = NomadAI;
 			productReference = 2F09CBD12F9DCCFB009A0EA2 /* NomadAI.app */;
@@ -94,6 +108,9 @@
 			);
 			mainGroup = 2F09CBC82F9DCCFB009A0EA2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2F09CC692F9E9505009A0EA2 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2F09CBD22F9DCCFB009A0EA2 /* Products */;
 			projectDirPath = "";
@@ -256,11 +273,15 @@
 				DEVELOPMENT_TEAM = Y42ADKWKAD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "NomadAI uses your location to find nearby campsites and measure distances from where you are.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "NomadAI uses the mic to dictate your campsite searches.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "NomadAI uses speech recognition to turn your voice into search queries.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -288,11 +309,15 @@
 				DEVELOPMENT_TEAM = Y42ADKWKAD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "NomadAI uses your location to find nearby campsites and measure distances from where you are.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "NomadAI uses the mic to dictate your campsite searches.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "NomadAI uses speech recognition to turn your voice into search queries.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -332,6 +357,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2F09CC692F9E9505009A0EA2 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2F09CC752F9E9D32009A0EA2 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2F09CC692F9E9505009A0EA2 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2F09CBC92F9DCCFB009A0EA2 /* Project object */;
 }
