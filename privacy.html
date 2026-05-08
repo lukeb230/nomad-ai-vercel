@@ -31,64 +31,80 @@ a{color:var(--tan);}
 </nav>
 <div class="container">
   <h1>Privacy Policy</h1>
-  <div class="date">Last updated: March 18, 2026</div>
+  <div class="date">Last updated: May 8, 2026</div>
 
-  <p>NomadAI ("we", "our", or "us") operates the NomadAI website and application at nomadai.us. This policy explains what data we collect, how we use it, and your rights.</p>
+  <p>NomadAI ("we", "our", or "us") operates the NomadAI iOS application and the marketing site at nomadai.us. This policy explains what data we collect, how we use it, and your rights as a user. The web application is no longer offered; iOS is the only product.</p>
 
   <h2>Information We Collect</h2>
-  <p>When you use NomadAI, we may collect:</p>
+  <p>The app works without any account. If you sign in to enable cross-device sync and community reviews, we additionally collect a small set of account data. Categories:</p>
   <ul>
-    <li><strong>Account information</strong> — your email address and display name when you create an account.</li>
-    <li><strong>Profile data</strong> — your optional profile photo and display name.</li>
-    <li><strong>Location data</strong> — your approximate GPS location, used only to find nearby campsites. We do not store your location history.</li>
-    <li><strong>Usage data</strong> — saved campsites, visited spots, trip routes, search history, and notes you create within the app.</li>
-    <li><strong>Device data</strong> — browser type and device type for analytics purposes via Vercel Analytics.</li>
+    <li><strong>Authentication identifiers (signed-in users only)</strong> — your email address and a Supabase user id. If you sign in with Apple and do not opt to hide your email, we receive your email; if you choose to hide it, we receive Apple's private relay address.</li>
+    <li><strong>Display name (signed-in users only)</strong> — captured from Apple Sign In's full name on first sign-in (formatted as "First L."), or derived from your email if you used email/password. Used to attribute community reviews. You can change it later.</li>
+    <li><strong>Location data</strong> — your approximate device coordinates, used only to find nearby campsites and to anchor weather lookups. Location data is sent to our servers only as part of a search query and is not stored linked to your account. The system-level CoreLocation permission can be revoked at any time in iOS Settings.</li>
+    <li><strong>Usage data (signed-in users)</strong> — saved campsites, visited spots, trip routes, your reviews (rating + note + visit date), and personal notes. Synced to your account so they appear on every device you sign into.</li>
+    <li><strong>Profile photo (signed-in users only)</strong> — if you upload an avatar, the image is stored in Supabase Storage and associated with your account. You can replace or remove it at any time in Account.</li>
+    <li><strong>Search session state</strong> — chat history and last search results, kept in memory for the lifetime of your search session and not transmitted to our servers as a separate record.</li>
+    <li><strong>Voice input (when you tap the microphone)</strong> — speech is processed via Apple's <em>SFSpeechRecognizer</em> framework, which may transmit audio to Apple's servers for transcription. We do not store or transmit the audio ourselves; we only receive the transcribed text, which is then handled like any other typed query.</li>
+    <li><strong>Feedback and bug reports</strong> — when you send a bug report or feature request via the in-app Help screen, we collect the body text you wrote, an optional contact email if you provided one, and basic diagnostic context (app version, iOS version, device model, your user id when signed in) to help us reproduce issues.</li>
+    <li><strong>Diagnostic and analytics events</strong> — we collect crash reports and a small number of non-fatal error events for debugging (via Sentry), and product-interaction events such as which features you use and how you move through the search-to-save funnel (via PostHog). See "Third-Party Services" below for what's stripped before sending.</li>
   </ul>
 
   <h2>How We Use Your Information</h2>
   <ul>
-    <li>To provide campsite search and recommendations powered by AI.</li>
-    <li>To sync your saved spots, trips, and preferences across devices.</li>
-    <li>To improve the app and understand how it's being used (via anonymous analytics).</li>
-    <li>To allow you to share specific campsites with others via share links.</li>
+    <li>To provide AI-assisted campsite search and recommendations.</li>
+    <li>To sync your saved spots, trips, reviews, and preferences across your devices.</li>
+    <li>To display your reviews to other users in the community-review feature, attributed to your display name.</li>
+    <li>To moderate content (process flagged reviews, enforce blocks).</li>
+    <li>To deliver weather, park alerts, and place photos through the providers below.</li>
   </ul>
 
   <h2>Data Storage</h2>
-  <p>Your account data is stored securely using Supabase, a cloud database provider. Data is encrypted in transit and at rest. Each user can only access their own data — this is enforced at the database level using Row Level Security.</p>
+  <p>Account data is stored using Supabase. Data is encrypted in transit (TLS) and at rest. Per-user data is protected by row-level security so only you can write to your records and most reads are restricted to you. Community reviews are explicitly stored in a public-read table — by leaving a review you publish your display name, star rating, note text, and the campsite it relates to.</p>
 
-  <h2>AI Search Queries</h2>
-  <p>When you use the Ask AI feature, your queries are sent to Anthropic's Claude API to generate campsite recommendations. Queries are not stored by us beyond the current session. Please review <a href="https://www.anthropic.com/privacy" target="_blank">Anthropic's privacy policy</a> for how they handle API requests.</p>
-
-  <h2>Analytics</h2>
-  <p>We use Vercel Analytics to collect anonymous, aggregated data about page views and visitor counts. This data does not include personally identifiable information and cannot be used to track individual users.</p>
-
-  <h2>Data Sharing</h2>
-  <p>We do not sell your personal data. We do not share your data with third parties except:</p>
+  <h2>Third-Party Services</h2>
+  <p>NomadAI sends limited data to a small number of third-party services to deliver core features and to help us debug and improve the app. We use first-party product analytics (PostHog) and crash reporting (Sentry) — neither shares your data with advertisers or data brokers. We do not use third-party advertising or cross-app trackers.</p>
   <ul>
-    <li>Supabase (database infrastructure)</li>
-    <li>Anthropic (AI search processing)</li>
-    <li>Vercel (hosting and analytics)</li>
+    <li><strong>Supabase</strong> — hosts the database, authentication, edge functions, and avatar storage. Receives all account data described above. <a href="https://supabase.com/privacy" target="_blank">Supabase Privacy</a>.</li>
+    <li><strong>Anthropic (Claude)</strong> — receives your AI search query text along with anonymous coordinates. We send queries through our own server proxy; queries are not stored by us. <a href="https://www.anthropic.com/privacy" target="_blank">Anthropic Privacy</a>.</li>
+    <li><strong>Sentry</strong> — receives crash reports and a small number of non-fatal error events (e.g. a sync failure) so we can debug the app. We strip your email address, IP address, and any URL query strings before sending. We do attach an opaque user identifier (your Supabase user id) when you're signed in so we can correlate errors per user. Used only for diagnostics. <a href="https://sentry.io/privacy/" target="_blank">Sentry Privacy</a>.</li>
+    <li><strong>PostHog</strong> — receives product-interaction events (which features you use, how you move through the search-to-save funnel, when you submit feedback). When signed in, events are tied to your opaque Supabase user id; otherwise anonymous. We never send raw search text, campsite names or identifiers, your email, or precise coordinates. Used only for our own first-party analytics — never shared with anyone or used for advertising. <a href="https://posthog.com/privacy" target="_blank">PostHog Privacy</a>.</li>
+    <li><strong>Open-Meteo</strong> — receives campsite coordinates only (no account info) for weather lookups. <a href="https://open-meteo.com/en/terms" target="_blank">Open-Meteo Terms</a>.</li>
+    <li><strong>Google Places (via our proxy)</strong> — receives campsite names and coordinates to retrieve photos. We never send your account info. <a href="https://policies.google.com/privacy" target="_blank">Google Privacy</a>.</li>
+    <li><strong>National Park Service</strong> — public alerts API; receives only US state codes. <a href="https://www.nps.gov/aboutus/privacy.htm" target="_blank">NPS Privacy</a>.</li>
+    <li><strong>Recreation.gov (RIDB)</strong> — receives only coordinates + radius to retrieve federal campsite listings.</li>
+    <li><strong>Apple</strong> — Sign in with Apple authentication, plus on-device speech recognition for voice search (see Voice Input above). <a href="https://www.apple.com/legal/privacy/" target="_blank">Apple Privacy</a>.</li>
+    <li><strong>Vercel</strong> — hosts this static marketing site. Receives standard web logs (IP, user agent) for the marketing pages only. The iOS app does not use Vercel.</li>
   </ul>
-  <p>All third-party providers are bound by their own privacy policies and data protection agreements.</p>
+  <p>NomadAI does not sell your personal data and does not use it for advertising.</p>
+
+  <h2>Community Reviews</h2>
+  <p>When you submit a review, your display name, star rating, note text, and the campsite identifier are made publicly readable by all users of NomadAI. You can edit or delete your reviews at any time. If three or more users report a review, it is automatically hidden from public view; the author can still see it. We may permanently remove reviews that violate our community guidelines.</p>
+
+  <h2>Reporting and Blocking</h2>
+  <p>Reports submitted via the Report flow are stored privately and used only for moderation. Blocking another user hides their reviews from your view; we do not notify the blocked user. The list of users you have blocked is private to you.</p>
 
   <h2>Shared Spot Links</h2>
-  <p>When you share a campsite using the Share button, basic campsite information (name, location, description, fees) is stored in our database to generate a shareable link. This information is publicly accessible to anyone with the link.</p>
+  <p>When you create a share link (Saved → Share trip), a snapshot of the trip's stops (name, coordinates, fees, description) is stored to generate a shareable link. The snapshot is publicly accessible to anyone with the link.</p>
 
   <h2>Your Rights</h2>
   <p>You have the right to:</p>
   <ul>
     <li>Access the personal data we hold about you.</li>
-    <li>Request deletion of your account and all associated data.</li>
-    <li>Export your saved data.</li>
-    <li>Opt out of analytics by using a browser with ad/tracking blockers.</li>
+    <li>Delete your account and all associated data. From the app: Settings → Account → Delete account. This permanently removes your reviews, profile, saved spots, and trips. The action cannot be undone.</li>
+    <li>Export the data you have stored with us (currently via emailed request — automated export is in development).</li>
+    <li>Withdraw consent at any time by signing out and uninstalling the app. Sign-out alone keeps cloud data; deleting your account purges it.</li>
+    <li>Revoke Sign in with Apple at any time in iOS Settings → Apple ID → Sign-In & Security → Apps Using Apple ID.</li>
   </ul>
-  <p>To request account deletion or data export, contact us at <a href="mailto:hello@nomadai.us">hello@nomadai.us</a>.</p>
+  <p>For data-access or export requests, contact us at <a href="mailto:hello@nomadai.us">hello@nomadai.us</a>.</p>
 
   <h2>Children's Privacy</h2>
-  <p>NomadAI is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13.</p>
+  <p>NomadAI is not directed at children under 13. We do not knowingly collect personal information from children under 13. If you believe we have collected such information, please contact us and we will delete it.</p>
+
+  <h2>Data Retention</h2>
+  <p>We retain account data for as long as your account is active. When you delete your account, we permanently remove your account and personal data within 30 days. Backups containing residual copies may persist for an additional 30 days before being overwritten.</p>
 
   <h2>Changes to This Policy</h2>
-  <p>We may update this policy from time to time. We will notify users of significant changes by updating the date at the top of this page.</p>
+  <p>We may update this policy from time to time. The "Last updated" date at the top reflects the most recent change.</p>
 
   <h2>Contact</h2>
   <p>If you have questions about this privacy policy, contact us at <a href="mailto:hello@nomadai.us">hello@nomadai.us</a>.</p>
